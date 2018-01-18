@@ -5,8 +5,15 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:PriceListLoader"
         mc:Ignorable="d"
-        Title="MainWindow" Height="350" Width="525">
+        Title="MainWindow" WindowStartupLocation="CenterScreen" Height="300" Width="300">
     <Grid>
-        
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+        <TextBox Grid.Row="0" Margin="10" x:Name="TextBoxResult" VerticalScrollBarVisibility="Visible"/>
+        <ProgressBar Grid.Row="1" x:Name="ProgressBarResult" Height="10" Margin="10,0"/>
+        <Button Grid.Row="2" Content="Start" Margin="10" Click="Button_Click" Width="80"/>
     </Grid>
 </Window>
