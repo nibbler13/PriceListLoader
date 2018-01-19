@@ -34,7 +34,10 @@ namespace PriceListLoader {
 			mrt24_ru,
 			dentol_ru,
 			zub_ru,
-			vse_svoi_ru
+			vse_svoi_ru,
+			novostom_ru,
+			masterdent_ru,
+			gemotest_ru
 		}
 
 		public SiteParser(BackgroundWorker backgroundWorker) {
@@ -42,7 +45,7 @@ namespace PriceListLoader {
 		}
 
 		public void ParseSelectedSites() {
-			_selectedSite = Sites.vse_svoi_ru;
+			_selectedSite = Sites.gemotest_ru;
 
 			switch (_selectedSite) {
 				case Sites.fdoctor_ru:
@@ -131,6 +134,24 @@ namespace PriceListLoader {
 					_companyName = "ООО \"ВСЕ СВОИ\"";
 					_xPathServices = "//div[@class='price-list-page']/table";
 					break;
+				case Sites.novostom_ru:
+					_urlRoot = "http://www.novostom.ru";
+					_urlServices = _urlRoot + "/tceny/ceny-v-moskvy/";
+					_companyName = "ООО СЦНТ \"НОВОСТОМ\"";
+					_xPathServices = "//table[@class='price-tbl']";
+					break;
+				case Sites.masterdent_ru:
+					_urlRoot = "http://masterdent.ru";
+					_urlServices = _urlRoot + "/prais.html";
+					_companyName = "Мастердент";
+					_xPathServices = "//div[@class='podrazdel']";
+					break;
+				case Sites.gemotest_ru:
+					_urlRoot = "https://www.gemotest.ru";
+					_urlServices = _urlRoot + "/catalog/po-laboratornym-napravleniyam/top-250-populyarnykh-uslug/";
+					_companyName = "ООО \"Лаборатория Гемотест\"";
+					_xPathServices = "//*[@id=\"d-content\"]/div/aside/nav/div[2]/ul//a[@href]";
+					break;
 				default:
 					return;
 			}
@@ -165,6 +186,7 @@ namespace PriceListLoader {
 				case Sites.helix_ru:
 				case Sites.dentol_ru:
 				case Sites.zub_ru:
+				case Sites.gemotest_ru:
 					ParseSitesWithLinksOnMainPage(docServices, ref itemSiteData);
 					break;
 				case Sites.alfazdrav_ru:
@@ -182,6 +204,12 @@ namespace PriceListLoader {
 				case Sites.vse_svoi_ru:
 					ParseSiteVseSvoiRu(docServices, ref itemSiteData);
 					break;
+				case Sites.novostom_ru:
+					ParseSiteNovostomRu(docServices, ref itemSiteData);
+					break;
+				case Sites.masterdent_ru:
+					ParseSiteMasterdentRu(docServices, ref itemSiteData);
+					break;
 				default:
 					break;
 			}
@@ -192,6 +220,96 @@ namespace PriceListLoader {
 			}
 
 			string resultFile = NpoiExcel.WriteItemSiteDataToExcel(itemSiteData, _backgroundWorker, progressCurrent, progressTo);
+		}
+
+		private void ParseSiteMasterdentRu(HtmlDocument docServices, ref ItemSiteData itemSiteData) {
+			HtmlNodeCollection nodeCollectionServices = _htmlAgility.GetNodeCollection(docServices, _xPathServices);
+			if (nodeCollectionServices == null) {
+				Console.WriteLine("nodeCollectionServices is null");
+				return;
+			}
+
+			foreach (HtmlNode node in nodeCollectionServices) {
+				HtmlNode htmlNodeGroup = node.SelectSingleNode("p");
+				if (htmlNodeGroup == null) {
+					Console.WriteLine("htmlNodeGroup == null");
+					continue;
+				}
+
+				string groupName = htmlNodeGroup.InnerText;
+				ItemServiceGroup itemServiceGroup = new ItemServiceGroup() {
+					Name = ClearString(groupName),
+					Link = _urlServices
+				};
+
+				HtmlNode htmlNodeTable = node.SelectSingleNode("div[1]/table");
+				if (htmlNodeTable == null) {
+					Console.WriteLine("htmlNodeTable == null");
+					continue;
+				}
+
+				List<ItemService> serviceItems = ReadTrNodesFdoctorRu(htmlNodeTable.SelectSingleNode("tbody"), 1, 1);
+				itemServiceGroup.ServiceItems = serviceItems;
+
+				itemSiteData.ServiceGroupItems.Add(itemServiceGroup);
+			}
+		}
+
+		private void ParseSiteNovostomRu(HtmlDocument docServices, ref ItemSiteData itemSiteData) {
+			HtmlNodeCollection nodeCollectionServices = _htmlAgility.GetNodeCollection(docServices, _xPathServices);
+			if (nodeCollectionServices == null) {
+				Console.WriteLine("nodeCollectionServices is null");
+				return;
+			}
+
+			foreach (HtmlNode node in nodeCollectionServices) {
+				ItemServiceGroup itemServiceGroup = new ItemServiceGroup() {
+					Link = _urlServices
+				};
+
+				HtmlNode htmlNodeCaption = node.SelectSingleNode("caption");
+				if (htmlNodeCaption != null) {
+					string groupName = htmlNodeCaption.InnerText;
+					itemServiceGroup.Name = groupName;
+				}
+
+				HtmlNode htmlNodeTbody = node.SelectSingleNode("tbody");
+				if (htmlNodeTbody == null) {
+					Console.WriteLine("htmlNodeTbody == null");
+					continue;
+				}
+
+				HtmlNodeCollection htmlNodeCollectionTr = htmlNodeTbody.SelectNodes("tr");
+				if (htmlNodeCollectionTr == null) {
+					Console.WriteLine("htmlNodeCollectionTr == null");
+					continue;
+				}
+
+				foreach (HtmlNode nodeTr in htmlNodeCollectionTr) {
+					HtmlNodeCollection htmlNodeCollectionTd = nodeTr.SelectNodes("td");
+					if (htmlNodeCollectionTd == null) {
+						Console.WriteLine("htmlNodeCollectionTd == null");
+						continue;
+					}
+					
+					if (htmlNodeCollectionTd.Count >= 1) {
+						string name = htmlNodeCollectionTd[0].InnerText;
+
+						ItemService itemService = new ItemService() {
+							Name = ClearString(name)
+						};
+
+						if (htmlNodeCollectionTd.Count >= 2) {
+							string price = htmlNodeCollectionTd[1].InnerText;
+							itemService.Price = ClearString(price);
+						}
+
+						itemServiceGroup.ServiceItems.Add(itemService);
+					}
+				}
+
+				itemSiteData.ServiceGroupItems.Add(itemServiceGroup);
+			}
 		}
 
 		private void ParseSiteVseSvoiRu(HtmlDocument docServices, ref ItemSiteData itemSiteData) {
@@ -572,6 +690,9 @@ namespace PriceListLoader {
 							ParseSiteZubRu(docService, ref itemServiceGroup);
 							ParseSiteZubRu(docServicePrice, ref itemServiceGroup);
 							break;
+						case Sites.gemotest_ru:
+							ParseSiteGemotestRu(docService, ref itemServiceGroup);
+							break;
 						default:
 							break;
 					}
@@ -590,6 +711,39 @@ namespace PriceListLoader {
 			}
 
 			Console.WriteLine("completed");
+		}
+
+		private void ParseSiteGemotestRu(HtmlDocument docService, ref ItemServiceGroup itemServiceGroup) {
+			string xPathTable = "//table[@class='d-col_xs_12 d-tal catalog-table']/tbody";
+			HtmlNodeCollection nodeCollectionService = _htmlAgility.GetNodeCollection(docService, xPathTable);
+
+			if (nodeCollectionService == null) {
+				Console.WriteLine("nodeCollectionService is null");
+				return;
+			}
+
+			foreach (HtmlNode nodeTbody in nodeCollectionService) {
+				try {
+					HtmlNodeCollection htmlNodeCollectionTd = nodeTbody.SelectNodes("tr[1]/td");
+					if (htmlNodeCollectionTd == null) {
+						Console.WriteLine("htmlNodeCollectionTd == null");
+						continue;
+					}
+
+					string name = htmlNodeCollectionTd[0].ChildNodes[1].InnerText;
+					string price = htmlNodeCollectionTd[3].ChildNodes[1].ChildNodes[1].InnerText;
+
+					ItemService itemService = new ItemService() {
+						Name = ClearString(name),
+						Price = ClearString(price)
+					};
+
+					itemServiceGroup.ServiceItems.Add(itemService);
+				} catch (Exception e) {
+					Console.WriteLine(e.Message + Environment.NewLine + e.StackTrace);
+				}
+			}
+			
 		}
 
 		private void ParseSiteZubRu(HtmlDocument docService, ref ItemServiceGroup itemServiceGroup) {
@@ -862,6 +1016,8 @@ namespace PriceListLoader {
 						{ " руб.", "" },
 						{ "руб.", "" },
 						{ " руб", "" },
+						{ ",00", "" },
+						{ "&raquo;", "" }
 					};
 
 			foreach (KeyValuePair<string, string> pair in toReplace)
