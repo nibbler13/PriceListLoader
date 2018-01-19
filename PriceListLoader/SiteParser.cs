@@ -25,12 +25,16 @@ namespace PriceListLoader {
 			familydoctor_ru,
 			familydoctor_ru_child,
 			alfazdrav_ru,
-			nrmed_ru, //!!!script used, not implemented
+			nrmed_ru,
 			onclinic_ru,
 			smclinic_ru,
 			invitro_ru, //!!!work only with offline html
 			cmd_online_ru,
-			helix_ru
+			helix_ru,
+			mrt24_ru,
+			dentol_ru,
+			zub_ru,
+			vse_svoi_ru
 		}
 
 		public SiteParser(BackgroundWorker backgroundWorker) {
@@ -38,7 +42,7 @@ namespace PriceListLoader {
 		}
 
 		public void ParseSelectedSites() {
-			_selectedSite = Sites.helix_ru;
+			_selectedSite = Sites.vse_svoi_ru;
 
 			switch (_selectedSite) {
 				case Sites.fdoctor_ru:
@@ -67,7 +71,7 @@ namespace PriceListLoader {
 					break;
 				case Sites.nrmed_ru:
 					_urlRoot = "http://www.nrmed.ru";
-					_urlServices = _urlRoot + "/rus/ourserv/prices/?action=show&id=192";
+					_urlServices = _urlRoot + "/rus/ourserv/prices/";
 					_companyName = "ООО \"НИАРМЕДИК ПЛЮС\"";
 					_xPathServices = "//*[@id=\"srv_list_wrap\"]//a[@href]";
 					break;
@@ -102,6 +106,31 @@ namespace PriceListLoader {
 					_companyName = "ООО «НПФ «ХЕЛИКС»";
 					_xPathServices = "/html/body/div[1]/div[6]/div[2]/div[1]//a[@href]";
 					break;
+				case Sites.mrt24_ru:
+					_urlRoot = "http://mrt24.ru";
+					_urlServices = _urlRoot + "/services/";
+					_urlServices = @"C:\Users\nn-admin\Desktop\Цены на услуги МРТ в Москве и Московской области в центрах МРТ24.html";
+					_companyName = "ООО \"ДЛ Медика\"";
+					_xPathServices = "//div[contains(@class,'_id_')]";
+					break;
+				case Sites.dentol_ru:
+					_urlRoot = "https://dentol.ru";
+					_urlServices = _urlRoot + "/uslugi/";
+					_companyName = "ООО “Сеть Семейных Медицинских Центров”";
+					_xPathServices = "/html/body/div[3]/div[2]/div[1]/div[7]//a[@href]";
+					break;
+				case Sites.zub_ru:
+					_urlRoot = "https://zub.ru";
+					_urlServices = _urlRoot + "/uslugi/";
+					_companyName = "ООО \"Зуб.ру\"";
+					_xPathServices = "//ul[@class='sn-lm']//a[@href]";
+					break;
+				case Sites.vse_svoi_ru:
+					_urlRoot = "https://vse-svoi.ru";
+					_urlServices = _urlRoot + "/msk/ceny/";
+					_companyName = "ООО \"ВСЕ СВОИ\"";
+					_xPathServices = "//div[@class='price-list-page']/table";
+					break;
 				default:
 					return;
 			}
@@ -113,7 +142,8 @@ namespace PriceListLoader {
 
 			HtmlDocument docServices;
 			
-			if (_selectedSite == Sites.invitro_ru) {
+			if (_selectedSite == Sites.invitro_ru ||
+				_selectedSite == Sites.mrt24_ru) {
 				docServices = _htmlAgility.GetDocument(_urlServices, true);
 			} else {
 				docServices = _htmlAgility.GetDocument(_urlServices);
@@ -133,6 +163,8 @@ namespace PriceListLoader {
 				case Sites.smclinic_ru:
 				case Sites.cmd_online_ru:
 				case Sites.helix_ru:
+				case Sites.dentol_ru:
+				case Sites.zub_ru:
 					ParseSitesWithLinksOnMainPage(docServices, ref itemSiteData);
 					break;
 				case Sites.alfazdrav_ru:
@@ -144,6 +176,12 @@ namespace PriceListLoader {
 				case Sites.invitro_ru:
 					ParseSiteInvitroRU(docServices, ref itemSiteData);
 					break;
+				case Sites.mrt24_ru:
+					ParseSiteMrt24Ru(docServices, ref itemSiteData);
+					break;
+				case Sites.vse_svoi_ru:
+					ParseSiteVseSvoiRu(docServices, ref itemSiteData);
+					break;
 				default:
 					break;
 			}
@@ -154,6 +192,197 @@ namespace PriceListLoader {
 			}
 
 			string resultFile = NpoiExcel.WriteItemSiteDataToExcel(itemSiteData, _backgroundWorker, progressCurrent, progressTo);
+		}
+
+		private void ParseSiteVseSvoiRu(HtmlDocument docServices, ref ItemSiteData itemSiteData) {
+			HtmlNodeCollection nodeCollectionServices = _htmlAgility.GetNodeCollection(docServices, _xPathServices);
+			if (nodeCollectionServices == null) {
+				Console.WriteLine("nodeCollectionServices is null");
+				return;
+			}
+
+			ItemServiceGroup itemServiceGroup = new ItemServiceGroup() {
+				Name = "",
+				Link = _urlServices
+			};
+
+			foreach (HtmlNode node in nodeCollectionServices) {
+				try {
+					HtmlNodeCollection nodeServices = node.ChildNodes[1].SelectNodes("tr");
+					if (nodeServices == null) {
+						Console.WriteLine("nodeServices == null");
+						continue;
+					}
+
+					foreach (HtmlNode nodeService in nodeServices) {
+						try {
+							string name = nodeService.ChildNodes[0].InnerText;
+							string price = nodeService.ChildNodes[1].FirstChild.FirstChild.InnerText;
+							ItemService itemService = new ItemService() {
+								Name = name,
+								Price = ClearString(price)
+							};
+
+							itemServiceGroup.ServiceItems.Add(itemService);
+						} catch (Exception ex) {
+							Console.WriteLine(ex.Message + Environment.NewLine + ex.StackTrace);
+						}
+					}
+				} catch (Exception e) {
+					Console.WriteLine(e.Message + Environment.NewLine + e.StackTrace);
+				}
+			}
+
+			itemSiteData.ServiceGroupItems.Add(itemServiceGroup);
+		}
+
+		private void ParseSiteMrt24Ru(HtmlDocument docServices, ref ItemSiteData itemSiteData) {
+			HtmlNodeCollection nodeCollectionServices = _htmlAgility.GetNodeCollection(docServices, _xPathServices);
+			if (nodeCollectionServices == null) {
+				Console.WriteLine("nodeCollectionServices is null");
+				return;
+			}
+
+			foreach (HtmlNode node in nodeCollectionServices) {
+				try {
+					HtmlNode nodeServiceName = node.SelectSingleNode("div[1]/div[1]");
+					string serviceName = nodeServiceName.InnerText;
+					_backgroundWorker.ReportProgress((int)progressCurrent, serviceName);
+					string nodeClassName = node.Attributes["class"].Value;
+
+					ItemServiceGroup itemServiceGroup = new ItemServiceGroup() { Name = serviceName };
+
+					HtmlNodeCollection nodeServices = node.SelectNodes("//div[@class='" + nodeClassName + "']//div[@class='group_container']");
+					if (nodeServices == null) {
+						Console.WriteLine("nodeServices == null");
+						continue;
+					}
+
+					foreach (HtmlNode nodeService in nodeServices) {
+						HtmlNode nodeItemServiceName = nodeService.SelectSingleNode("div[1]/div[1]");
+						string itemServiceName = nodeItemServiceName.InnerText;
+						_backgroundWorker.ReportProgress((int)progressCurrent, itemServiceName);
+
+						HtmlNodeCollection nodesCol2InnerCol1 = nodeService.SelectNodes("div[2]/div[1]/div[1]/span");
+
+						if (nodesCol2InnerCol1 != null) {
+							string prefix = ", Закрытый контур, ";
+
+							if (nodesCol2InnerCol1.Count >= 1) {
+								string title = nodesCol2InnerCol1[0].ChildNodes[0].InnerText;
+								string price = nodesCol2InnerCol1[0].ChildNodes[1].InnerText;
+								string name = itemServiceName + prefix + title;
+								ItemService itemService = new ItemService() {
+									Name = name,
+									Price = price
+								};
+								itemServiceGroup.ServiceItems.Add(itemService);
+							}
+
+							if (nodesCol2InnerCol1.Count >= 2) {
+								string title = nodesCol2InnerCol1[1].ChildNodes[0].InnerText;
+								string price = nodesCol2InnerCol1[1].ChildNodes[1].InnerText;
+								string name = itemServiceName + prefix + title;
+								ItemService itemService = new ItemService() {
+									Name = name,
+									Price = price
+								};
+								itemServiceGroup.ServiceItems.Add(itemService);
+							}
+						}
+						
+						HtmlNodeCollection nodesCol2InnerCol2 = nodeService.SelectNodes("div[2]/div[1]/div[2]/span");
+
+						if (nodesCol2InnerCol2 != null) {
+							string prefix = ", Открытый контур, ";
+
+							if (nodesCol2InnerCol2.Count >= 1) {
+								string title = nodesCol2InnerCol2[0].ChildNodes[0].InnerText;
+								string price = nodesCol2InnerCol2[0].ChildNodes[1].InnerText;
+								string name = itemServiceName + prefix + title;
+								ItemService itemService = new ItemService() {
+									Name = name,
+									Price = price
+								};
+								itemServiceGroup.ServiceItems.Add(itemService);
+							}
+
+							if (nodesCol2InnerCol2.Count >= 2) {
+								string title = nodesCol2InnerCol2[1].ChildNodes[0].InnerText;
+								string price = nodesCol2InnerCol2[1].ChildNodes[1].InnerText;
+								string name = itemServiceName + prefix + title;
+								ItemService itemService = new ItemService() {
+									Name = name,
+									Price = price
+								};
+								itemServiceGroup.ServiceItems.Add(itemService);
+							}
+						}
+
+						HtmlNodeCollection nodesCol2Col2InnerCol1 = nodeService.SelectNodes("div[2]/div[2]/div[1]/div[1]/span");
+
+						if (nodesCol2Col2InnerCol1 != null) {
+							if (nodesCol2Col2InnerCol1.Count >= 1) {
+								string prefix = ", Закрытый контур, ";
+
+								string title = nodesCol2Col2InnerCol1[0].ChildNodes[0].InnerText;
+								string price = nodesCol2Col2InnerCol1[0].ChildNodes[1].InnerText;
+								string name = itemServiceName + prefix + title;
+								ItemService itemService = new ItemService() {
+									Name = name,
+									Price = price
+								};
+								itemServiceGroup.ServiceItems.Add(itemService);
+							}
+
+							if (nodesCol2Col2InnerCol1.Count >= 2) {
+								string prefix = ", Открытый контур, ";
+								string title = nodesCol2Col2InnerCol1[1].ChildNodes[0].InnerText;
+								string price = nodesCol2Col2InnerCol1[1].ChildNodes[1].InnerText;
+								string name = itemServiceName + prefix + title;
+								ItemService itemService = new ItemService() {
+									Name = name,
+									Price = price
+								};
+								itemServiceGroup.ServiceItems.Add(itemService);
+							}
+						}
+						
+						HtmlNodeCollection nodesCol2Col2InnerCol2 = nodeService.SelectNodes("div[2]/div[2]/div[1]/div[2]/span");
+						
+						if (nodesCol2Col2InnerCol2 != null) {
+							if (nodesCol2Col2InnerCol2.Count >= 1) {
+								string prefix = ", Закрытый контур, ";
+
+								string title = nodesCol2Col2InnerCol2[0].ChildNodes[0].InnerText;
+								string price = nodesCol2Col2InnerCol2[0].ChildNodes[1].InnerText;
+								string name = itemServiceName + prefix + title;
+								ItemService itemService = new ItemService() {
+									Name = name,
+									Price = price
+								};
+								itemServiceGroup.ServiceItems.Add(itemService);
+							}
+
+							if (nodesCol2Col2InnerCol2.Count >= 2) {
+								string prefix = ", Открытый контур, ";
+								string title = nodesCol2Col2InnerCol2[1].ChildNodes[0].InnerText;
+								string price = nodesCol2Col2InnerCol2[1].ChildNodes[1].InnerText;
+								string name = itemServiceName + prefix + title;
+								ItemService itemService = new ItemService() {
+									Name = name,
+									Price = price
+								};
+								itemServiceGroup.ServiceItems.Add(itemService);
+							}
+						}
+					}
+
+					itemSiteData.ServiceGroupItems.Add(itemServiceGroup);
+				} catch (Exception e) {
+					Console.WriteLine(e.Message + Environment.NewLine + e.StackTrace);
+				}
+			}
 		}
 
 		private void ParseSiteInvitroRU(HtmlDocument docServices, ref ItemSiteData itemSiteData) {
@@ -296,6 +525,11 @@ namespace PriceListLoader {
 					ItemServiceGroup itemServiceGroup = new ItemServiceGroup() { Name = serviceName, Link = urlService };
 
 					HtmlDocument docService = _htmlAgility.GetDocument(urlService);
+					HtmlDocument docServicePrice = new HtmlDocument();
+
+					if (_selectedSite == Sites.zub_ru)
+						docServicePrice = _htmlAgility.GetDocument(urlService + "price/");
+
 					if (docService == null) {
 						Console.WriteLine("docService is null");
 						continue;
@@ -328,6 +562,16 @@ namespace PriceListLoader {
 						case Sites.helix_ru:
 							ParseSiteHelixRu(docService, ref itemServiceGroup);
 							break;
+						case Sites.nrmed_ru:
+							ParseSiteNrmedRu(docService, ref itemServiceGroup);
+							break;
+						case Sites.dentol_ru:
+							ParseSiteDentolRu(docService, ref itemServiceGroup);
+							break;
+						case Sites.zub_ru:
+							ParseSiteZubRu(docService, ref itemServiceGroup);
+							ParseSiteZubRu(docServicePrice, ref itemServiceGroup);
+							break;
 						default:
 							break;
 					}
@@ -346,6 +590,51 @@ namespace PriceListLoader {
 			}
 
 			Console.WriteLine("completed");
+		}
+
+		private void ParseSiteZubRu(HtmlDocument docService, ref ItemServiceGroup itemServiceGroup) {
+			string xPathTable = "//div[@class='price_block visible']";
+			HtmlNodeCollection nodeCollectionService = _htmlAgility.GetNodeCollection(docService, xPathTable);
+
+			if (nodeCollectionService == null) {
+				Console.WriteLine("nodeCollectionService is null");
+				return;
+			}
+
+			foreach (HtmlNode node in nodeCollectionService) {
+				try {
+					List<ItemService> serviceItems = ReadTrNodesFdoctorRu(node.SelectSingleNode("table[1]"));
+					itemServiceGroup.ServiceItems.AddRange(serviceItems);
+				} catch (Exception e) {
+					Console.WriteLine(e.Message + Environment.NewLine + e.StackTrace);
+				}
+			}
+		}
+
+		private void ParseSiteDentolRu(HtmlDocument docService, ref ItemServiceGroup itemServiceGroup) {
+			string xPathTable = "//table[@class='wp_excel_cms_table wp_excel_cms_table_общий']";
+			HtmlNodeCollection nodeCollectionService = _htmlAgility.GetNodeCollection(docService, xPathTable);
+
+			if (nodeCollectionService == null) {
+				Console.WriteLine("nodeCollectionService is null");
+				return;
+			}
+
+			List<ItemService> serviceItems = ReadTrNodesFdoctorRu(nodeCollectionService.First());
+			itemServiceGroup.ServiceItems = serviceItems;
+		}
+
+		private void ParseSiteNrmedRu(HtmlDocument docService, ref ItemServiceGroup itemServiceGroup) {
+			string xPathTable = "//*[@id=\"vacancies_block\"]/table/tbody";
+			HtmlNodeCollection nodeCollectionService = _htmlAgility.GetNodeCollection(docService, xPathTable);
+
+			if (nodeCollectionService == null) {
+				Console.WriteLine("nodeCollectionService is null");
+				return;
+			}
+
+			List<ItemService> serviceItems = ReadTrNodesFdoctorRu(nodeCollectionService.First(), 1, 1);
+			itemServiceGroup.ServiceItems = serviceItems;
 		}
 
 		private void ParseSiteHelixRu(HtmlDocument docService, ref ItemServiceGroup itemServiceGroup) {
@@ -570,7 +859,9 @@ namespace PriceListLoader {
 						{ "&quot;", "\"" },
 						{ "\t", "" },
 						{ "р.", "" },
-						{ " руб.", ""}
+						{ " руб.", "" },
+						{ "руб.", "" },
+						{ " руб", "" },
 					};
 
 			foreach (KeyValuePair<string, string> pair in toReplace)

@@ -15,34 +15,37 @@ namespace PriceListLoader {
 
 		public HtmlDocument GetDocument(string url, bool isLocalFile = false) {
 			HtmlDocument doc = new HtmlDocument();
-
-			Console.WriteLine(hc.DefaultRequestHeaders.TryAddWithoutValidation(
-				"Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8"));
-			Console.WriteLine(hc.DefaultRequestHeaders.TryAddWithoutValidation(
-				"Accept-Encoding", "gzip, deflate, br"));
-			Console.WriteLine(hc.DefaultRequestHeaders.TryAddWithoutValidation(
-				"User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/63.0.3239.132 Safari/537.36"));
-			Console.WriteLine(hc.DefaultRequestHeaders.TryAddWithoutValidation(
-				"Accept-Charset", "ISO-8859-1"));
-
-
-			if (isLocalFile) {
-				string html = File.ReadAllText(url, Encoding.GetEncoding("windows-1251"));
-				doc.LoadHtml(html);
-			} else {
-				HttpResponseMessage result = hc.GetAsync(url).Result;
-				Stream stream = result.Content.ReadAsStreamAsync().Result;
-				StreamReader streamReader = new StreamReader(stream, true);
-				
-				doc.Load(streamReader);
-
-				result.Dispose();
-				stream.Close();
-				stream.Dispose();
-				streamReader.Close();
-				streamReader.Dispose();
-			}
+			string html;
 			
+			if (isLocalFile) {
+				html = File.ReadAllText(url, Encoding.UTF8); //"windows-1251"
+			} else {
+
+				HttpWebRequest request = (HttpWebRequest)WebRequest.Create(url);
+				request.UserAgent = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_2) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/63.0.3239.84 Safari/537.36";
+
+				HttpWebResponse response = (HttpWebResponse)request.GetResponse();
+
+				if (response.StatusCode == HttpStatusCode.OK) {
+					Stream receiveStream = response.GetResponseStream();
+					StreamReader readStream = null;
+
+					if (response.CharacterSet == null) {
+						readStream = new StreamReader(receiveStream);
+					} else {
+						readStream = new StreamReader(receiveStream, Encoding.GetEncoding(response.CharacterSet));
+					}
+
+					html = readStream.ReadToEnd();
+
+					response.Close();
+					readStream.Close();
+				} else
+					return doc;
+			}
+
+			doc.LoadHtml(html);
+
 			return doc;
 		}
 
