@@ -1,4 +1,5 @@
 ﻿using HtmlAgilityPack;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -37,7 +38,8 @@ namespace PriceListLoader {
 			vse_svoi_ru,
 			novostom_ru,
 			masterdent_ru,
-			gemotest_ru
+			gemotest_ru,
+			kdllab_ru
 		}
 
 		public SiteParser(BackgroundWorker backgroundWorker) {
@@ -45,7 +47,7 @@ namespace PriceListLoader {
 		}
 
 		public void ParseSelectedSites() {
-			_selectedSite = Sites.gemotest_ru;
+			_selectedSite = Sites.kdllab_ru;
 
 			switch (_selectedSite) {
 				case Sites.fdoctor_ru:
@@ -152,6 +154,12 @@ namespace PriceListLoader {
 					_companyName = "ООО \"Лаборатория Гемотест\"";
 					_xPathServices = "//*[@id=\"d-content\"]/div/aside/nav/div[2]/ul//a[@href]";
 					break;
+				case Sites.kdllab_ru:
+					_urlRoot = "https://kdllab.ru";
+					_urlServices = _urlRoot + "/analizy-i-tseny";
+					_companyName = "ООО «КДЛ ДОМОДЕДОВО-ТЕСТ»";
+					_xPathServices = "/html/body/div[5]/div/div[3]/div[2]//a[@href]";
+					break;
 				default:
 					return;
 			}
@@ -187,6 +195,7 @@ namespace PriceListLoader {
 				case Sites.dentol_ru:
 				case Sites.zub_ru:
 				case Sites.gemotest_ru:
+				case Sites.kdllab_ru:
 					ParseSitesWithLinksOnMainPage(docServices, ref itemSiteData);
 					break;
 				case Sites.alfazdrav_ru:
@@ -638,7 +647,12 @@ namespace PriceListLoader {
 					string serviceName = ClearString(servicePage.InnerText);
 					_backgroundWorker.ReportProgress((int)progressCurrent, serviceName);
 					Console.WriteLine("serviceName: " + serviceName);
-					string urlService = _urlRoot + servicePage.Attributes["href"].Value;
+					string hrefValue = servicePage.Attributes["href"].Value;
+
+					if (!hrefValue.StartsWith("/"))
+						hrefValue = "/" + hrefValue;
+
+					string urlService = _urlRoot + hrefValue;
 
 					ItemServiceGroup itemServiceGroup = new ItemServiceGroup() { Name = serviceName, Link = urlService };
 
@@ -693,6 +707,9 @@ namespace PriceListLoader {
 						case Sites.gemotest_ru:
 							ParseSiteGemotestRu(docService, ref itemServiceGroup);
 							break;
+						case Sites.kdllab_ru:
+							ParseSiteKdlLabRu(docService, ref itemServiceGroup);
+							break;
 						default:
 							break;
 					}
@@ -712,6 +729,52 @@ namespace PriceListLoader {
 
 			Console.WriteLine("completed");
 		}
+
+		private void ParseSiteKdlLabRu(HtmlDocument docService, ref ItemServiceGroup itemServiceGroup) {
+			string xPathMainBlock = "//div[@class='h-card__inner']";
+			HtmlNodeCollection nodeCollectionMainBlock = _htmlAgility.GetNodeCollection(docService, xPathMainBlock);
+
+			if (nodeCollectionMainBlock != null) {
+				foreach (HtmlNode nodeCard in nodeCollectionMainBlock) {
+					try {
+						string name = nodeCard.ChildNodes[1].ChildNodes[3].InnerText;
+						string price = nodeCard.ChildNodes[5].ChildNodes[3].InnerText;
+
+						ItemService itemService = new ItemService() {
+							Name = ClearString(name),
+							Price = ClearString(price)
+						};
+
+						itemServiceGroup.ServiceItems.Add(itemService);
+					} catch (Exception e) {
+						Console.WriteLine(e.Message + Environment.NewLine + e.StackTrace);
+					}
+				}
+			}
+
+
+			string xPathDataService = "/html/body/div[5]/div/div[3]/div[4]";
+			HtmlNodeCollection nodeCollectionService = _htmlAgility.GetNodeCollection(docService, xPathDataService);
+
+			if (nodeCollectionService != null) {
+
+				HtmlNode htmlNodeDataServiceList = nodeCollectionService.First();
+				if (!htmlNodeDataServiceList.Attributes.Contains("data-services-list")) {
+					Console.WriteLine("!htmlNodeDataServiceList.Attributes.Contains(\"data-services-list\")");
+					return;
+				}
+
+				string jsonArray = htmlNodeDataServiceList.Attributes["data-services-list"].Value;
+				if (string.IsNullOrEmpty(jsonArray) || string.IsNullOrWhiteSpace(jsonArray)) {
+					Console.WriteLine("jsonArray is empty");
+					return;
+				}
+
+				List<ItemService> serviceItems = JsonConvert.DeserializeObject<List<ItemService>>(jsonArray);
+				itemServiceGroup.ServiceItems.AddRange(serviceItems);
+			}
+		}
+		 
 
 		private void ParseSiteGemotestRu(HtmlDocument docService, ref ItemServiceGroup itemServiceGroup) {
 			string xPathTable = "//table[@class='d-col_xs_12 d-tal catalog-table']/tbody";
@@ -1017,7 +1080,8 @@ namespace PriceListLoader {
 						{ "руб.", "" },
 						{ " руб", "" },
 						{ ",00", "" },
-						{ "&raquo;", "" }
+						{ "&raquo;", "" },
+						{ " ₽", "" }
 					};
 
 			foreach (KeyValuePair<string, string> pair in toReplace)
