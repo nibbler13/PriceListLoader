@@ -48,7 +48,7 @@ namespace PriceListLoader {
 		}
 
 		public void ParseSelectedSites() {
-			_selectedSite = Sites.medsi_ru;
+			_selectedSite = Sites.onclinic_ru;
 
 			switch (_selectedSite) {
 				case Sites.fdoctor_ru:
@@ -83,9 +83,9 @@ namespace PriceListLoader {
 					break;
 				case Sites.onclinic_ru:
 					_urlRoot = "https://www.onclinic.ru";
-					_urlServices = _urlRoot + "/klientam/stoimost_uslug/";
+					_urlServices = _urlRoot + "/all/";
 					_companyName = "ООО \"Он Клиник Геоконик\"";
-					_xPathServices = "//*[@id=\"center\"]/div";
+					_xPathServices = "//*[@id=\"center\"]/div//a[@href]";
 					break;
 				case Sites.smclinic_ru:
 					_urlRoot = "http://www.smclinic.ru";
@@ -204,13 +204,11 @@ namespace PriceListLoader {
 				case Sites.gemotest_ru:
 				case Sites.kdllab_ru:
 				case Sites.medsi_ru:
+				case Sites.onclinic_ru:
 					ParseSitesWithLinksOnMainPage(docServices, ref itemSiteData);
 					break;
 				case Sites.alfazdrav_ru:
 					ParseSiteAlfazdrav(docServices, ref itemSiteData);
-					break;
-				case Sites.onclinic_ru:
-					ParseSiteOnClinic(docServices, ref itemSiteData);
 					break;
 				case Sites.invitro_ru:
 					ParseSiteInvitroRU(docServices, ref itemSiteData);
@@ -546,53 +544,6 @@ namespace PriceListLoader {
 			}
 		}
 
-		private void ParseSiteOnClinic(HtmlDocument docServices, ref ItemSiteData itemSiteData) {
-			HtmlNodeCollection nodeCollectionServices = _htmlAgility.GetNodeCollection(docServices, _xPathServices);
-			if (nodeCollectionServices == null) {
-				Console.WriteLine("nodeCollectionServices is null");
-				return;
-			}
-
-			for (int i = 0; i < nodeCollectionServices.Count; i++) {
-				HtmlNode nodeRoot = nodeCollectionServices[i];
-
-				try {
-					if (nodeRoot.HasAttributes && nodeRoot.Attributes.Contains("class")) {
-						string value = nodeRoot.Attributes["class"].Value;
-
-						if (value.Equals("price-holder")) {
-							ItemServiceGroup itemServiceGroup = new ItemServiceGroup() {
-								Name = "Первичный прием врача - специалиста",
-								Link = _urlServices
-							};
-
-							_backgroundWorker.ReportProgress((int)progressCurrent, itemServiceGroup.Name);
-
-							List<ItemService> serviceItems = ReadTrNodesFdoctorRu(nodeRoot.ChildNodes[1].ChildNodes[1]);
-							itemServiceGroup.ServiceItems = serviceItems;
-							itemSiteData.ServiceGroupItems.Add(itemServiceGroup);
-						}
-
-						if (value.Equals("block")) {
-							string serviceGroupName = nodeRoot.FirstChild.InnerText.Replace("\r", "").Replace("\n", "").TrimStart(' ').TrimEnd(' ');
-							_backgroundWorker.ReportProgress((int)progressCurrent, serviceGroupName);
-							List<ItemService> serviceItems = ReadTrNodesFdoctorRu(nodeRoot.ChildNodes[2].ChildNodes[1].ChildNodes[1]);
-
-							ItemServiceGroup itemServiceGroup = new ItemServiceGroup() {
-								Name = serviceGroupName,
-								Link = _urlServices,
-								ServiceItems = serviceItems
-							};
-
-							itemSiteData.ServiceGroupItems.Add(itemServiceGroup);
-						}
-					}
-				} catch (Exception e) {
-					_backgroundWorker.ReportProgress((int)progressCurrent, e.Message + Environment.NewLine + e.StackTrace);
-				}
-			}
-		}
-
 		private void ParseSiteAlfazdrav(HtmlDocument docServices, ref ItemSiteData itemSiteData) {
 			HtmlNodeCollection nodeCollectionServices = _htmlAgility.GetNodeCollection(docServices, _xPathServices);
 			if (nodeCollectionServices == null) {
@@ -725,6 +676,9 @@ namespace PriceListLoader {
 						case Sites.medsi_ru:
 							ParseSiteMedsiRu(docService, ref itemSiteData, itemServiceGroup);
 							break;
+						case Sites.onclinic_ru:
+							ParseSiteOnClinic(docService, ref itemServiceGroup, ref itemSiteData);
+							break;
 						default:
 							break;
 					}
@@ -743,6 +697,56 @@ namespace PriceListLoader {
 			}
 
 			Console.WriteLine("completed");
+		}
+
+		private void ParseSiteOnClinic(HtmlDocument docServices, ref ItemServiceGroup itemServiceGroup, ref ItemSiteData itemSiteData, bool goDeep = true) {
+			string xPathTable = "//div[@class='price-holder tbl-sm-font']";
+			HtmlNodeCollection nodeCollectionPriceTable = _htmlAgility.GetNodeCollection(docServices, xPathTable);
+			if (nodeCollectionPriceTable != null) {
+				try {
+					List<ItemService> serviceItems = ReadTrNodesFdoctorRu(nodeCollectionPriceTable[0].ChildNodes[1].ChildNodes[1]);
+					itemServiceGroup.ServiceItems = serviceItems;
+				} catch (Exception e) {
+					Console.WriteLine(e.Message + Environment.NewLine + e.StackTrace);
+				}
+			}
+
+			if (!goDeep)
+				return;
+
+			string xPathLeftMenu = "//div[@id='left-menu']";
+			HtmlNodeCollection nodeCollectionLeftMenu = _htmlAgility.GetNodeCollection(docServices, xPathLeftMenu);
+			if (nodeCollectionLeftMenu != null) {
+				HtmlNodeCollection nodeCollectionLinks = nodeCollectionLeftMenu[0].SelectNodes(xPathLeftMenu + "//a[@href]");
+				if (nodeCollectionLinks == null) {
+					Console.WriteLine("nodeCollectionLinks == null");
+					return;
+				}
+
+				foreach (HtmlNode nodeLink in nodeCollectionLinks) {
+					try {
+						string serviceName = ClearString(nodeLink.InnerText);
+						_backgroundWorker.ReportProgress((int)progressCurrent, serviceName);
+						Console.WriteLine("serviceName: " + serviceName);
+						string hrefValue = nodeLink.Attributes["href"].Value;
+						string urlService = _urlRoot + hrefValue;
+
+						ItemServiceGroup itemServiceGroupInner = new ItemServiceGroup() { Name = serviceName, Link = urlService };
+						HtmlDocument docService = _htmlAgility.GetDocument(urlService);
+
+						if (docService == null) {
+							Console.WriteLine("docService == null");
+							continue;
+						}
+
+						ParseSiteOnClinic(docService, ref itemServiceGroupInner, ref itemSiteData, false);
+
+						itemSiteData.ServiceGroupItems.Add(itemServiceGroupInner);
+					} catch (Exception e) {
+						Console.WriteLine(e.Message + Environment.NewLine + e.StackTrace);
+					}
+				}
+			}
 		}
 
 		private void ParseSiteMedsiRu(HtmlDocument docService, ref ItemSiteData itemSiteData, ItemServiceGroup itemServiceGroupRoot) {
@@ -879,7 +883,6 @@ namespace PriceListLoader {
 			}
 		}
 		 
-
 		private void ParseSiteGemotestRu(HtmlDocument docService, ref ItemServiceGroup itemServiceGroup) {
 			string xPathTable = "//table[@class='d-col_xs_12 d-tal catalog-table']/tbody";
 			HtmlNodeCollection nodeCollectionService = _htmlAgility.GetNodeCollection(docService, xPathTable);
