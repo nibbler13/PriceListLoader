@@ -39,7 +39,8 @@ namespace PriceListLoader {
 			novostom_ru,
 			masterdent_ru,
 			gemotest_ru,
-			kdllab_ru
+			kdllab_ru,
+			medsi_ru
 		}
 
 		public SiteParser(BackgroundWorker backgroundWorker) {
@@ -47,7 +48,7 @@ namespace PriceListLoader {
 		}
 
 		public void ParseSelectedSites() {
-			_selectedSite = Sites.kdllab_ru;
+			_selectedSite = Sites.medsi_ru;
 
 			switch (_selectedSite) {
 				case Sites.fdoctor_ru:
@@ -160,6 +161,12 @@ namespace PriceListLoader {
 					_companyName = "ООО «КДЛ ДОМОДЕДОВО-ТЕСТ»";
 					_xPathServices = "/html/body/div[5]/div/div[3]/div[2]//a[@href]";
 					break;
+				case Sites.medsi_ru:
+					_urlRoot = "https://medsi.ru";
+					_urlServices = _urlRoot + "/services/";
+					_companyName = "АО \"Группа компаний МЕДСИ\"";
+					_xPathServices = "/html/body/div[5]/div[2]/div/div/div[2]//a[@href]";
+					break;
 				default:
 					return;
 			}
@@ -196,6 +203,7 @@ namespace PriceListLoader {
 				case Sites.zub_ru:
 				case Sites.gemotest_ru:
 				case Sites.kdllab_ru:
+				case Sites.medsi_ru:
 					ParseSitesWithLinksOnMainPage(docServices, ref itemSiteData);
 					break;
 				case Sites.alfazdrav_ru:
@@ -654,6 +662,10 @@ namespace PriceListLoader {
 
 					string urlService = _urlRoot + hrefValue;
 
+					if (_selectedSite == Sites.medsi_ru)
+						if (urlService.Contains("#") && !urlService.EndsWith("/"))
+							continue;
+
 					ItemServiceGroup itemServiceGroup = new ItemServiceGroup() { Name = serviceName, Link = urlService };
 
 					HtmlDocument docService = _htmlAgility.GetDocument(urlService);
@@ -710,6 +722,9 @@ namespace PriceListLoader {
 						case Sites.kdllab_ru:
 							ParseSiteKdlLabRu(docService, ref itemServiceGroup);
 							break;
+						case Sites.medsi_ru:
+							ParseSiteMedsiRu(docService, ref itemSiteData, itemServiceGroup);
+							break;
 						default:
 							break;
 					}
@@ -728,6 +743,95 @@ namespace PriceListLoader {
 			}
 
 			Console.WriteLine("completed");
+		}
+
+		private void ParseSiteMedsiRu(HtmlDocument docService, ref ItemSiteData itemSiteData, ItemServiceGroup itemServiceGroupRoot) {
+			string xPathClinicsId = "//*[@class='ui-select__nosearch js-pricelist-select']/option";
+			HtmlNodeCollection htmlNodeId = docService.DocumentNode.SelectNodes(xPathClinicsId);
+
+			if (htmlNodeId == null) {
+				Console.WriteLine("htmlNodeId == null");
+				return;
+			}
+
+			Dictionary<string, string> idValues = new Dictionary<string, string>();
+			foreach (HtmlNode nodeId in htmlNodeId) {
+				try {
+					string key = nodeId.Attributes["value"].Value;
+					string value = ClearString(nodeId.InnerText);
+					idValues.Add(key, value);
+				} catch (Exception e) {
+					Console.WriteLine(e.Message + Environment.NewLine + e.StackTrace);
+				}
+			}
+			
+			string xPathTable = "//div[@class='js-pricelist-clinic']";
+			HtmlNodeCollection nodeCollectionService = _htmlAgility.GetNodeCollection(docService, xPathTable);
+
+			if (nodeCollectionService == null) {
+				Console.WriteLine("nodeCollectionService is null");
+				return;
+			}
+
+			foreach (HtmlNode nodeGroup in nodeCollectionService) {
+				if (nodeGroup.ChildNodes.Count <= 1 ) {
+					Console.WriteLine("nodeGroup.ChildNodes.Count <= 1");
+					continue;
+				}
+
+				try {
+					string id = nodeGroup.Attributes["data-id"].Value;
+					string priceType = nodeGroup.Attributes["data-price-type-id"].Value;
+					string clinicName = "ClinicNameUnknown";
+					if (idValues.ContainsKey(id))
+						clinicName = idValues[id];
+
+					if (priceType.Equals("1"))
+						clinicName += ", выходные";
+					else if (priceType.Equals("2"))
+						clinicName += ", будни";
+
+					HtmlNodeCollection nodeCollectionRowPrice = nodeGroup.SelectNodes(nodeGroup.XPath + "//div[@class='table-row-price']");
+					if (nodeCollectionRowPrice == null) {
+						Console.WriteLine("nodeCollectionRowPrice == null");
+						continue;
+					}
+
+					ItemServiceGroup itemServiceGroup = new ItemServiceGroup() {
+						Name = itemServiceGroupRoot.Name + ", " + clinicName,
+						Link = itemServiceGroupRoot.Link
+					};
+
+					foreach (HtmlNode nodeRowPrice in nodeCollectionRowPrice) {
+						try {
+							string name = ClearString(nodeRowPrice.SelectSingleNode("div[1]").InnerText);
+
+							HtmlNode nodePrice = nodeRowPrice.SelectSingleNode("div[2]").SelectSingleNode("div[1]");
+							HtmlNode nodePriceButton = nodePrice.SelectSingleNode("a[1]");
+
+							string price;
+
+							if (nodePriceButton != null)
+								price = nodePriceButton.SelectSingleNode("i[1]").InnerText;
+							else
+								price = nodePrice.InnerText;
+
+							ItemService itemService = new ItemService() {
+								Name = name,
+								Price = ClearString(price)
+							};
+
+							itemServiceGroup.ServiceItems.Add(itemService);
+						} catch (Exception priceExc) {
+							Console.WriteLine(priceExc.Message + Environment.NewLine + priceExc.StackTrace);
+						}
+					}
+
+					itemSiteData.ServiceGroupItems.Add(itemServiceGroup);
+				} catch (Exception e) {
+					Console.WriteLine(e.Message + Environment.NewLine + e.StackTrace);
+				}
+			}
 		}
 
 		private void ParseSiteKdlLabRu(HtmlDocument docService, ref ItemServiceGroup itemServiceGroup) {
