@@ -48,7 +48,7 @@ namespace PriceListLoader {
 		}
 
 		public void ParseSelectedSites() {
-			_selectedSite = Sites.onclinic_ru;
+			_selectedSite = Sites.cmd_online_ru;
 
 			switch (_selectedSite) {
 				case Sites.fdoctor_ru:
@@ -104,7 +104,7 @@ namespace PriceListLoader {
 					_urlRoot = "https://www.cmd-online.ru";
 					_urlServices = _urlRoot + "/analizy-i-tseny-po-gruppam/kompleksnyje-programmy-laboratornyh-issledovanij_323/";
 					_companyName = "ФБУН ЦНИИ Эпидемиологии Роспотребнадзора";
-					_xPathServices = "//*[@id=\"serv_list_content\"]/table//a[@href]";
+					_xPathServices = "//*[@id=\"analyzes_and_rates\"]/div[1]//a[@href]";
 					break;
 				case Sites.helix_ru:
 					_urlRoot = "https://helix.ru";
@@ -652,7 +652,7 @@ namespace PriceListLoader {
 							ParseSiteSmClinicRu(docService, ref itemServiceGroup);
 							break;
 						case Sites.cmd_online_ru:
-							ParseSiteCmdOnlineRu(docService, ref itemServiceGroup);
+							ParseSiteCmdOnlineRu(docService, ref itemServiceGroup, ref itemSiteData);
 							break;
 						case Sites.helix_ru:
 							ParseSiteHelixRu(docService, ref itemServiceGroup);
@@ -995,12 +995,16 @@ namespace PriceListLoader {
 			}
 		}
 
-		private void ParseSiteCmdOnlineRu(HtmlDocument docService, ref ItemServiceGroup itemServiceGroup) {
+		private void ParseSiteCmdOnlineRu(HtmlDocument docService, ref ItemServiceGroup itemServiceGroup, ref ItemSiteData itemSiteData) {
 			string xPathPriceTable = "//*[@id=\"serv_list_content\"]/table[1]/tbody";
 			
 			HtmlNodeCollection nodeCollectionService = _htmlAgility.GetNodeCollection(docService, xPathPriceTable);
 			if (nodeCollectionService == null) {
 				Console.WriteLine("nodeCollectionService is null");
+
+				_xPathServices = "//*[@id=\"serv_list_content\"]//a[@href]";
+				ParseSitesWithLinksOnMainPage(docService, ref itemSiteData);
+
 				return;
 			}
 
