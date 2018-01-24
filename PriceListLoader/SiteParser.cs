@@ -29,6 +29,7 @@ namespace PriceListLoader {
 			nrmed_ru,
 			onclinic_ru,
 			smclinic_ru,
+			smdoctor_ru,
 			invitro_ru, //!!!work only with offline html
 			cmd_online_ru,
 			helix_ru,
@@ -48,7 +49,7 @@ namespace PriceListLoader {
 		}
 
 		public void ParseSelectedSites() {
-			_selectedSite = Sites.cmd_online_ru;
+			_selectedSite = Sites.smdoctor_ru;
 
 			switch (_selectedSite) {
 				case Sites.fdoctor_ru:
@@ -92,6 +93,12 @@ namespace PriceListLoader {
 					_urlServices = _urlRoot + "/services/";
 					_companyName = "ООО «СМ-Клиника»";
 					_xPathServices = "//*[@id=\"colleft\"]//a[@href]";
+					break;
+				case Sites.smdoctor_ru:
+					_urlRoot = "http://www.smdoctor.ru";
+					_urlServices = _urlRoot + "/about/price/";
+					_companyName = "ООО «СМ-Доктор»";
+					_xPathServices = "//table[@class='price-list']";
 					break;
 				case Sites.invitro_ru:
 					_urlRoot = "https://www.invitro.ru";
@@ -225,6 +232,9 @@ namespace PriceListLoader {
 				case Sites.masterdent_ru:
 					ParseSiteMasterdentRu(docServices, ref itemSiteData);
 					break;
+				case Sites.smdoctor_ru:
+					ParseSiteSmDoctorRu(docServices, ref itemSiteData);
+					break;
 				default:
 					break;
 			}
@@ -235,6 +245,29 @@ namespace PriceListLoader {
 			}
 
 			string resultFile = NpoiExcel.WriteItemSiteDataToExcel(itemSiteData, _backgroundWorker, progressCurrent, progressTo);
+		}
+
+		private void ParseSiteSmDoctorRu(HtmlDocument docServices, ref ItemSiteData itemSiteData) {
+			HtmlNodeCollection nodeCollectionServices = _htmlAgility.GetNodeCollection(docServices, _xPathServices);
+			if (nodeCollectionServices == null) {
+				Console.WriteLine("nodeCollectionServices is null");
+				return;
+			}
+
+			ItemServiceGroup itemServiceGroup = new ItemServiceGroup() {
+				Link = _urlServices
+			};
+
+			foreach (HtmlNode node in nodeCollectionServices) {
+				try {
+					List<ItemService> serviceItems = ReadTrNodesFdoctorRu(node.FirstChild);
+					itemServiceGroup.ServiceItems.AddRange(serviceItems);
+				} catch (Exception e) {
+					Console.WriteLine(e.Message + Environment.NewLine + e.StackTrace);
+				}
+			}
+
+			itemSiteData.ServiceGroupItems.Add(itemServiceGroup);
 		}
 
 		private void ParseSiteMasterdentRu(HtmlDocument docServices, ref ItemSiteData itemSiteData) {
