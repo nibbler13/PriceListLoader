@@ -27,6 +27,7 @@ namespace PriceListLoader {
 			familydoctor_ru_child,
 			alfazdrav_ru,
 			nrmed_ru,
+			nrlab_ru,
 			onclinic_ru,
 			smclinic_ru,
 			smdoctor_ru,
@@ -49,7 +50,7 @@ namespace PriceListLoader {
 		}
 
 		public void ParseSelectedSites() {
-			_selectedSite = Sites.smdoctor_ru;
+			_selectedSite = Sites.smclinic_ru;
 
 			switch (_selectedSite) {
 				case Sites.fdoctor_ru:
@@ -82,6 +83,12 @@ namespace PriceListLoader {
 					_companyName = "ООО \"НИАРМЕДИК ПЛЮС\"";
 					_xPathServices = "//*[@id=\"srv_list_wrap\"]//a[@href]";
 					break;
+				case Sites.nrlab_ru:
+					_urlRoot = "http://www.nrlab.ru";
+					_urlServices = _urlRoot + "/prices/groups/";
+					_companyName = "Лаборатория Ниармедик";
+					_xPathServices = "//div[@class=\"spis_analiz\"]//a[@href]";
+					break;
 				case Sites.onclinic_ru:
 					_urlRoot = "https://www.onclinic.ru";
 					_urlServices = _urlRoot + "/all/";
@@ -90,9 +97,9 @@ namespace PriceListLoader {
 					break;
 				case Sites.smclinic_ru:
 					_urlRoot = "http://www.smclinic.ru";
-					_urlServices = _urlRoot + "/services/";
+					_urlServices = _urlRoot + "/doctors/";
 					_companyName = "ООО «СМ-Клиника»";
-					_xPathServices = "//*[@id=\"colleft\"]//a[@href]";
+					_xPathServices = "//div[@id=\"content\"]//a[@href]";
 					break;
 				case Sites.smdoctor_ru:
 					_urlRoot = "http://www.smdoctor.ru";
@@ -212,6 +219,7 @@ namespace PriceListLoader {
 				case Sites.kdllab_ru:
 				case Sites.medsi_ru:
 				case Sites.onclinic_ru:
+				case Sites.nrlab_ru:
 					ParseSitesWithLinksOnMainPage(docServices, ref itemSiteData);
 					break;
 				case Sites.alfazdrav_ru:
@@ -712,6 +720,9 @@ namespace PriceListLoader {
 						case Sites.onclinic_ru:
 							ParseSiteOnClinic(docService, ref itemServiceGroup, ref itemSiteData);
 							break;
+						case Sites.nrlab_ru:
+							ParseSiteNrLabRu(docService, ref itemServiceGroup);
+							break;
 						default:
 							break;
 					}
@@ -730,6 +741,21 @@ namespace PriceListLoader {
 			}
 
 			Console.WriteLine("completed");
+		}
+
+		private void ParseSiteNrLabRu(HtmlDocument docService, ref ItemServiceGroup itemServiceGroup) {
+			string xPathTable = "//table[contains(@class, 'tab_issledov tab_op_isl')]";
+			HtmlNodeCollection nodeCollectionService = _htmlAgility.GetNodeCollection(docService, xPathTable);
+
+			if (nodeCollectionService == null) {
+				Console.WriteLine("nodeCollectionService is null");
+				return;
+			}
+
+			foreach (HtmlNode node in nodeCollectionService) {
+				List<ItemService> serviceItems = ReadTrNodesFdoctorRu(node, 1, 3);
+				itemServiceGroup.ServiceItems.AddRange(serviceItems);
+			}
 		}
 
 		private void ParseSiteOnClinic(HtmlDocument docServices, ref ItemServiceGroup itemServiceGroup, ref ItemSiteData itemSiteData, bool goDeep = true) {
