@@ -11,8 +11,6 @@ using HtmlAgilityPack;
 
 namespace PriceListLoader {
 	class HtmlAgility {
-		private	HttpClient hc = new HttpClient();
-
 		public HtmlDocument GetDocument(string url, bool isLocalFile = false) {
 			HtmlDocument doc = new HtmlDocument();
 			string html;
@@ -20,7 +18,6 @@ namespace PriceListLoader {
 			if (isLocalFile) {
 				html = File.ReadAllText(url, Encoding.UTF8); //"windows-1251"
 			} else {
-
 				HttpWebRequest request = (HttpWebRequest)WebRequest.Create(url);
 				request.UserAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/63.0.3239.132 Safari/537.36";
 
@@ -33,7 +30,7 @@ namespace PriceListLoader {
 					if (response.CharacterSet == null) {
 						readStream = new StreamReader(receiveStream);
 					} else {
-						readStream = new StreamReader(receiveStream, Encoding.GetEncoding(response.CharacterSet));
+						readStream = new StreamReader(receiveStream, Encoding.Default, true);
 					}
 
 					html = readStream.ReadToEnd();

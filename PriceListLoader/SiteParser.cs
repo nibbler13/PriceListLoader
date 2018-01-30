@@ -50,7 +50,7 @@ namespace PriceListLoader {
 		}
 
 		public void ParseSelectedSites() {
-			_selectedSite = Sites.smclinic_ru;
+			_selectedSite = Sites.alfazdrav_ru;
 
 			switch (_selectedSite) {
 				case Sites.fdoctor_ru:
@@ -72,8 +72,8 @@ namespace PriceListLoader {
 					_xPathServices = "//*[@id=\"content\"]/article/div[4]//a[@href]";
 					break;
 				case Sites.alfazdrav_ru:
-					_urlRoot = "https://www.alfazdrav.ru";
-					_urlServices = _urlRoot + "/services/price/";
+					_urlRoot = @"C:\Users\nn-admin\Desktop";
+					_urlServices = _urlRoot + @"\Прейскурант _ Альфа - Центр Здоровья.html";
 					_companyName = "ООО «МедАС» — «Альфа-Центр Здоровья»";
 					_xPathServices = "/html/body/section/section/div/div/ul[1]/li";
 					break;
@@ -149,7 +149,7 @@ namespace PriceListLoader {
 					_urlRoot = "https://vse-svoi.ru";
 					_urlServices = _urlRoot + "/msk/ceny/";
 					_companyName = "ООО \"ВСЕ СВОИ\"";
-					_xPathServices = "//div[@class='price-list-page']/table";
+					_xPathServices = "//div[@class='price-list-page']";
 					break;
 				case Sites.novostom_ru:
 					_urlRoot = "http://www.novostom.ru";
@@ -191,13 +191,14 @@ namespace PriceListLoader {
 			ItemSiteData itemSiteData = new ItemSiteData() { SiteAddress = _urlServices, CompanyName = _companyName };
 
 			HtmlDocument docServices;
-			
+
+			bool isLocalFile = false;
 			if (_selectedSite == Sites.invitro_ru ||
-				_selectedSite == Sites.mrt24_ru) {
-				docServices = _htmlAgility.GetDocument(_urlServices, true);
-			} else {
-				docServices = _htmlAgility.GetDocument(_urlServices);
-			}
+				_selectedSite == Sites.mrt24_ru ||
+				_selectedSite == Sites.alfazdrav_ru)
+				isLocalFile = true;
+				
+			docServices = _htmlAgility.GetDocument(_urlServices, isLocalFile);
 
 			if (docServices == null) {
 				_backgroundWorker.ReportProgress((int)progressCurrent, "Не удалось загрузить страницу: " + _urlServices);
@@ -375,39 +376,58 @@ namespace PriceListLoader {
 				return;
 			}
 
-			ItemServiceGroup itemServiceGroup = new ItemServiceGroup() {
-				Name = "",
-				Link = _urlServices
-			};
-
-			foreach (HtmlNode node in nodeCollectionServices) {
+			nodeCollectionServices = nodeCollectionServices[0].ChildNodes; 
+			for (int i = 0; i < nodeCollectionServices.Count; i++) {
 				try {
-					HtmlNodeCollection nodeServices = node.ChildNodes[1].SelectNodes("tr");
-					if (nodeServices == null) {
-						Console.WriteLine("nodeServices == null");
+					HtmlNode nodeHeader = nodeCollectionServices[i];
+					if (!nodeHeader.Name.Equals("h3") &&
+						!nodeHeader.Name.Equals("noindex"))
 						continue;
-					}
 
-					foreach (HtmlNode nodeService in nodeServices) {
-						try {
-							string name = nodeService.ChildNodes[0].InnerText;
-							string price = nodeService.ChildNodes[1].FirstChild.FirstChild.InnerText;
-							ItemService itemService = new ItemService() {
-								Name = name,
-								Price = ClearString(price)
-							};
+					ItemServiceGroup itemServiceGroup = new ItemServiceGroup() {
+						Name = nodeHeader.InnerText,
+						Link = _urlServices
+					};
 
-							itemServiceGroup.ServiceItems.Add(itemService);
-						} catch (Exception ex) {
-							Console.WriteLine(ex.Message + Environment.NewLine + ex.StackTrace);
+					for (int x = i + 1; x < nodeCollectionServices.Count; x++) {
+						HtmlNode nodeTable = nodeCollectionServices[x];
+
+						if (nodeTable.Name.Equals("h3") ||
+							nodeTable.Name.Equals("noindex")) {
+							i = x - 1;
+							break;
+						}
+
+						if (!nodeTable.Name.Equals("table"))
+							continue;
+
+						HtmlNodeCollection nodeServices = nodeTable.ChildNodes[1].SelectNodes("tr");
+						if (nodeServices == null) {
+							Console.WriteLine("nodeServices == null");
+							continue;
+						}
+
+						foreach (HtmlNode nodeService in nodeServices) {
+							try {
+								string name = nodeService.ChildNodes[0].InnerText;
+								string price = nodeService.ChildNodes[1].FirstChild.FirstChild.InnerText;
+								ItemService itemService = new ItemService() {
+									Name = name,
+									Price = ClearString(price)
+								};
+
+								itemServiceGroup.ServiceItems.Add(itemService);
+							} catch (Exception ex) {
+								Console.WriteLine(ex.Message + Environment.NewLine + ex.StackTrace);
+							}
 						}
 					}
+
+					itemSiteData.ServiceGroupItems.Add(itemServiceGroup);
 				} catch (Exception e) {
 					Console.WriteLine(e.Message + Environment.NewLine + e.StackTrace);
 				}
 			}
-
-			itemSiteData.ServiceGroupItems.Add(itemServiceGroup);
 		}
 
 		private void ParseSiteMrt24Ru(HtmlDocument docServices, ref ItemSiteData itemSiteData) {
@@ -612,16 +632,24 @@ namespace PriceListLoader {
 						ItemServiceGroup itemServiceGroup = new ItemServiceGroup() 
 							{ Name = departmentName + ", " + groupName, Link = _urlServices };
 
-						HtmlNodeCollection nodeServices = nodeGroup.SelectNodes("div[1]/table[1]");
+						HtmlNodeCollection nodeTables = nodeGroup.SelectNodes(nodeGroup.XPath + "//table");
 
-						List<ItemService> serviceItems = ReadTrNodesFdoctorRu(nodeServices.First());
-
-						if (serviceItems.Count == 0) {
-							_backgroundWorker.ReportProgress((int)progressCurrent, "Услуг не обнаружено, пропуск");
+						if (nodeTables == null) {
+							Console.WriteLine("nodeTables == null");
 							continue;
 						}
 
-						itemServiceGroup.ServiceItems = serviceItems;
+						foreach (HtmlNode nodeTable in nodeTables) {
+							List<ItemService> serviceItems = ReadTrNodesFdoctorRu(nodeTable.LastChild);
+
+							if (serviceItems.Count == 0) {
+								_backgroundWorker.ReportProgress((int)progressCurrent, "Услуг не обнаружено, пропуск");
+								continue;
+							}
+
+							itemServiceGroup.ServiceItems.AddRange(serviceItems);
+						}
+
 						itemSiteData.ServiceGroupItems.Add(itemServiceGroup);
 					}
 				} catch (Exception e) {
