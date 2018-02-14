@@ -42,7 +42,9 @@ namespace PriceListLoader {
 			masterdent_ru,
 			gemotest_ru,
 			kdllab_ru,
-			medsi_ru
+			medsi_ru,
+			sm_stomatology_ru,
+			smclinic_ru_lab
 		}
 
 		public SiteParser(BackgroundWorker backgroundWorker) {
@@ -50,7 +52,7 @@ namespace PriceListLoader {
 		}
 
 		public void ParseSelectedSites() {
-			_selectedSite = Sites.alfazdrav_ru;
+			_selectedSite = Sites.smdoctor_ru;
 
 			switch (_selectedSite) {
 				case Sites.fdoctor_ru:
@@ -105,7 +107,7 @@ namespace PriceListLoader {
 					_urlRoot = "http://www.smdoctor.ru";
 					_urlServices = _urlRoot + "/about/price/";
 					_companyName = "ООО «СМ-Доктор»";
-					_xPathServices = "//table[@class='price-list']";
+					_xPathServices = "//div[contains(@class, 'tab-price-panel')]";
 					break;
 				case Sites.invitro_ru:
 					_urlRoot = "https://www.invitro.ru";
@@ -181,6 +183,18 @@ namespace PriceListLoader {
 					_companyName = "АО \"Группа компаний МЕДСИ\"";
 					_xPathServices = "/html/body/div[5]/div[2]/div/div/div[2]//a[@href]";
 					break;
+				case Sites.sm_stomatology_ru:
+					_urlRoot = "http://www.sm-stomatology.ru";
+					_urlServices = _urlRoot + "/services/";
+					_companyName = "СМ-Стоматология";
+					_xPathServices = "//div[@class='b-aside-menu']//a[@href]";
+					break;
+				case Sites.smclinic_ru_lab:
+					_urlRoot = "http://www.smclinic.ru";
+					_urlServices = _urlRoot + "/calc/";
+					_companyName = "ООО «СМ-Клиника»";
+					_xPathServices = "//div[@class='panel panel-default pull-left']";
+					break;
 				default:
 					return;
 			}
@@ -221,6 +235,7 @@ namespace PriceListLoader {
 				case Sites.medsi_ru:
 				case Sites.onclinic_ru:
 				case Sites.nrlab_ru:
+				case Sites.sm_stomatology_ru:
 					ParseSitesWithLinksOnMainPage(docServices, ref itemSiteData);
 					break;
 				case Sites.alfazdrav_ru:
@@ -244,6 +259,9 @@ namespace PriceListLoader {
 				case Sites.smdoctor_ru:
 					ParseSiteSmDoctorRu(docServices, ref itemSiteData);
 					break;
+				case Sites.smclinic_ru_lab:
+					ParseSiteSmClinicRuLab(docServices, ref itemSiteData);
+					break;
 				default:
 					break;
 			}
@@ -256,6 +274,50 @@ namespace PriceListLoader {
 			string resultFile = NpoiExcel.WriteItemSiteDataToExcel(itemSiteData, _backgroundWorker, progressCurrent, progressTo);
 		}
 
+		private void ParseSiteSmClinicRuLab(HtmlDocument docServices, ref ItemSiteData itemSiteData) {
+			HtmlNodeCollection nodeCollectionServices = _htmlAgility.GetNodeCollection(docServices, _xPathServices);
+			if (nodeCollectionServices == null) {
+				Console.WriteLine("nodeCollectionServices is null");
+				return;
+			}
+
+			foreach (HtmlNode node in nodeCollectionServices) {
+				string blockName = string.Empty;
+				HtmlNode nodeBlockName = node.SelectSingleNode(node.XPath + "/div[@class='panel-heading']");
+				if (nodeBlockName != null)
+					blockName = ClearString(nodeBlockName.InnerText);
+
+				ItemServiceGroup itemServiceGroup = new ItemServiceGroup() {
+					Name = blockName,
+					Link = _urlServices
+				};
+
+				HtmlNodeCollection nodeCollectionItems = node.SelectNodes(node.XPath + "//div[@class='input-holder']");
+				if (nodeCollectionItems == null) {
+					Console.WriteLine("nodeCollectionItems == null");
+					continue;
+				}
+
+				foreach (HtmlNode nodeItem in nodeCollectionItems) {
+					try {
+						string itemCost = ClearString(nodeItem.ChildNodes[1].Attributes["data-price"].Value);
+						string itemName = ClearString(nodeItem.ChildNodes[2].InnerText);
+						itemServiceGroup.ServiceItems.Add(new ItemService() {
+							Name = itemName,
+							Price = itemCost
+						});
+					} catch (Exception e) {
+						Console.WriteLine(e.Message + Environment.NewLine + e.StackTrace);
+					}
+				}
+
+				if (itemServiceGroup.ServiceItems.Count == 0)
+					continue;
+
+				itemSiteData.ServiceGroupItems.Add(itemServiceGroup);
+			}
+		}
+
 		private void ParseSiteSmDoctorRu(HtmlDocument docServices, ref ItemSiteData itemSiteData) {
 			HtmlNodeCollection nodeCollectionServices = _htmlAgility.GetNodeCollection(docServices, _xPathServices);
 			if (nodeCollectionServices == null) {
@@ -263,20 +325,73 @@ namespace PriceListLoader {
 				return;
 			}
 
-			ItemServiceGroup itemServiceGroup = new ItemServiceGroup() {
-				Link = _urlServices
-			};
+			foreach (HtmlNode nodeGroup in nodeCollectionServices) {
+				HtmlNodeCollection nodeCollectionLi = nodeGroup.SelectNodes(nodeGroup.XPath + "//li[@class='section-item']");
 
-			foreach (HtmlNode node in nodeCollectionServices) {
-				try {
-					List<ItemService> serviceItems = ReadTrNodesFdoctorRu(node.FirstChild);
-					itemServiceGroup.ServiceItems.AddRange(serviceItems);
-				} catch (Exception e) {
-					Console.WriteLine(e.Message + Environment.NewLine + e.StackTrace);
+				if (nodeCollectionLi == null) {
+					Console.WriteLine("nodeCollectionLi == null");
+					continue;
+				}
+
+				foreach (HtmlNode nodeLi in nodeCollectionLi) {
+					try {
+						HtmlNode nodeSectionName = nodeLi.SelectSingleNode(nodeLi.XPath + "/span");
+
+						if (nodeSectionName == null) {
+							Console.WriteLine("nodeSectionName == null");
+							continue;
+						}
+
+						string sectionName = ClearString(nodeSectionName.InnerText);
+						ItemServiceGroup itemServiceGroup = new ItemServiceGroup() {
+							Name = sectionName,
+							Link = _urlServices
+						};
+
+						HtmlNode nodeTableBody = nodeLi.SelectSingleNode(nodeLi.XPath + "//table[@class='price-list']/tbody");
+						if (nodeTableBody == null) {
+							Console.WriteLine("nodeTableBody == null");
+							continue;
+						}
+
+						List<ItemService> serviceItems = ReadTrNodesFdoctorRu(nodeTableBody);
+						itemServiceGroup.ServiceItems.AddRange(serviceItems);
+
+						if (itemServiceGroup.ServiceItems.Count == 0)
+							continue;
+
+						itemSiteData.ServiceGroupItems.Add(itemServiceGroup);
+					} catch (Exception e) {
+						Console.WriteLine(e.Message + Environment.NewLine + e.StackTrace);
+					}
+				}
+
+				HtmlNode nodeSingleTable = nodeGroup.SelectSingleNode(nodeGroup.XPath + "/table[@class='price-list']/tbody");
+				if (nodeSingleTable != null) {
+					ItemServiceGroup itemServiceGroup = new ItemServiceGroup() {
+						Name = "Детская хирургия",
+						Link = _urlServices
+					};
+
+					HtmlNode nodeTableBody = nodeGroup.SelectSingleNode(nodeGroup.XPath + "//table[@class='price-list']/tbody");
+					if (nodeTableBody == null) {
+						Console.WriteLine("nodeTableBody == null");
+						continue;
+					}
+
+					try {
+						List<ItemService> serviceItems = ReadTrNodesFdoctorRu(nodeTableBody);
+						itemServiceGroup.ServiceItems.AddRange(serviceItems);
+					} catch (Exception e) {
+						Console.WriteLine(e.Message + Environment.NewLine + e.StackTrace);
+					}
+
+					if (itemServiceGroup.ServiceItems.Count == 0)
+						continue;
+
+					itemSiteData.ServiceGroupItems.Add(itemServiceGroup);
 				}
 			}
-
-			itemSiteData.ServiceGroupItems.Add(itemServiceGroup);
 		}
 
 		private void ParseSiteMasterdentRu(HtmlDocument docServices, ref ItemSiteData itemSiteData) {
@@ -658,6 +773,8 @@ namespace PriceListLoader {
 			}
 		}
 
+
+
 		private void ParseSitesWithLinksOnMainPage(HtmlDocument docServices, ref ItemSiteData itemSiteData) {
 			HtmlNodeCollection nodeCollectionServices = _htmlAgility.GetNodeCollection(docServices, _xPathServices);
 			if (nodeCollectionServices == null) {
@@ -751,6 +868,9 @@ namespace PriceListLoader {
 						case Sites.nrlab_ru:
 							ParseSiteNrLabRu(docService, ref itemServiceGroup);
 							break;
+						case Sites.sm_stomatology_ru:
+							ParseSiteSmStomatologyRu(docService, ref itemServiceGroup);
+							break;
 						default:
 							break;
 					}
@@ -769,6 +889,22 @@ namespace PriceListLoader {
 			}
 
 			Console.WriteLine("completed");
+		}
+
+		private void ParseSiteSmStomatologyRu(HtmlDocument docService, ref ItemServiceGroup itemServiceGroup) {
+			string xPathTable = "//table[@class='table b-table']/tbody";
+			HtmlNodeCollection nodeCollectionService = _htmlAgility.GetNodeCollection(docService, xPathTable);
+			Console.WriteLine(itemServiceGroup.Name);
+
+			if (nodeCollectionService == null) {
+				Console.WriteLine("nodeCollectionService is null");
+				return;
+			}
+
+			foreach (HtmlNode node in nodeCollectionService) {
+				List<ItemService> serviceItems = ReadTrNodesFdoctorRu(node);
+				itemServiceGroup.ServiceItems.AddRange(serviceItems);
+			}
 		}
 
 		private void ParseSiteNrLabRu(HtmlDocument docService, ref ItemServiceGroup itemServiceGroup) {

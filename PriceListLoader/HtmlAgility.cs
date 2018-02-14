@@ -30,7 +30,7 @@ namespace PriceListLoader {
 					if (response.CharacterSet == null) {
 						readStream = new StreamReader(receiveStream);
 					} else {
-						readStream = new StreamReader(receiveStream, Encoding.Default, true);
+						readStream = new StreamReader(receiveStream, Encoding.GetEncoding(response.CharacterSet));
 					}
 
 					html = readStream.ReadToEnd();
