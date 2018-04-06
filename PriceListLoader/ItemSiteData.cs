@@ -26,7 +26,31 @@ namespace PriceListLoader {
 	}
 	
 	public class ItemService {
+		private static Dictionary<string, string> toReplace = new Dictionary<string, string>() {
+			{ "р.", "" },
+			{ " руб.", "" },
+			{ "руб.", "" },
+			{ " руб", "" },
+			{ ",00", "" },
+			{ " ₽", "" },
+			{ ".00", "" },
+			{ " ф", "" }
+		};
+
 		public string Name { get; set; }
-		public string Price { get; set; }
+
+		private string price;
+		public string Price {
+			get {
+				return price;
+			}
+			set {
+				string newValue = value;
+				foreach (KeyValuePair<string, string> item in toReplace)
+					newValue = newValue.Replace(item.Key, item.Value);
+
+				price = newValue;
+			}
+		}
 	}
 }
