@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.IO;
 using System.Linq;
@@ -21,17 +22,28 @@ namespace PriceListLoader {
 	/// Логика взаимодействия для MainWindow.xaml
 	/// </summary>
 	public partial class MainWindow : Window {
+		public ObservableCollection<SiteInfo> SiteItems { get; set; } = new ObservableCollection<SiteInfo>();
+
 		public MainWindow() {
 			InitializeComponent();
+
+			//ListViewSites.DataContext = this;
+			DataGridSites.DataContext = this;
+
+			foreach (SiteInfo.SiteName name in Enum.GetValues(typeof(SiteInfo.SiteName)))
+				SiteItems.Add(new SiteInfo(name));
+			
 		}
 
-		private void Button_Click(object sender, RoutedEventArgs e) {
-			BackgroundWorker backgroundWorker = new BackgroundWorker();
-			backgroundWorker.WorkerReportsProgress = true;
+		private void ButtonExecute_Click(object sender, RoutedEventArgs e) {
+			BackgroundWorker backgroundWorker = new BackgroundWorker {
+				WorkerReportsProgress = true
+			};
+
 			backgroundWorker.DoWork += BackgroundWorker_DoWork;
 			backgroundWorker.RunWorkerCompleted += BackgroundWorker_RunWorkerCompleted;
 			backgroundWorker.ProgressChanged += BackgroundWorker_ProgressChanged;
-			backgroundWorker.RunWorkerAsync();
+			backgroundWorker.RunWorkerAsync(DataGridSites.SelectedItems);
 			IsEnabled = false;
 		}
 
@@ -58,7 +70,17 @@ namespace PriceListLoader {
 
 		private void BackgroundWorker_DoWork(object sender, DoWorkEventArgs e) {
 			SiteParser siteParser = new SiteParser(sender as BackgroundWorker);
-			siteParser.ParseSelectedSites();
+
+			foreach (SiteInfo siteInfo in (System.Collections.IList)e.Argument)
+				siteParser.ParseSelectedSite(siteInfo);
+		}
+
+		private void DataGridSites_SelectionChanged(object sender, SelectionChangedEventArgs e) {
+			ButtonExecute.IsEnabled = DataGridSites.SelectedItems.Count > 0;
+		}
+
+		private void ButtonDo_Click(object sender, RoutedEventArgs e) {
+			PriceSummary.Test();
 		}
 	}
 }

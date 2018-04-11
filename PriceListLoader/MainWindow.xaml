@@ -5,15 +5,106 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:PriceListLoader"
         mc:Ignorable="d"
-        Title="MainWindow" WindowStartupLocation="CenterScreen" Height="300" Width="300">
+        Title="MainWindow" 
+        WindowStartupLocation="CenterScreen" 
+        Width="1024" 
+        Height="768">
     <Grid>
-        <Grid.RowDefinitions>
-            <RowDefinition Height="*"/>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
-        </Grid.RowDefinitions>
-        <TextBox Grid.Row="0" Margin="10" x:Name="TextBoxResult" VerticalScrollBarVisibility="Visible"/>
-        <ProgressBar Grid.Row="1" x:Name="ProgressBarResult" Height="10" Margin="10,0"/>
-        <Button Grid.Row="2" Content="Start" Margin="10" Click="Button_Click" Width="80"/>
+        <TabControl>
+            <TabItem Header="Выгрузка">
+                <Grid Margin="10">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+
+                    <TextBlock Grid.Row="0"
+                               Text="Список доступных сайтов:"/>
+
+                    <DataGrid Grid.Row="1" 
+                              ItemsSource="{Binding SiteItems}" 
+                              x:Name="DataGridSites" 
+                              AutoGenerateColumns="False" 
+                              GridLinesVisibility="Horizontal"
+                              HorizontalGridLinesBrush="#FFC8C8C8" 
+                              VerticalGridLinesBrush="#FFC8C8C8"
+                              SelectionChanged="DataGridSites_SelectionChanged">
+                        <DataGrid.CellStyle>
+                            <Style TargetType="DataGridCell">
+                                <Setter Property="Margin" Value="10,0,10,0"/>
+                            </Style>
+                        </DataGrid.CellStyle>
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Binding="{Binding City}" Header="Город">
+                                <DataGridTextColumn.HeaderStyle>
+                                    <Style TargetType="DataGridColumnHeader">
+                                        <Setter Property="HorizontalContentAlignment" Value="Center"/>
+                                    </Style>
+                                </DataGridTextColumn.HeaderStyle>
+                            </DataGridTextColumn>
+                            <DataGridTextColumn Binding="{Binding CompanyName}" Header="Название компании">
+                                <DataGridTextColumn.HeaderStyle>
+                                    <Style TargetType="DataGridColumnHeader">
+                                        <Setter Property="HorizontalContentAlignment" Value="Center"/>
+                                    </Style>
+                                </DataGridTextColumn.HeaderStyle>
+                            </DataGridTextColumn>
+                            <DataGridTextColumn Binding="{Binding UrlRoot}" Header="Адрес сайта">
+                                <DataGridTextColumn.HeaderStyle>
+                                    <Style TargetType="DataGridColumnHeader">
+                                        <Setter Property="HorizontalContentAlignment" Value="Center"/>
+                                    </Style>
+                                </DataGridTextColumn.HeaderStyle>
+                            </DataGridTextColumn>
+                            <DataGridTextColumn Binding="{Binding UrlServicesPage}" Header="Страница со списком услуг">
+                                <DataGridTextColumn.HeaderStyle>
+                                    <Style TargetType="DataGridColumnHeader">
+                                        <Setter Property="HorizontalContentAlignment" Value="Center"/>
+                                    </Style>
+                                </DataGridTextColumn.HeaderStyle>
+                            </DataGridTextColumn>
+                        </DataGrid.Columns>
+                    </DataGrid>
+
+                    <Button Grid.Row="2"
+                            Content="Выполнить" 
+                            Margin="10" 
+                            Click="ButtonExecute_Click"
+                            Width="80"
+                            IsEnabled="False"
+                            x:Name="ButtonExecute"/>
+
+                    <TextBlock Grid.Row="3"
+                               Text="Результат выполнения:"
+                               Margin="10,0,0,0"/>
+
+                    <TextBox Grid.Row="4"
+                             Margin="10" 
+                             x:Name="TextBoxResult" 
+                             VerticalScrollBarVisibility="Visible"/>
+
+                    <ProgressBar Grid.Row="5" 
+                                 x:Name="ProgressBarResult" 
+                                 Height="10"
+                                 Margin="0,10,0,10"/>
+                </Grid>
+            </TabItem>
+            
+            <TabItem Header="Сводная таблица">
+                <Grid Margin="10">
+                    <Button Content="Do" 
+                            VerticalAlignment="Center" 
+                            HorizontalAlignment="Center" 
+                            x:Name="ButtonDo" 
+                            Click="ButtonDo_Click" 
+                            Width="85"/>
+                </Grid>
+            </TabItem>
+        </TabControl>
+        
     </Grid>
 </Window>
