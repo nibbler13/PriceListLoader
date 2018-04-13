@@ -51,7 +51,11 @@ namespace PriceListLoader {
 			spb_medswiss_spb_ru,
 			spb_invitro_ru,
 			spb_helix_ru,
-			spb_emcclinic_ru
+			spb_emcclinic_ru,
+			ufa_megi_clinic,
+			ufa_promedicina_clinic,
+			ufa_mamadeti_ru,
+			ufa_mdplus_ru
 		}
 
 
@@ -87,73 +91,15 @@ namespace PriceListLoader {
 							if (serviceName.Equals("рентгенография органов грудной клетки (боковая проекция) (дети)"))
 								return priceValue + "*2";
 							break;
-						case SiteName.alfazdrav_ru:
-							break;
-						case SiteName.nrmed_ru:
-							break;
-						case SiteName.nrmed_ru_child:
-							break;
-						case SiteName.nrlab_ru:
-							break;
 						case SiteName.onclinic_ru:
 							if (serviceName.Equals("снятие зубных отложений airflow (1 зуб)"))
 								return priceValue + "*28";
-							break;
-						case SiteName.smclinic_ru:
-							break;
-						case SiteName.smdoctor_ru:
-							break;
-						case SiteName.invitro_ru:
-							break;
-						case SiteName.cmd_online_ru:
-							break;
-						case SiteName.helix_ru:
-							break;
-						case SiteName.mrt24_ru:
-							break;
-						case SiteName.dentol_ru:
-							break;
-						case SiteName.zub_ru:
-							break;
-						case SiteName.vse_svoi_ru:
-							break;
-						case SiteName.novostom_ru:
-							break;
-						case SiteName.masterdent_ru:
-							break;
-						case SiteName.gemotest_ru:
-							break;
-						case SiteName.kdllab_ru:
-							break;
-						case SiteName.medsi_ru:
 							break;
 						case SiteName.sm_stomatology_ru:
 							if (serviceName.Equals("удаление зубного налета аэр флоу (1 челюсть)"))
 								return priceValue + "*2";
 							if (serviceName.Equals("снятие твердых зубных отложений ультразвуком (1 зуб)"))
 								return priceValue + "*28";
-							break;
-						case SiteName.smclinic_ru_lab:
-							break;
-						case SiteName.spb_mc21_ru:
-							break;
-						case SiteName.spb_evro_med_ru:
-							break;
-						case SiteName.spb_baltzdrav_ru:
-							break;
-						case SiteName.spb_german_clinic:
-							break;
-						case SiteName.spb_german_dental:
-							break;
-						case SiteName.spb_clinic_complex_ru:
-							break;
-						case SiteName.spb_medswiss_spb_ru:
-							break;
-						case SiteName.spb_invitro_ru:
-							break;
-						case SiteName.spb_helix_ru:
-							break;
-						case SiteName.spb_emcclinic_ru:
 							break;
 						default:
 							break;
@@ -438,6 +384,34 @@ namespace PriceListLoader {
 					XPathServices = "//div[@class='n-services__item']//a[@href]";
 					City = "Санкт-Петербург";
 					break;
+				case SiteName.ufa_megi_clinic:
+					UrlRoot = "http://megi.clinic";
+					UrlServicesPage = UrlRoot + "/cost/";
+					CompanyName = "Сеть клиник «МЕГИ»";
+					XPathServices = "//div[@class='detail_cost']//div[@class='test']";
+					City = "Уфа";
+					break;
+				case SiteName.ufa_promedicina_clinic:
+					UrlRoot = "https://www.promedicina.clinic";
+					UrlServicesPage = UrlRoot + "/adult/services/";
+					CompanyName = "ООО ММЦ «Профилактическая медицина»";
+					XPathServices = "//div[starts-with(@class,'col-md-4')]//a[@href]";
+					City = "Уфа";
+					break;
+				case SiteName.ufa_mamadeti_ru:
+					UrlRoot = "http://ufa.mamadeti.ru";
+					UrlServicesPage = UrlRoot + "/price-list2/the-clinic-mother-and-child-ufa/price/";
+					CompanyName = "Группа компаний «Мать и дитя»";
+					XPathServices = "//div[@class='b-tree_link__item']";
+					City = "Уфа";
+					break;
+				case SiteName.ufa_mdplus_ru:
+					UrlRoot = "http://www.ufamdplus.ru";
+					UrlServicesPage = UrlRoot + "/services/prays-list/";
+					CompanyName = "Клиника «МД плюс»";
+					XPathServices = "//div[@class='col-lg-12']";
+					City = "Уфа";
+					break;
 				default:
 					return;
 			}
@@ -445,17 +419,18 @@ namespace PriceListLoader {
 
 		public static string ClearString(string initial) {
 			Dictionary<string, string> toReplace = new Dictionary<string, string>() {
-					{ "\r\n", "" },
-					{ "\r", "" },
-					{ "\n", "" },
-					{ "&nbsp;", " " },
-					{ "&quot;", "\"" },
-					{ "\t", "" },
-					{ "&raquo;", "" },
-					{ "&ndash;", "" },
-					{ "&lt;", "<" },
-					{ "&gt;", ">" }
-				};
+				{ "\r\n", "" },
+				{ "\r", "" },
+				{ "\n", "" },
+				{ "&nbsp;", " " },
+				{ "&quot;", "\"" },
+				{ "\t", "" },
+				{ "&raquo;", "" },
+				{ "&ndash;", "" },
+				{ "&lt;", "<" },
+				{ "&gt;", ">" },
+				{ "+", "" }
+			};
 
 			foreach (KeyValuePair<string, string> pair in toReplace)
 				initial = initial.Replace(pair.Key, pair.Value);
@@ -485,7 +460,9 @@ namespace PriceListLoader {
 			{ ",00", "" },
 			{ " ₽", "" },
 			{ ".00", "" },
-			{ " ф", "" }
+			{ " ф", "" },
+			{ " i", "" },
+			{ " р", "" }
 		};
 
 		public string Name { get; set; }
