@@ -55,7 +55,10 @@ namespace PriceListLoader {
 			ufa_megi_clinic,
 			ufa_promedicina_clinic,
 			ufa_mamadeti_ru,
-			ufa_mdplus_ru
+			ufa_mdplus_ru,
+			yekuk_ruslabs_ru,
+			yekuk_mc_vd_ru,
+			yekuk_immunoresurs_ru
 		}
 
 
@@ -412,6 +415,27 @@ namespace PriceListLoader {
 					XPathServices = "//div[@class='col-lg-12']";
 					City = "Уфа";
 					break;
+				case SiteName.yekuk_ruslabs_ru:
+					UrlRoot = "http://www.ruslabs.ru";
+					UrlServicesPage = UrlRoot + "/uslugi/obsheklinicheskiye-issledovaniya/";
+					CompanyName = "Лаборатория «Руслаб»";
+					XPathServices = "//div[@class='price-sidebar']//a[@href]";
+					City = "Каменск-Уральский";
+					break;
+				case SiteName.yekuk_mc_vd_ru:
+					UrlRoot = "http://mc-vd.ru";
+					UrlServicesPage = UrlRoot + "/uslugi/";
+					CompanyName = "ООО \"Медсервис Каменск\"";
+					XPathServices = "//div[@id='nextend-accordion-menu-nextendaccordionmenuwidget-2']//a[@href]";
+					City = "Каменск-Уральский";
+					break;
+				case SiteName.yekuk_immunoresurs_ru:
+					UrlRoot = "http://immunoresurs.ru";
+					UrlServicesPage = UrlRoot + "/uslugi-i-ceny/";
+					CompanyName = "ООО Медицинский центр \"Иммуноресурс\"";
+					XPathServices = "//div[@id='global3']//a[@href]";
+					City = "Каменск-Уральский";
+					break;
 				default:
 					return;
 			}
@@ -429,7 +453,10 @@ namespace PriceListLoader {
 				{ "&ndash;", "" },
 				{ "&lt;", "<" },
 				{ "&gt;", ">" },
-				{ "+", "" }
+				{ "+", "" },
+				{ "&#8212;", "-" },
+				{ "&#171;", "«" },
+				{ "&#187;", "»" }
 			};
 
 			foreach (KeyValuePair<string, string> pair in toReplace)
@@ -462,7 +489,8 @@ namespace PriceListLoader {
 			{ ".00", "" },
 			{ " ф", "" },
 			{ " i", "" },
-			{ " р", "" }
+			{ " р", "" },
+			{ " &#1088;&#1091;&#1073;.", "" }
 		};
 
 		public string Name { get; set; }
@@ -475,9 +503,10 @@ namespace PriceListLoader {
 			set {
 				string newValue = value;
 				foreach (KeyValuePair<string, string> item in toReplace)
-					newValue = newValue.Replace(item.Key, item.Value);
-
-				price = newValue;
+					if (newValue.EndsWith(item.Key))
+						newValue = newValue.Replace(item.Key, item.Value);
+				
+				price = newValue.Replace(",", "");
 			}
 		}
 	}
