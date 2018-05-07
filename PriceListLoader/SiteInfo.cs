@@ -58,7 +58,11 @@ namespace PriceListLoader {
 			ufa_mdplus_ru,
 			yekuk_ruslabs_ru,
 			yekuk_mc_vd_ru,
-			yekuk_immunoresurs_ru
+			yekuk_immunoresurs_ru,
+			kazan_ava_kazan_ru,
+			kazan_mc_aybolit_ru,
+			kazan_biomed_mc_ru,
+			kazan_zdorovie7i_ru
 		}
 
 
@@ -436,6 +440,34 @@ namespace PriceListLoader {
 					XPathServices = "//div[@id='global3']//a[@href]";
 					City = "Каменск-Уральский";
 					break;
+				case SiteName.kazan_ava_kazan_ru:
+					UrlRoot = "https://ava-kazan.ru";
+					UrlServicesPage = UrlRoot + "/price/";
+					CompanyName = "АО \"АВА - Казань\"";
+					XPathServices = "//a[@class='off_menu__link']";
+					City = "Казань";
+					break;
+				case SiteName.kazan_mc_aybolit_ru:
+					UrlRoot = "http://mc-aybolit.ru";
+					UrlServicesPage = UrlRoot + "/nashi_uslugi";
+					CompanyName = "ООО \"МЦ Айболит\"";
+					XPathServices = "//div[@id='accordion']//a[@href]";
+					City = "Казань";
+					break;
+				case SiteName.kazan_biomed_mc_ru:
+					UrlRoot = "https://biomed-mc.ru";
+					UrlServicesPage = UrlRoot + "/static5/uslugi";
+					CompanyName = "ООО лечебно-диагностический центр \"БИОМЕД\"";
+					XPathServices = "//div[starts-with(@class,'megamenu')]//a[@href]";
+					City = "Казань";
+					break;
+				case SiteName.kazan_zdorovie7i_ru:
+					UrlRoot = "http://zdorovie7i.ru";
+					UrlServicesPage = UrlRoot + "/uslugi-i-tseny";
+					CompanyName = "Сеть лечебно-диагностических центров «Здоровье семьи»";
+					XPathServices = "//div[@class='mainpage']//a[@href]";
+					City = "Казань";
+					break;
 				default:
 					return;
 			}
@@ -490,7 +522,8 @@ namespace PriceListLoader {
 			{ " ф", "" },
 			{ " i", "" },
 			{ " р", "" },
-			{ " &#1088;&#1091;&#1073;.", "" }
+			{ " &#1088;&#1091;&#1073;.", "" },
+			{ "Казань:", "" }
 		};
 
 		public string Name { get; set; }
@@ -503,7 +536,7 @@ namespace PriceListLoader {
 			set {
 				string newValue = value;
 				foreach (KeyValuePair<string, string> item in toReplace)
-					if (newValue.EndsWith(item.Key))
+					if (newValue.Contains(item.Key))
 						newValue = newValue.Replace(item.Key, item.Value);
 				
 				price = newValue.Replace(",", "");

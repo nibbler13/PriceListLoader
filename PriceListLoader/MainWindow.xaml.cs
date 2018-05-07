@@ -50,9 +50,11 @@ namespace PriceListLoader {
 		private void BackgroundWorker_ProgressChanged(object sender, ProgressChangedEventArgs e) {
 			ProgressBarResult.Value = e.ProgressPercentage;
 
-			if (e.UserState != null)
+			if (e.UserState != null) {
+				Console.WriteLine(e.UserState as string);
 				TextBoxResult.Text = DateTime.Now.ToShortTimeString() + ": " + e.UserState as string +
 					Environment.NewLine + TextBoxResult.Text;
+			}
 		}
 
 		private void BackgroundWorker_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e) {
