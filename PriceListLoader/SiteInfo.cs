@@ -62,7 +62,15 @@ namespace PriceListLoader {
 			kazan_ava_kazan_ru,
 			kazan_mc_aybolit_ru,
 			kazan_biomed_mc_ru,
-			kazan_zdorovie7i_ru
+			kazan_zdorovie7i_ru,
+			kazan_starclinic_ru,
+			kazan_love_dr_ru,
+			kazan_medexpert_kazan_ru,
+			krd_clinic23_ru,
+			krd_clinicist_ru,
+			krd_poly_clinic_ru,
+			krd_clinica_nazdorovie_ru,
+			krd_kuban_kbl_ru
 		}
 
 
@@ -468,6 +476,62 @@ namespace PriceListLoader {
 					XPathServices = "//div[@class='mainpage']//a[@href]";
 					City = "Казань";
 					break;
+				case SiteName.kazan_starclinic_ru:
+					UrlRoot = "http://www.starclinic.ru";
+					UrlServicesPage = UrlRoot + "/prays/";
+					CompanyName = "Медцентр «ЗВЕЗДА»";
+					XPathServices = "//div[@class='news-list']//a[@href]";
+					City = "Казань";
+					break;
+				case SiteName.kazan_love_dr_ru:
+					UrlRoot = "http://www.love-dr.ru";
+					UrlServicesPage = UrlRoot + "/tseny/";
+					CompanyName = "ООО \"Любимый доктор\"";
+					XPathServices = "//td[@class='main-column']//ul[not(@*)]//a[@href]";
+					City = "Казань";
+					break;
+				case SiteName.kazan_medexpert_kazan_ru:
+					UrlRoot = "http://medexpert-kazan.ru";
+					UrlServicesPage = UrlRoot + "/uslugi/";
+					CompanyName = "Сеть медицинских клиник «Медэксперт»";
+					XPathServices = "//ul[starts-with(@class,'service__list row')]//a[@href]";
+					City = "Казань";
+					break;
+				case SiteName.krd_clinic23_ru:
+					UrlRoot = "https://www.clinic23.ru";
+					UrlServicesPage = UrlRoot + "";
+					CompanyName = "КЛИНИКА «ЕКАТЕРИНИНСКАЯ»";
+					XPathServices = "//table[@class='categoriya']//a[@href]";
+					City = "Краснодар";
+					break;
+				case SiteName.krd_clinicist_ru:
+					UrlRoot = "https://www.clinicist.ru";
+					UrlServicesPage = UrlRoot + "/tseny/";
+					CompanyName = "Сеть медицинских центров «Клиницист»";
+					XPathServices = "//table[@class='visual-table']//tbody//tr";
+					City = "Краснодар";
+					break;
+				case SiteName.krd_poly_clinic_ru:
+					UrlRoot = "https://poly-clinic.ru";
+					UrlServicesPage = UrlRoot + "/price/";
+					CompanyName = "Клиника семейного здоровья Сити-Клиник";
+					XPathServices = "//div[@class='news-list']//a[@href]";
+					City = "Краснодар";
+					break;
+				case SiteName.krd_clinica_nazdorovie_ru:
+					UrlRoot = "http://clinica-nazdorovie.ru";
+					UrlServicesPage = UrlRoot + "";
+					CompanyName = "ООО \"МФО \"Клиника На здоровье\"";
+					XPathServices = "//div[@class=' top-menu-main']/ul[1]/li[4]//a[@href]";
+					City = "Краснодар";
+					break;
+				case SiteName.krd_kuban_kbl_ru:
+					UrlRoot = "https://www.kuban-kbl.ru";
+					UrlServicesPage = UrlRoot + "/ceni.php";
+					CompanyName = "ОАО «ЦВМР «Краснодарская бальнеолечебница»";
+					XPathServices = "//div[@class='panel panel-default']";
+					City = "Краснодар";
+					break;
 				default:
 					return;
 			}
@@ -481,7 +545,9 @@ namespace PriceListLoader {
 				{ "&nbsp;", " " },
 				{ "&quot;", "\"" },
 				{ "\t", "" },
-				{ "&raquo;", "" },
+				{ "&mdash;", "-" },
+				{ "&laquo;", "«" },
+				{ "&raquo;", "»" },
 				{ "&ndash;", "" },
 				{ "&lt;", "<" },
 				{ "&gt;", ">" },
