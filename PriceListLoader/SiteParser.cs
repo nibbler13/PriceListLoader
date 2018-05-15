@@ -33,9 +33,9 @@ namespace PriceListLoader {
 			HtmlDocument docServices;
 
 			bool isLocalFile = false;
-			if (this.siteInfo.Name == SiteInfo.SiteName.invitro_ru ||
-				this.siteInfo.Name == SiteInfo.SiteName.mrt24_ru ||
-				this.siteInfo.Name == SiteInfo.SiteName.alfazdrav_ru) {
+			if (this.siteInfo.Name == SiteInfo.SiteName.msk_invitro_ru ||
+				this.siteInfo.Name == SiteInfo.SiteName.msk_mrt24_ru ||
+				this.siteInfo.Name == SiteInfo.SiteName.msk_alfazdrav_ru) {
 				isLocalFile = true;
 				OpenFileDialog openFileDialog = new OpenFileDialog {
 					Filter = "HTML файл (*.html)|*.html",
@@ -62,22 +62,22 @@ namespace PriceListLoader {
 			}
 
 			switch (this.siteInfo.Name) {
-				case SiteInfo.SiteName.fdoctor_ru:
-				case SiteInfo.SiteName.familydoctor_ru:
-				case SiteInfo.SiteName.familydoctor_ru_child:
-				case SiteInfo.SiteName.nrmed_ru:
-				case SiteInfo.SiteName.nrmed_ru_child:
-				case SiteInfo.SiteName.smclinic_ru:
-				case SiteInfo.SiteName.cmd_online_ru:
-				case SiteInfo.SiteName.helix_ru:
-				case SiteInfo.SiteName.dentol_ru:
-				case SiteInfo.SiteName.zub_ru:
-				case SiteInfo.SiteName.gemotest_ru:
-				case SiteInfo.SiteName.kdllab_ru:
-				case SiteInfo.SiteName.medsi_ru:
-				case SiteInfo.SiteName.onclinic_ru:
-				case SiteInfo.SiteName.nrlab_ru:
-				case SiteInfo.SiteName.sm_stomatology_ru:
+				case SiteInfo.SiteName.msk_fdoctor_ru:
+				case SiteInfo.SiteName.msk_familydoctor_ru:
+				case SiteInfo.SiteName.msk_familydoctor_ru_child:
+				case SiteInfo.SiteName.msk_nrmed_ru:
+				case SiteInfo.SiteName.msk_nrmed_ru_child:
+				case SiteInfo.SiteName.msk_smclinic_ru:
+				case SiteInfo.SiteName.msk_cmd_online_ru:
+				case SiteInfo.SiteName.msk_helix_ru:
+				case SiteInfo.SiteName.msk_dentol_ru:
+				case SiteInfo.SiteName.msk_zub_ru:
+				case SiteInfo.SiteName.msk_gemotest_ru:
+				case SiteInfo.SiteName.msk_kdllab_ru:
+				case SiteInfo.SiteName.msk_medsi_ru:
+				case SiteInfo.SiteName.msk_onclinic_ru:
+				case SiteInfo.SiteName.msk_nrlab_ru:
+				case SiteInfo.SiteName.msk_sm_stomatology_ru:
 				case SiteInfo.SiteName.spb_evro_med_ru:
 				case SiteInfo.SiteName.spb_baltzdrav_ru:
 				case SiteInfo.SiteName.spb_german_clinic:
@@ -101,29 +101,29 @@ namespace PriceListLoader {
 				case SiteInfo.SiteName.krd_clinica_nazdorovie_ru:
 					ParseSiteWithLinksOnMainPage(docServices);
 					break;
-				case SiteInfo.SiteName.alfazdrav_ru:
+				case SiteInfo.SiteName.msk_alfazdrav_ru:
 					ParseSiteAlfazdrav(docServices);
 					break;
-				case SiteInfo.SiteName.invitro_ru:
+				case SiteInfo.SiteName.msk_invitro_ru:
 				case SiteInfo.SiteName.spb_invitro_ru:
 					ParseSiteInvitroRU(docServices);
 					break;
-				case SiteInfo.SiteName.mrt24_ru:
+				case SiteInfo.SiteName.msk_mrt24_ru:
 					ParseSiteMrt24Ru(docServices);
 					break;
-				case SiteInfo.SiteName.vse_svoi_ru:
+				case SiteInfo.SiteName.msk_vse_svoi_ru:
 					ParseSiteVseSvoiRu(docServices);
 					break;
-				case SiteInfo.SiteName.novostom_ru:
+				case SiteInfo.SiteName.msk_novostom_ru:
 					ParseSiteNovostomRu(docServices);
 					break;
-				case SiteInfo.SiteName.masterdent_ru:
+				case SiteInfo.SiteName.msk_masterdent_ru:
 					ParseSiteMasterdentRu(docServices);
 					break;
-				case SiteInfo.SiteName.smdoctor_ru:
+				case SiteInfo.SiteName.msk_smdoctor_ru:
 					ParseSiteSmDoctorRu(docServices);
 					break;
-				case SiteInfo.SiteName.smclinic_ru_lab:
+				case SiteInfo.SiteName.msk_smclinic_ru_lab:
 					ParseSiteSmClinicRuLab(docServices);
 					break;
 				case SiteInfo.SiteName.spb_mc21_ru:
@@ -147,6 +147,18 @@ namespace PriceListLoader {
 				case SiteInfo.SiteName.krd_kuban_kbl_ru:
 					ParseSiteKrdKubanKdlRu(docServices);
 					break;
+				case SiteInfo.SiteName.sochi_armed_mc_ru:
+					ParseSiteSochiArmedRu(docServices);
+					break;
+				case SiteInfo.SiteName.sochi_uzlovaya_poliklinika_ru:
+					ParseSiteSochiUzlovayaPoliklinikaRu(docServices);
+					break;
+				case SiteInfo.SiteName.sochi_23doc_ru:
+					ParseSiteSochi23docRu(docServices);
+					break;
+				case SiteInfo.SiteName.sochi_medcentr_sochi_ru:
+					ParseSiteSochiMedcentrSochiRu(docServices);
+					break;
 				default:
 					break;
 			}
@@ -160,9 +172,154 @@ namespace PriceListLoader {
 		}
 
 
+		private void ParseSiteSochiMedcentrSochiRu(HtmlDocument docServices) {
+			HtmlNodeCollection nodeCollection = _htmlAgility.GetNodeCollection(docServices, siteInfo.XPathServices);
+			if (nodeCollection == null) {
+				Console.WriteLine("nodeCollection == null");
+				return;
+			}
 
-		private void ParseSiteKrdKubanKdlRu(HtmlDocument docService) {
-			HtmlNodeCollection nodeCollection = _htmlAgility.GetNodeCollection(docService, siteInfo.XPathServices);
+			ItemServiceGroup itemServiceGroup = null;
+			foreach (HtmlNode nodeChild in nodeCollection[0].ChildNodes) {
+				if (nodeChild.Name.Equals("h3")) {
+					itemServiceGroup = new ItemServiceGroup() {
+						Name = SiteInfo.ClearString(nodeChild.InnerText),
+						Link = siteInfo.UrlServicesPage
+					};
+					_backgroundWorker.ReportProgress(0, itemServiceGroup.Name);
+				} else if (nodeChild.Name.Equals("table") || nodeChild.Name.Equals("div")) {
+					if (itemServiceGroup == null)
+						continue;
+
+					HtmlNode htmlNodeTbody = nodeChild.SelectSingleNode(nodeChild.XPath + "//tbody");
+					if (htmlNodeTbody == null) {
+						Console.WriteLine("htmlNodeTbody == null");
+						continue;
+					}
+
+					List<ItemService> serviceItems = ReadTrNodesFdoctorRu(htmlNodeTbody, 1, 1);
+					itemServiceGroup.ServiceItems.AddRange(serviceItems);
+					siteInfo.ServiceGroupItems.Add(itemServiceGroup);
+				}
+			}
+		}
+
+		private void ParseSiteSochi23docRu(HtmlDocument docServices) {
+			HtmlNodeCollection nodeCollection = _htmlAgility.GetNodeCollection(docServices, siteInfo.XPathServices);
+			if (nodeCollection == null) {
+				Console.WriteLine("nodeCollection == null");
+				return;
+			}
+			
+			foreach (HtmlNode nodeLi in nodeCollection) {
+				HtmlNode nodeA = nodeLi.SelectSingleNode(nodeLi.XPath + "//a");
+				if (nodeA == null) {
+					Console.WriteLine("nodeA == null");
+					continue;
+				}
+
+				ItemServiceGroup itemServiceGroup = new ItemServiceGroup() {
+					Name = SiteInfo.ClearString(nodeA.InnerText),
+					Link = siteInfo.UrlServicesPage
+				};
+
+				_backgroundWorker.ReportProgress(0, itemServiceGroup.Name);
+
+				HtmlNode htmlNodeTbody = nodeLi.SelectSingleNode(nodeLi.XPath + "//tbody");
+				if (htmlNodeTbody == null) {
+					Console.WriteLine("htmlNodeTbody == null");
+					continue;
+				}
+
+				List<ItemService> serviceItems = ReadTrNodesFdoctorRu(htmlNodeTbody);
+				itemServiceGroup.ServiceItems.AddRange(serviceItems);
+				siteInfo.ServiceGroupItems.Add(itemServiceGroup);
+			}
+		}
+
+		private void ParseSiteSochiUzlovayaPoliklinikaRu(HtmlDocument docServices) {
+			HtmlNodeCollection nodeCollection = _htmlAgility.GetNodeCollection(docServices, siteInfo.XPathServices);
+			if (nodeCollection == null) {
+				Console.WriteLine("nodeCollection == null");
+				return;
+			}
+
+			ItemServiceGroup itemServiceGroup = null;
+			foreach (HtmlNode nodeChild in nodeCollection[0].ChildNodes) {
+				if (nodeChild.Name.Equals("h4")) {
+					itemServiceGroup = new ItemServiceGroup() {
+						Name = SiteInfo.ClearString(nodeChild.InnerText),
+						Link = siteInfo.UrlServicesPage
+					};
+
+					_backgroundWorker.ReportProgress(0, itemServiceGroup.Name);
+				} else if (nodeChild.Name.Equals("ul")) {
+					if (itemServiceGroup == null)
+						continue;
+
+					HtmlNodeCollection nodeCollectionServices = nodeChild.SelectNodes(nodeChild.XPath + "//div[@class='pricelist-item-container  pd-m']");
+					if (nodeCollectionServices == null) {
+						Console.WriteLine("nodeCollectionServices == null");
+						continue;
+					}
+
+
+					foreach (HtmlNode htmlNodeService in nodeCollectionServices) {
+						HtmlNode htmlNodeServiceName = htmlNodeService.SelectSingleNode(htmlNodeService.XPath + "//span[@class='js-pricelist-title']");
+						HtmlNode htmlNodeServicePrice = htmlNodeService.SelectSingleNode(htmlNodeService.XPath + "//div[@class='price-weight fs-large clearfix']");
+
+						if (htmlNodeServiceName == null || htmlNodeServicePrice == null) {
+							Console.WriteLine("htmlNodeServiceName == null || htmlNodeServicePrice == null");
+							continue;
+						}
+
+						ItemService itemService = new ItemService() {
+							Name = SiteInfo.ClearString(htmlNodeServiceName.InnerText),
+							Price = SiteInfo.ClearString(htmlNodeServicePrice.InnerText)
+						};
+						itemServiceGroup.ServiceItems.Add(itemService);
+					}
+
+					siteInfo.ServiceGroupItems.Add(itemServiceGroup);
+				}
+			}
+		}
+
+		private void ParseSiteSochiArmedRu(HtmlDocument docServices) {
+			HtmlNodeCollection nodeCollection = _htmlAgility.GetNodeCollection(docServices, siteInfo.XPathServices);
+			if (nodeCollection == null) {
+				Console.WriteLine("nodeCollection == null");
+				return;
+			}
+
+			foreach (HtmlNode nodeGroupDiv in nodeCollection) {
+				HtmlNode nodeGroupName = nodeGroupDiv.SelectSingleNode(nodeGroupDiv.XPath + "//div[@class='mk-accordion-tab']");
+				if (nodeGroupName == null) {
+					Console.WriteLine("nodeGroupName == null");
+					continue;
+				}
+
+				ItemServiceGroup itemServiceGroup = new ItemServiceGroup() {
+					Name = SiteInfo.ClearString(nodeGroupName.InnerText),
+					Link = siteInfo.UrlServicesPage
+				};
+
+				_backgroundWorker.ReportProgress(0, itemServiceGroup.Name);
+
+				HtmlNode nodeTbody = nodeGroupDiv.SelectSingleNode(nodeGroupDiv.XPath + "//tbody");
+				if (nodeTbody == null) {
+					Console.WriteLine("nodeTbody == null");
+					continue;
+				}
+
+				List<ItemService> serviceItems = ReadTrNodesFdoctorRu(nodeTbody);
+				itemServiceGroup.ServiceItems.AddRange(serviceItems);
+				siteInfo.ServiceGroupItems.Add(itemServiceGroup);
+			}
+		}
+
+		private void ParseSiteKrdKubanKdlRu(HtmlDocument docServices) {
+			HtmlNodeCollection nodeCollection = _htmlAgility.GetNodeCollection(docServices, siteInfo.XPathServices);
 			if (nodeCollection == null) {
 				Console.WriteLine("nodeCollection == null");
 				return;
@@ -179,6 +336,8 @@ namespace PriceListLoader {
 					Name = SiteInfo.ClearString(nodeDivHead.InnerText),
 					Link = siteInfo.UrlServicesPage
 				};
+
+				_backgroundWorker.ReportProgress(0, itemServiceGroup.Name);
 
 				HtmlNode nodeTbody = nodeGroupDiv.SelectSingleNode(nodeGroupDiv.XPath + "//tbody");
 				if (nodeTbody == null) {
@@ -1046,14 +1205,14 @@ namespace PriceListLoader {
 						}
 					}
 
-					if (siteInfo.Name == SiteInfo.SiteName.helix_ru ||
+					if (siteInfo.Name == SiteInfo.SiteName.msk_helix_ru ||
 						siteInfo.Name == SiteInfo.SiteName.spb_helix_ru) {
 						string onClickValue = servicePage.Attributes["onclick"].Value;
 						onClickValue = onClickValue.Replace("$(location).attr('href', '", "").Replace(";');", "").Replace("');", "");
 						urlService = siteInfo.UrlRoot + onClickValue;
 					}
 
-					if (siteInfo.Name == SiteInfo.SiteName.medsi_ru)
+					if (siteInfo.Name == SiteInfo.SiteName.msk_medsi_ru)
 						if (urlService.Contains("#") && !urlService.EndsWith("/"))
 							continue;
 
@@ -1077,7 +1236,7 @@ namespace PriceListLoader {
 					HtmlDocument docService = _htmlAgility.GetDocument(urlService, siteInfo.Name);
 					HtmlDocument docServicePrice = new HtmlDocument();
 
-					if (siteInfo.Name == SiteInfo.SiteName.zub_ru)
+					if (siteInfo.Name == SiteInfo.SiteName.msk_zub_ru)
 						docServicePrice = _htmlAgility.GetDocument(urlService + "price/", siteInfo.Name);
 
 					if (docService == null) {
@@ -1086,14 +1245,14 @@ namespace PriceListLoader {
 					}
 
 					switch (siteInfo.Name) {
-						case SiteInfo.SiteName.fdoctor_ru:
+						case SiteInfo.SiteName.msk_fdoctor_ru:
 							ParseSiteFdoctorRu(docService, ref itemServiceGroup);
 							break;
-						case SiteInfo.SiteName.familydoctor_ru:
-						case SiteInfo.SiteName.familydoctor_ru_child:
+						case SiteInfo.SiteName.msk_familydoctor_ru:
+						case SiteInfo.SiteName.msk_familydoctor_ru_child:
 							ParseSiteFamilyDoctorRu(docService, ref itemServiceGroup);
 							break;
-						case SiteInfo.SiteName.smclinic_ru:
+						case SiteInfo.SiteName.msk_smclinic_ru:
 							if (serviceName.Equals("Диагностика")) {
 								siteInfo.XPathServices = "//*[@id=\"content-in\"]/div[2]//a[@href]";
 								ParseSiteWithLinksOnMainPage(docService);
@@ -1106,40 +1265,40 @@ namespace PriceListLoader {
 
 							ParseSiteSmClinicRu(docService, ref itemServiceGroup);
 							break;
-						case SiteInfo.SiteName.cmd_online_ru:
+						case SiteInfo.SiteName.msk_cmd_online_ru:
 							ParseSiteCmdOnlineRu(docService, ref itemServiceGroup);
 							break;
-						case SiteInfo.SiteName.helix_ru:
+						case SiteInfo.SiteName.msk_helix_ru:
 						case SiteInfo.SiteName.spb_helix_ru:
 							ParseSiteHelixRu(docService, ref itemServiceGroup);
 							break;
-						case SiteInfo.SiteName.nrmed_ru:
-						case SiteInfo.SiteName.nrmed_ru_child:
+						case SiteInfo.SiteName.msk_nrmed_ru:
+						case SiteInfo.SiteName.msk_nrmed_ru_child:
 							ParseSiteNrmedRu(docService, ref itemServiceGroup);
 							break;
-						case SiteInfo.SiteName.dentol_ru:
+						case SiteInfo.SiteName.msk_dentol_ru:
 							ParseSiteDentolRu(docService, ref itemServiceGroup);
 							break;
-						case SiteInfo.SiteName.zub_ru:
+						case SiteInfo.SiteName.msk_zub_ru:
 							ParseSiteZubRu(docService, ref itemServiceGroup);
 							ParseSiteZubRu(docServicePrice, ref itemServiceGroup);
 							break;
-						case SiteInfo.SiteName.gemotest_ru:
+						case SiteInfo.SiteName.msk_gemotest_ru:
 							ParseSiteGemotestRu(docService, ref itemServiceGroup);
 							break;
-						case SiteInfo.SiteName.kdllab_ru:
+						case SiteInfo.SiteName.msk_kdllab_ru:
 							ParseSiteKdlLabRu(docService, ref itemServiceGroup);
 							break;
-						case SiteInfo.SiteName.medsi_ru:
+						case SiteInfo.SiteName.msk_medsi_ru:
 							ParseSiteMedsiRu(docService, itemServiceGroup);
 							break;
-						case SiteInfo.SiteName.onclinic_ru:
+						case SiteInfo.SiteName.msk_onclinic_ru:
 							ParseSiteOnClinic(docService, ref itemServiceGroup);
 							break;
-						case SiteInfo.SiteName.nrlab_ru:
+						case SiteInfo.SiteName.msk_nrlab_ru:
 							ParseSiteNrLabRu(docService, ref itemServiceGroup);
 							break;
-						case SiteInfo.SiteName.sm_stomatology_ru:
+						case SiteInfo.SiteName.msk_sm_stomatology_ru:
 							ParseSiteSmStomatologyRu(docService, ref itemServiceGroup);
 							break;
 						case SiteInfo.SiteName.spb_evro_med_ru:
@@ -2543,7 +2702,7 @@ namespace PriceListLoader {
 					}
 
 					if (nodeTd.Count > 1 + priceOffset) {
-						if (siteInfo.Name == SiteInfo.SiteName.cmd_online_ru) {
+						if (siteInfo.Name == SiteInfo.SiteName.msk_cmd_online_ru) {
 							priceRaw = nodeTd[1 + priceOffset].ChildNodes[3].InnerText;
 						} else
 							priceRaw = nodeTd[1 + priceOffset].InnerText;

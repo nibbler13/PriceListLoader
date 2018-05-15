@@ -18,30 +18,30 @@ namespace PriceListLoader {
 		public SiteName Name { get; set; }
 
 		public enum SiteName {
-			fdoctor_ru,
-			familydoctor_ru,
-			familydoctor_ru_child,
-			alfazdrav_ru,
-			nrmed_ru,
-			nrmed_ru_child,
-			nrlab_ru,
-			onclinic_ru,
-			smclinic_ru,
-			smdoctor_ru,
-			invitro_ru,
-			cmd_online_ru,
-			helix_ru,
-			mrt24_ru,
-			dentol_ru,
-			zub_ru,
-			vse_svoi_ru,
-			novostom_ru,
-			masterdent_ru,
-			gemotest_ru,
-			kdllab_ru,
-			medsi_ru,
-			sm_stomatology_ru,
-			smclinic_ru_lab,
+			msk_fdoctor_ru,
+			msk_familydoctor_ru,
+			msk_familydoctor_ru_child,
+			msk_alfazdrav_ru,
+			msk_nrmed_ru,
+			msk_nrmed_ru_child,
+			msk_nrlab_ru,
+			msk_onclinic_ru,
+			msk_smclinic_ru,
+			msk_smdoctor_ru,
+			msk_invitro_ru,
+			msk_cmd_online_ru,
+			msk_helix_ru,
+			msk_mrt24_ru,
+			msk_dentol_ru,
+			msk_zub_ru,
+			msk_vse_svoi_ru,
+			msk_novostom_ru,
+			msk_masterdent_ru,
+			msk_gemotest_ru,
+			msk_kdllab_ru,
+			msk_medsi_ru,
+			msk_sm_stomatology_ru,
+			msk_smclinic_ru_lab,
 			spb_mc21_ru,
 			spb_evro_med_ru,
 			spb_baltzdrav_ru,
@@ -70,7 +70,11 @@ namespace PriceListLoader {
 			krd_clinicist_ru,
 			krd_poly_clinic_ru,
 			krd_clinica_nazdorovie_ru,
-			krd_kuban_kbl_ru
+			krd_kuban_kbl_ru,
+			sochi_armed_mc_ru,
+			sochi_uzlovaya_poliklinika_ru,
+			sochi_23doc_ru,
+			sochi_medcentr_sochi_ru
 		}
 
 
@@ -94,23 +98,23 @@ namespace PriceListLoader {
 
 				if (double.TryParse(price, out double priceValue)) {
 					switch (Name) {
-						case SiteName.fdoctor_ru:
+						case SiteName.msk_fdoctor_ru:
 							if (serviceName.Equals("профилактическая чистка зубов с помощью аппарата \" air-flow\" (за один зуб)"))
 								return priceValue + "*28";
 							break;
-						case SiteName.familydoctor_ru:
+						case SiteName.msk_familydoctor_ru:
 							if (serviceName.Equals("рентгенография органов грудной клетки (боковая проекция)"))
 								return priceValue + "*2";
 							break;
-						case SiteName.familydoctor_ru_child:
+						case SiteName.msk_familydoctor_ru_child:
 							if (serviceName.Equals("рентгенография органов грудной клетки (боковая проекция) (дети)"))
 								return priceValue + "*2";
 							break;
-						case SiteName.onclinic_ru:
+						case SiteName.msk_onclinic_ru:
 							if (serviceName.Equals("снятие зубных отложений airflow (1 зуб)"))
 								return priceValue + "*28";
 							break;
-						case SiteName.sm_stomatology_ru:
+						case SiteName.msk_sm_stomatology_ru:
 							if (serviceName.Equals("удаление зубного налета аэр флоу (1 челюсть)"))
 								return priceValue + "*2";
 							if (serviceName.Equals("снятие твердых зубных отложений ультразвуком (1 зуб)"))
@@ -134,7 +138,7 @@ namespace PriceListLoader {
 			ServiceGroupItems = new List<ItemServiceGroup>();
 
 			switch (name) {
-				case SiteName.fdoctor_ru:
+				case SiteName.msk_fdoctor_ru:
 					UrlRoot = "https://www.fdoctor.ru";
 					UrlServicesPage = UrlRoot + "/services";
 					CompanyName = "ЗАО Сеть поликлиник \"Семейный доктор\"";
@@ -142,7 +146,7 @@ namespace PriceListLoader {
 					City = "Москва";
 					SummaryColumnName = "Семейный доктор fdoctor.ru";
 					break;
-				case SiteName.familydoctor_ru:
+				case SiteName.msk_familydoctor_ru:
 					UrlRoot = "http://www.familydoctor.ru";
 					UrlServicesPage = UrlRoot + "/prices";
 					CompanyName = "ООО \"Медицинская клиника \"Семейный доктор\"";
@@ -150,7 +154,7 @@ namespace PriceListLoader {
 					City = "Москва";
 					SummaryColumnName = "МК Семейный доктор";
 					break;
-				case SiteName.familydoctor_ru_child:
+				case SiteName.msk_familydoctor_ru_child:
 					UrlRoot = "http://www.familydoctor.ru";
 					UrlServicesPage = UrlRoot + "/prices/child/";
 					CompanyName = "ООО \"Медицинская клиника \"Семейный доктор\"";
@@ -158,7 +162,7 @@ namespace PriceListLoader {
 					City = "Москва";
 					SummaryColumnName = "МК Семейный доктор (дети)";
 					break;
-				case SiteName.alfazdrav_ru:
+				case SiteName.msk_alfazdrav_ru:
 					UrlRoot = "https://www.alfazdrav.ru";
 					UrlServicesPage = UrlRoot + "/services/price/";
 					CompanyName = "ООО «МедАС» — «Альфа-Центр Здоровья»";
@@ -166,7 +170,7 @@ namespace PriceListLoader {
 					City = "Москва";
 					SummaryColumnName = "Альфа Центр Здоровья";
 					break;
-				case SiteName.nrmed_ru:
+				case SiteName.msk_nrmed_ru:
 					UrlRoot = "http://www.nrmed.ru";
 					UrlServicesPage = UrlRoot + "/rus/dlya-vzroslykh/";
 					CompanyName = "ООО \"НИАРМЕДИК ПЛЮС\"";
@@ -174,7 +178,7 @@ namespace PriceListLoader {
 					City = "Москва";
 					SummaryColumnName = "НИАРМЕДИК";
 					break;
-				case SiteName.nrmed_ru_child:
+				case SiteName.msk_nrmed_ru_child:
 					UrlRoot = "http://www.nrmed.ru";
 					UrlServicesPage = UrlRoot + "/rus/dlya-detey/";
 					CompanyName = "ООО \"НИАРМЕДИК ПЛЮС\"";
@@ -182,7 +186,7 @@ namespace PriceListLoader {
 					City = "Москва";
 					SummaryColumnName = "НИАРМЕДИК дети";
 					break;
-				case SiteName.nrlab_ru:
+				case SiteName.msk_nrlab_ru:
 					UrlRoot = "http://www.nrlab.ru";
 					UrlServicesPage = UrlRoot + "/prices/groups/";
 					CompanyName = "Лаборатория Ниармедик";
@@ -190,7 +194,7 @@ namespace PriceListLoader {
 					City = "Москва";
 					SummaryColumnName = "НИАРМЕДИК лаборатория";
 					break;
-				case SiteName.onclinic_ru:
+				case SiteName.msk_onclinic_ru:
 					UrlRoot = "https://www.onclinic.ru";
 					UrlServicesPage = UrlRoot + "/all/";
 					CompanyName = "ООО \"Он Клиник Геоконик\"";
@@ -198,7 +202,7 @@ namespace PriceListLoader {
 					City = "Москва";
 					SummaryColumnName = "ОН-Клиник";
 					break;
-				case SiteName.smclinic_ru:
+				case SiteName.msk_smclinic_ru:
 					UrlRoot = "http://www.smclinic.ru";
 					UrlServicesPage = UrlRoot + "/doctors/";
 					CompanyName = "ООО «СМ-Клиника»";
@@ -206,7 +210,7 @@ namespace PriceListLoader {
 					City = "Москва";
 					SummaryColumnName = "СМ-Клиник";
 					break;
-				case SiteName.smdoctor_ru:
+				case SiteName.msk_smdoctor_ru:
 					UrlRoot = "http://www.smdoctor.ru";
 					UrlServicesPage = UrlRoot + "/about/price/";
 					CompanyName = "ООО «СМ-Доктор»";
@@ -214,7 +218,7 @@ namespace PriceListLoader {
 					City = "Москва";
 					SummaryColumnName = "СМ-Клиник дети";
 					break;
-				case SiteName.invitro_ru:
+				case SiteName.msk_invitro_ru:
 					UrlRoot = "https://www.invitro.ru";
 					UrlServicesPage = UrlRoot + "/analizes/for-doctors/";
 					CompanyName = "ООО «ИНВИТРО»";
@@ -223,7 +227,7 @@ namespace PriceListLoader {
 					City = "Москва";
 					SummaryColumnName = "Инвитро";
 					break;
-				case SiteName.cmd_online_ru:
+				case SiteName.msk_cmd_online_ru:
 					UrlRoot = "https://www.cmd-online.ru";
 					UrlServicesPage = UrlRoot + "/analizy-i-tseny-po-gruppam/kompleksnyje-programmy-laboratornyh-issledovanij_323/";
 					CompanyName = "ФБУН ЦНИИ Эпидемиологии Роспотребнадзора";
@@ -231,7 +235,7 @@ namespace PriceListLoader {
 					City = "Москва";
 					SummaryColumnName = "ЦМД";
 					break;
-				case SiteName.helix_ru:
+				case SiteName.msk_helix_ru:
 					UrlRoot = "https://helix.ru";
 					UrlServicesPage = UrlRoot + "/catalog";
 					CompanyName = "ООО «НПФ «ХЕЛИКС»";
@@ -240,7 +244,7 @@ namespace PriceListLoader {
 					City = "Москва";
 					SummaryColumnName = "ХЕЛИКС";
 					break;
-				case SiteName.mrt24_ru:
+				case SiteName.msk_mrt24_ru:
 					UrlRoot = "http://mrt24.ru";
 					UrlServicesPage = UrlRoot + "/services/";
 					//UrlServicesPage = @"C:\Users\nn-admin\Desktop\Цены на услуги МРТ в Москве и Московской области в центрах МРТ24.html";
@@ -249,7 +253,7 @@ namespace PriceListLoader {
 					City = "Москва";
 					SummaryColumnName = "Сеть МРТ";
 					break;
-				case SiteName.dentol_ru:
+				case SiteName.msk_dentol_ru:
 					UrlRoot = "https://dentol.ru";
 					UrlServicesPage = UrlRoot + "/uslugi/";
 					CompanyName = "ООО “Сеть Семейных Медицинских Центров”";
@@ -257,7 +261,7 @@ namespace PriceListLoader {
 					City = "Москва";
 					SummaryColumnName = "Сеть МЦ";
 					break;
-				case SiteName.zub_ru:
+				case SiteName.msk_zub_ru:
 					UrlRoot = "https://zub.ru";
 					UrlServicesPage = UrlRoot + "/uslugi/";
 					CompanyName = "ООО \"Зуб.ру\"";
@@ -265,7 +269,7 @@ namespace PriceListLoader {
 					City = "Москва";
 					SummaryColumnName = "Зуб.ру";
 					break;
-				case SiteName.vse_svoi_ru:
+				case SiteName.msk_vse_svoi_ru:
 					UrlRoot = "https://vse-svoi.ru";
 					UrlServicesPage = UrlRoot + "/msk/ceny/";
 					CompanyName = "ООО \"ВСЕ СВОИ\"";
@@ -273,7 +277,7 @@ namespace PriceListLoader {
 					City = "Москва";
 					SummaryColumnName = "Все свои";
 					break;
-				case SiteName.novostom_ru:
+				case SiteName.msk_novostom_ru:
 					UrlRoot = "http://www.novostom.ru";
 					UrlServicesPage = UrlRoot + "/tceny/";
 					CompanyName = "ООО СЦНТ \"НОВОСТОМ\"";
@@ -281,7 +285,7 @@ namespace PriceListLoader {
 					City = "Москва";
 					SummaryColumnName = "НОВОСТОМ";
 					break;
-				case SiteName.masterdent_ru:
+				case SiteName.msk_masterdent_ru:
 					UrlRoot = "http://masterdent.ru";
 					UrlServicesPage = UrlRoot + "/prais.html";
 					CompanyName = "Мастердент";
@@ -289,7 +293,7 @@ namespace PriceListLoader {
 					City = "Москва";
 					SummaryColumnName = "Мастердент";
 					break;
-				case SiteName.gemotest_ru:
+				case SiteName.msk_gemotest_ru:
 					UrlRoot = "https://www.gemotest.ru";
 					UrlServicesPage = UrlRoot + "/catalog/po-laboratornym-napravleniyam/top-250-populyarnykh-uslug/";
 					CompanyName = "ООО \"Лаборатория Гемотест\"";
@@ -297,7 +301,7 @@ namespace PriceListLoader {
 					City = "Москва";
 					SummaryColumnName = "Гемотест";
 					break;
-				case SiteName.kdllab_ru:
+				case SiteName.msk_kdllab_ru:
 					UrlRoot = "https://kdl.ru";
 					UrlServicesPage = UrlRoot + "/analizy-i-tseny";
 					CompanyName = "ООО «КДЛ ДОМОДЕДОВО-ТЕСТ»";
@@ -305,7 +309,7 @@ namespace PriceListLoader {
 					City = "Москва";
 					SummaryColumnName = "КДЛ Домодедово";
 					break;
-				case SiteName.medsi_ru:
+				case SiteName.msk_medsi_ru:
 					UrlRoot = "https://medsi.ru";
 					UrlServicesPage = UrlRoot + "/services/";
 					CompanyName = "АО \"Группа компаний МЕДСИ\"";
@@ -313,7 +317,7 @@ namespace PriceListLoader {
 					City = "Москва";
 					SummaryColumnName = "Медси на Пироговке";
 					break;
-				case SiteName.sm_stomatology_ru:
+				case SiteName.msk_sm_stomatology_ru:
 					UrlRoot = "http://www.sm-stomatology.ru";
 					UrlServicesPage = UrlRoot + "/services/";
 					CompanyName = "СМ-Стоматология";
@@ -321,7 +325,7 @@ namespace PriceListLoader {
 					City = "Москва";
 					SummaryColumnName = "СМ-Клиник стоматология";
 					break;
-				case SiteName.smclinic_ru_lab:
+				case SiteName.msk_smclinic_ru_lab:
 					UrlRoot = "http://www.smclinic.ru";
 					UrlServicesPage = UrlRoot + "/calc/";
 					CompanyName = "ООО «СМ-Клиника»";
@@ -532,6 +536,34 @@ namespace PriceListLoader {
 					XPathServices = "//div[@class='panel panel-default']";
 					City = "Краснодар";
 					break;
+				case SiteName.sochi_armed_mc_ru:
+					UrlRoot = "http://armed-mc.ru";
+					UrlServicesPage = UrlRoot + "/tseny/";
+					CompanyName = "ООО \"АРМЕД\"";
+					XPathServices = "//div[@class='mk-accordion-single']";
+					City = "Сочи";
+					break;
+				case SiteName.sochi_uzlovaya_poliklinika_ru:
+					UrlRoot = "http://uzlovaya-poliklinika.ru";
+					UrlServicesPage = UrlRoot + "/price/";
+					CompanyName = "Узловая поликлиника на станции Сочи";
+					XPathServices = "//div[@class='pricelist-group btop pd-m']";
+					City = "Сочи";
+					break;
+				case SiteName.sochi_23doc_ru:
+					UrlRoot = "http://23doc.ru";
+					UrlServicesPage = UrlRoot + "/prays-list";
+					CompanyName = "Детский диагностический центр \"Семья\"";
+					XPathServices = "//ul[@class='accordion_square accordion-rounded2']//li";
+					City = "Сочи";
+					break;
+				case SiteName.sochi_medcentr_sochi_ru:
+					UrlRoot = "https://medcentr-sochi.ru";
+					UrlServicesPage = UrlRoot + "/uslugi-i-ceny-medicinskogo-centra-proksima.html";
+					CompanyName = "Медицинский клинический центр «Проксима»";
+					XPathServices = "//div[@id='page']";
+					City = "Сочи";
+					break;
 				default:
 					return;
 			}
@@ -554,7 +586,8 @@ namespace PriceListLoader {
 				{ "+", "" },
 				{ "&#8212;", "-" },
 				{ "&#171;", "«" },
-				{ "&#187;", "»" }
+				{ "&#187;", "»" },
+				{ "&#160;", "" }
 			};
 
 			foreach (KeyValuePair<string, string> pair in toReplace)

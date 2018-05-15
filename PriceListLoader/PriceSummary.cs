@@ -11,7 +11,7 @@ namespace PriceListLoader {
 			SiteInfo siteInfo = NpoiExcel.ReadPriceList(
 				@"C:\_Projects C#\PriceListLoader\PriceListLoader\bin\Debug\Results\20180410\" +
 				"Медси_Пироговка.xlsx", 
-				SiteInfo.SiteName.medsi_ru);
+				SiteInfo.SiteName.msk_medsi_ru);
 
 			if (siteInfo.ServiceGroupItems.Count == 0) {
 				MessageBox.Show("Не удалось считать услуги из файла");
