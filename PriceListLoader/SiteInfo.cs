@@ -55,10 +55,13 @@ namespace PriceListLoader {
 			ufa_megi_clinic,
 			ufa_promedicina_clinic,
 			ufa_mamadeti_ru,
+			ufa_rkbkuv_ru,
 			ufa_mdplus_ru,
+			yekuk_mfcrubin_ru,
 			yekuk_ruslabs_ru,
 			yekuk_mc_vd_ru,
 			yekuk_immunoresurs_ru,
+			yekuk_medkamensk_ru,
 			kazan_ava_kazan_ru,
 			kazan_mc_aybolit_ru,
 			kazan_biomed_mc_ru,
@@ -265,7 +268,7 @@ namespace PriceListLoader {
 					UrlRoot = "https://zub.ru";
 					UrlServicesPage = UrlRoot + "/uslugi/";
 					CompanyName = "ООО \"Зуб.ру\"";
-					XPathServices = "//ul[@class='sn-lm']//a[@href]";
+					XPathServices = "//div[@class='services-grid pads']//a[@href]";
 					City = "Москва";
 					SummaryColumnName = "Зуб.ру";
 					break;
@@ -424,12 +427,26 @@ namespace PriceListLoader {
 					XPathServices = "//div[@class='b-tree_link__item']";
 					City = "Уфа";
 					break;
+				case SiteName.ufa_rkbkuv_ru:
+					UrlRoot = "https://rkbkuv.ru";
+					UrlServicesPage = UrlRoot + "/list_paid_services";
+					CompanyName = "ГБУЗ РКБ им. Г.Г. Куватова";
+					XPathServices = "";
+					City = "Уфа";
+					break;
 				case SiteName.ufa_mdplus_ru:
 					UrlRoot = "http://www.ufamdplus.ru";
 					UrlServicesPage = UrlRoot + "/services/prays-list/";
 					CompanyName = "Клиника «МД плюс»";
 					XPathServices = "//div[@class='col-lg-12']";
 					City = "Уфа";
+					break;
+				case SiteName.yekuk_mfcrubin_ru:
+					UrlRoot = "http://www.mfcrubin.ru";
+					UrlServicesPage = UrlRoot + "/stoimostuslug";
+					CompanyName = "ООО МФЦ РУБИН";
+					XPathServices = "//div[@class='item column-1']//tr";
+					City = "Каменск-Уральский";
 					break;
 				case SiteName.yekuk_ruslabs_ru:
 					UrlRoot = "http://www.ruslabs.ru";
@@ -450,6 +467,13 @@ namespace PriceListLoader {
 					UrlServicesPage = UrlRoot + "/uslugi-i-ceny/";
 					CompanyName = "ООО Медицинский центр \"Иммуноресурс\"";
 					XPathServices = "//div[@id='global3']//a[@href]";
+					City = "Каменск-Уральский";
+					break;
+				case SiteName.yekuk_medkamensk_ru:
+					UrlRoot = "http://medkamensk.ru";
+					UrlServicesPage = UrlRoot + "/prejskurant-tsen/";
+					CompanyName = "ГБУЗ Свердловской обл. «Городская больница г.Каменск - Уральский»";
+					XPathServices = "//table[@class='waffle']//tr";
 					City = "Каменск-Уральский";
 					break;
 				case SiteName.kazan_ava_kazan_ru:

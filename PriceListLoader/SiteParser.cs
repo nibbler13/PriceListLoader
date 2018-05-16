@@ -34,8 +34,10 @@ namespace PriceListLoader {
 
 			bool isLocalFile = false;
 			if (this.siteInfo.Name == SiteInfo.SiteName.msk_invitro_ru ||
+				this.siteInfo.Name == SiteInfo.SiteName.spb_invitro_ru ||
 				this.siteInfo.Name == SiteInfo.SiteName.msk_mrt24_ru ||
-				this.siteInfo.Name == SiteInfo.SiteName.msk_alfazdrav_ru) {
+				this.siteInfo.Name == SiteInfo.SiteName.msk_alfazdrav_ru ||
+				this.siteInfo.Name == SiteInfo.SiteName.yekuk_medkamensk_ru) {
 				isLocalFile = true;
 				OpenFileDialog openFileDialog = new OpenFileDialog {
 					Filter = "HTML файл (*.html)|*.html",
@@ -159,6 +161,12 @@ namespace PriceListLoader {
 				case SiteInfo.SiteName.sochi_medcentr_sochi_ru:
 					ParseSiteSochiMedcentrSochiRu(docServices);
 					break;
+				case SiteInfo.SiteName.yekuk_mfcrubin_ru:
+					ParseSiteYekukMfcrubinRu(docServices);
+					break;
+				case SiteInfo.SiteName.yekuk_medkamensk_ru:
+					ParseSiteYekukMedkamenskRu(docServices);
+					break;
 				default:
 					break;
 			}
@@ -171,6 +179,63 @@ namespace PriceListLoader {
 			string resultFile = NpoiExcel.WriteItemSiteDataToExcel(this.siteInfo, _backgroundWorker, progressCurrent, progressTo);
 		}
 
+
+
+
+
+		private void ParseSiteYekukMedkamenskRu(HtmlDocument docServices) {
+			HtmlNodeCollection nodeCollection = _htmlAgility.GetNodeCollection(docServices, siteInfo.XPathServices);
+			if (nodeCollection == null) {
+				Console.WriteLine("nodeCollection == null");
+				return;
+			}
+
+			ItemServiceGroup itemServiceGroup = null;
+			foreach (HtmlNode nodeTr in nodeCollection) { }
+		}
+
+		private void ParseSiteYekukMfcrubinRu(HtmlDocument docServices) {
+			HtmlNodeCollection nodeCollection = _htmlAgility.GetNodeCollection(docServices, siteInfo.XPathServices);
+			if (nodeCollection == null) {
+				Console.WriteLine("nodeCollection == null");
+				return;
+			}
+
+			ItemServiceGroup itemServiceGroup = null;
+			foreach (HtmlNode nodeTr in nodeCollection) {
+				HtmlNodeCollection nodeCollectionTd = nodeTr.SelectNodes(nodeTr.XPath + "//td");
+				if (nodeCollectionTd == null) {
+					Console.WriteLine("nodeCollectionTd == null");
+					continue;
+				}
+
+				if (nodeCollectionTd.Count == 1) {
+					if (itemServiceGroup != null) 
+						siteInfo.ServiceGroupItems.Add(itemServiceGroup);
+
+					itemServiceGroup = new ItemServiceGroup() {
+						Name = SiteInfo.ClearString(nodeCollectionTd[0].InnerText),
+						Link = siteInfo.UrlServicesPage
+					};
+
+					_backgroundWorker.ReportProgress(0, itemServiceGroup.Name);
+				} else if (nodeCollectionTd.Count == 3) {
+					if (itemServiceGroup == null)
+						continue;
+
+					string serviceName = SiteInfo.ClearString(nodeCollectionTd[1].InnerText);
+					string servicePrice = SiteInfo.ClearString(nodeCollectionTd[2].InnerText);
+					if (string.IsNullOrEmpty(serviceName) || string.IsNullOrEmpty(servicePrice))
+						continue;
+
+					ItemService itemService = new ItemService() {
+						Name = serviceName,
+						Price = servicePrice
+					};
+					itemServiceGroup.ServiceItems.Add(itemService);
+				}
+			}
+		}
 
 		private void ParseSiteSochiMedcentrSochiRu(HtmlDocument docServices) {
 			HtmlNodeCollection nodeCollection = _htmlAgility.GetNodeCollection(docServices, siteInfo.XPathServices);
@@ -2395,7 +2460,7 @@ namespace PriceListLoader {
 		}
 
 		private void ParseSiteZubRu(HtmlDocument docService, ref ItemServiceGroup itemServiceGroup) {
-			string xPathTable = "//div[@class='price_block visible']";
+			string xPathTable = "//table[@class='table-responsive']";
 			HtmlNodeCollection nodeCollectionService = _htmlAgility.GetNodeCollection(docService, xPathTable);
 
 			if (nodeCollectionService == null) {
@@ -2405,7 +2470,7 @@ namespace PriceListLoader {
 
 			foreach (HtmlNode node in nodeCollectionService) {
 				try {
-					List<ItemService> serviceItems = ReadTrNodesFdoctorRu(node.SelectSingleNode("table[1]"));
+					List<ItemService> serviceItems = ReadTrNodesFdoctorRu(node);
 					itemServiceGroup.ServiceItems.AddRange(serviceItems);
 				} catch (Exception e) {
 					Console.WriteLine(e.Message + Environment.NewLine + e.StackTrace);
@@ -2427,23 +2492,61 @@ namespace PriceListLoader {
 		}
 
 		private void ParseSiteNrmedRu(HtmlDocument docService, ref ItemServiceGroup itemServiceGroup) {
+			string xPathLinks = "//dd[@class='timeline-event-content']//a[@href]";
+			HtmlNodeCollection nodeCollectionLinks = _htmlAgility.GetNodeCollection(docService, xPathLinks);
+			if (nodeCollectionLinks != null) {
+				siteInfo.XPathServices = xPathLinks;
+				ParseSiteWithLinksOnMainPage(docService);
+			}
+
+			string xPathAnalizes = "//div[@class='in-medcenter__title with-analysis']";
+			HtmlNodeCollection nodeCollectionAnalizes = _htmlAgility.GetNodeCollection(docService, xPathAnalizes);
+
+			if (nodeCollectionAnalizes != null) {
+				foreach (HtmlNode nodeChild in nodeCollectionAnalizes) {
+					HtmlNode htmlNodeServiceName = nodeChild.SelectSingleNode(nodeChild.XPath + "//div[@class='in-medcenter__title-count']");
+					HtmlNode htmlNodeServicePrice = nodeChild.SelectSingleNode(nodeChild.XPath + "//div[@class='in-medcenter__title-price']");
+
+					if (htmlNodeServiceName == null || htmlNodeServicePrice == null) {
+						Console.WriteLine("htmlNodeServiceName == null || htmlNodeServicePrice == null");
+						continue;
+					}
+
+					ItemService itemService = new ItemService() {
+						Name = SiteInfo.ClearString(htmlNodeServiceName.InnerText),
+						Price = SiteInfo.ClearString(htmlNodeServicePrice.InnerText)
+					};
+					itemServiceGroup.ServiceItems.Add(itemService);
+				}
+			}
+
+
+
+			string xPathTableCurrent = "//table[@class='pricecurrent']//tbody";
+			HtmlNodeCollection nodeCollectionTablesCurrent = _htmlAgility.GetNodeCollection(docService, xPathTableCurrent);
+			if (nodeCollectionTablesCurrent != null) {
+				foreach (HtmlNode nodeTbody in nodeCollectionTablesCurrent) {
+					List<ItemService> serviceItems = ReadTrNodesFdoctorRu(nodeTbody);
+					itemServiceGroup.ServiceItems.AddRange(serviceItems);
+				}
+			}
+
+
+
 			string xPathTable = "//div[@class='pediatrics__disease-row']";
 			HtmlNodeCollection nodeCollectionService = _htmlAgility.GetNodeCollection(docService, xPathTable);
 
-			if (nodeCollectionService == null) {
-				Console.WriteLine("nodeCollectionService is null");
-				return;
-			}
-
-			foreach (HtmlNode htmlNodeService in nodeCollectionService) {
-				try {
-					ItemService itemService = new ItemService() {
-						Name = SiteInfo.ClearString(htmlNodeService.ChildNodes[3].InnerText).Remove(0, 6).TrimStart(' '),
-						Price = htmlNodeService.ChildNodes[5].InnerText
-					};
-					itemServiceGroup.ServiceItems.Add(itemService);
-				} catch (Exception e) {
-					Console.WriteLine(e.Message + Environment.NewLine + e.StackTrace);
+			if (nodeCollectionService != null) {
+				foreach (HtmlNode htmlNodeService in nodeCollectionService) {
+					try {
+						ItemService itemService = new ItemService() {
+							Name = SiteInfo.ClearString(htmlNodeService.ChildNodes[3].InnerText).Remove(0, 6).TrimStart(' '),
+							Price = htmlNodeService.ChildNodes[5].InnerText
+						};
+						itemServiceGroup.ServiceItems.Add(itemService);
+					} catch (Exception e) {
+						Console.WriteLine(e.Message + Environment.NewLine + e.StackTrace);
+					}
 				}
 			}
 		}
