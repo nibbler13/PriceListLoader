@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -7,21 +9,26 @@ using System.Windows;
 
 namespace PriceListLoader {
 	class PriceSummary {
-		public static void Test() {
-			SiteInfo siteInfo = NpoiExcel.ReadPriceList(
-				@"C:\_Projects C#\PriceListLoader\PriceListLoader\bin\Debug\Results\20180410\" +
-				"Медси_Пироговка.xlsx", 
-				SiteInfo.SiteName.msk_medsi_ru);
-
-			if (siteInfo.ServiceGroupItems.Count == 0) {
-				MessageBox.Show("Не удалось считать услуги из файла");
-				return;
+		public static void Test(ObservableCollection<SiteInfo> pivotTableItems, string templateFile, BackgroundWorker backgroundWorker, bool LoadBzPrices) {
+			backgroundWorker.ReportProgress(0, "Считывание прайс-листов");
+			double progressCurrent = 0;
+			double progressStep = 45.0d / (double)pivotTableItems.Count;
+			foreach (SiteInfo siteInfo in pivotTableItems) {
+				progressCurrent += progressStep;
+				if (string.IsNullOrEmpty(siteInfo.SelectedPriceListFile)) {
+					backgroundWorker.ReportProgress((int)progressCurrent, "Для сайта " + siteInfo.CompanyName + " не выбран файл с прайс-листом, пропуск");
+					continue;
+				}
+				
+				NpoiExcel.ReadPriceList(siteInfo);
+				backgroundWorker.ReportProgress((int)progressCurrent, siteInfo.CompanyName + ", считано групп услуг: " + siteInfo.ServiceGroupItems.Count +
+					" - " + siteInfo.SelectedPriceListFile);
+				if (siteInfo.ServiceGroupItems.Count == 0) 
+					backgroundWorker.ReportProgress((int)progressCurrent, "!!! Внимание! Не считано ни одной группы услуг");
 			}
 
-			NpoiExcel.WritePriceListToSummary(
-				@"C:\_Projects C#\PriceListLoader\PriceListLoader\bin\Debug\Results\20180412\" +
-				"SummaryPrice_20180412_001041.xlsx", 
-				siteInfo);
+			NpoiExcel.WritePriceListToSummary(templateFile, pivotTableItems.ToList(), backgroundWorker, LoadBzPrices);
+
 			MessageBox.Show("Завершено");
 		}
 	}

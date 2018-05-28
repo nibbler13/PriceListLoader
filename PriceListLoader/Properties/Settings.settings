@@ -1,7 +1,40 @@
 ﻿<?xml version='1.0' encoding='utf-8'?>
-<SettingsFile xmlns="uri:settings" CurrentProfile="(Default)">
-  <Profiles>
-    <Profile Name="(Default)" />
-  </Profiles>
-  <Settings />
+<SettingsFile xmlns="http://schemas.microsoft.com/VisualStudio/2004/01/settings" CurrentProfile="(Default)" GeneratedClassNamespace="PriceListLoader.Properties" GeneratedClassName="Settings">
+  <Profiles />
+  <Settings>
+    <Setting Name="MisDbAddress" Type="System.String" Scope="User">
+      <Value Profile="(Default)">172.16.9.9</Value>
+    </Setting>
+    <Setting Name="MisDbName" Type="System.String" Scope="User">
+      <Value Profile="(Default)">central</Value>
+    </Setting>
+    <Setting Name="MisDbUser" Type="System.String" Scope="User">
+      <Value Profile="(Default)">sysdba</Value>
+    </Setting>
+    <Setting Name="MisDbPassword" Type="System.String" Scope="User">
+      <Value Profile="(Default)">masterkey</Value>
+    </Setting>
+    <Setting Name="MisDbSelectPriceByCode" Type="System.String" Scope="User">
+      <Value Profile="(Default)">select first 1 S.SPRICE
+    from WSCHEMA W
+        join PRICESCONTRACTOR P on p.filial = @filid
+                                and p.fdate &lt;= current_date
+        join SCHPRICECONTRACTOR S   on w.schid = s.schid
+                                    and s.prid = p.prid
+                                    and s.kateg = 13
+    where
+        w.schid = (
+select schid 
+from wschema 
+where kodoper=@kodoper
+and schname=@schname
+and w.structid = 3)
+        and w.structid = 3
+        and (W.DISDATE is null or W.DISDATE &gt; '01.01.2017')
+        and (W.INVISINPRICE is null or W.INVISINPRICE = 0)
+        and s.schid is not null
+        and s.pricetype = 0
+    order by w.schid, p.fdate desc</Value>
+    </Setting>
+  </Settings>
 </SettingsFile>

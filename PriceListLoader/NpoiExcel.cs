@@ -12,7 +12,8 @@ using System.Windows;
 
 namespace PriceListLoader {
 	class NpoiExcel {
-		public static void WritePriceListToSummary(string fileName, SiteInfo siteInfo) {
+		public static void WritePriceListToSummary(string templateFileName, List<SiteInfo> sitesInfo, BackgroundWorker backgroundWorker, bool LoadBzPrices) {
+			backgroundWorker.ReportProgress(50, "Заполнение шаблона сводной таблицы");
 			string resultPath = Path.Combine(Environment.CurrentDirectory, "Results\\" + DateTime.Now.ToString("yyyyMMdd"));
 			if (!Directory.Exists(resultPath))
 				Directory.CreateDirectory(resultPath);
@@ -22,83 +23,159 @@ namespace PriceListLoader {
 
 			IWorkbook workbook;
 			try {
-				using (FileStream file = new FileStream(fileName, FileMode.Open, FileAccess.Read)) {
+				backgroundWorker.ReportProgress(55, "Открытие книги: " + templateFileName);
+				using (FileStream file = new FileStream(templateFileName, FileMode.Open, FileAccess.Read))
 					workbook = new XSSFWorkbook(file);
-				}
 			} catch (Exception e) {
 				Console.WriteLine(e.Message + Environment.NewLine + e.StackTrace);
 				return;
 			}
 
-			int siteInfoColumnServiceName = -1;
-			int siteInfoColumnServicePrice = -1;
+			double progressCurrent = 55;
 			ISheet sheet = workbook.GetSheet("Data");
-			for (int rowCount = 0; rowCount <= sheet.LastRowNum; rowCount++) {
-				IRow row = sheet.GetRow(rowCount);
+			if (LoadBzPrices)
+				WriteBzPricesToSummaryTable(sheet, sitesInfo[0].GetFilId(), backgroundWorker, (int)progressCurrent);
+			else
+				backgroundWorker.ReportProgress((int)progressCurrent, "Пропуск загрузки собственных цен");
 
-				if (row == null)  //null is when the row only contains empty cells 
-					continue;
+			double progressStep = 40.0d / (double)sitesInfo.Count;
+			foreach (SiteInfo siteInfo in sitesInfo) {
+				progressCurrent += progressStep;
+				backgroundWorker.ReportProgress((int)progressCurrent, "Обработка информации для сайта: " + siteInfo.CompanyName + " - " + 
+					siteInfo.SummaryColumnName + " - " + siteInfo.SelectedPriceListFile);
 
-				if (rowCount == 0) {
-					for (int columnCount = 3; columnCount < row.Cells.Count; columnCount += 3) {
-						string currentSite = row.GetCell(columnCount).StringCellValue;
-						if (!currentSite.Equals(siteInfo.SummaryColumnName))
-							continue;
-
-						siteInfoColumnServiceName = columnCount;
-						siteInfoColumnServicePrice = columnCount + 1;
-						break;
-					}
-
-					if (siteInfoColumnServiceName == -1) {
-						Console.WriteLine("Не удалось найти столбец для сайта: " + siteInfo.SummaryColumnName);
-						break;
-					}
-
+				if (string.IsNullOrEmpty(siteInfo.SelectedPriceListFile)) {
+					backgroundWorker.ReportProgress((int)progressCurrent, "Не был выбран прайс-лист, пропуск");
 					continue;
 				}
 
-				if (rowCount == 85)
-					Console.WriteLine();
+				int siteInfoColumnServiceName = -1;
+				int siteInfoColumnServicePrice = -1;
 
-				ICell cellName = row.GetCell(siteInfoColumnServiceName);
-				if (cellName == null || cellName.CellType == CellType.Blank) {
-					Console.WriteLine("Row: " + rowCount + " - value is empty");
-					continue;
+				for (int rowCount = 0; rowCount <= sheet.LastRowNum; rowCount++) {
+					IRow row = sheet.GetRow(rowCount);
+
+					if (row == null)  //null is when the row only contains empty cells 
+						continue;
+
+					if (rowCount == 0) {
+						backgroundWorker.ReportProgress((int)progressCurrent, "Поиск столбца с именем: " + siteInfo.SummaryColumnName);
+						for (int columnCount = 4; columnCount < row.Cells.Count; columnCount += 3) {
+							string currentSite = row.GetCell(columnCount).StringCellValue;
+							if (!currentSite.Equals(siteInfo.SummaryColumnName))
+								continue;
+
+							siteInfoColumnServiceName = columnCount;
+							siteInfoColumnServicePrice = columnCount + 1;
+							break;
+						}
+
+						if (siteInfoColumnServiceName == -1) {
+							backgroundWorker.ReportProgress((int)progressCurrent, "Не удалось найти столбец с именем: " + siteInfo.SummaryColumnName);
+							break;
+						}
+
+						continue; //move to next row after headers
+					}
+
+					ICell cellName = row.GetCell(siteInfoColumnServiceName);
+					if (cellName == null || cellName.CellType == CellType.Blank) 
+						continue;
+
+					string siteInfoServiceName = cellName.StringCellValue;
+					ICell cellPrice = row.GetCell(siteInfoColumnServicePrice);
+					object siteInfoServicePrice = siteInfo.GetServicePrice(siteInfoServiceName);
+
+					if (siteInfoServicePrice.Equals("NOT_FOUND"))
+						backgroundWorker.ReportProgress((int)progressCurrent, "--- Не удалось найти сопоставление для услуги: '" + siteInfoServiceName + "'");
+
+					try {
+						if (siteInfoServicePrice is string) {
+							string price = siteInfoServicePrice as string;
+							if ((price.Contains("*") && !price.EndsWith("*")) || price.Contains("/"))
+								cellPrice.SetCellFormula(price);
+							else
+								cellPrice.SetCellValue(price);
+						} else if (siteInfoServicePrice is double)
+							cellPrice.SetCellValue((double)siteInfoServicePrice);
+					} catch (Exception e) {
+						Console.WriteLine(e.Message + Environment.NewLine + e.StackTrace);
+					}
 				}
-
-				string siteInfoServiceName = cellName.StringCellValue;
-				Console.WriteLine("Row: " + rowCount + " - value: " + siteInfoServiceName);
-				ICell cellPrice = row.GetCell(siteInfoColumnServicePrice);
-				object siteInfoServicePrice = siteInfo.GetServicePrice(siteInfoServiceName);
-				if (siteInfoServicePrice is string) {
-					string price = siteInfoServicePrice as string;
-					if (price.Contains("*") || price.Contains("/"))
-						cellPrice.SetCellFormula(price);
-					else
-						cellPrice.SetCellValue(price);
-				} else if (siteInfoServicePrice is double)
-					cellPrice.SetCellValue((double)siteInfoServicePrice);
 			}
 
-
+			backgroundWorker.ReportProgress(100, "Запись данных в файл: " + resultFile);
 			using (FileStream stream = new FileStream(resultFile, FileMode.Create, FileAccess.Write))
 				workbook.Write(stream);
 
 			workbook.Close();
 		}
 
-		public static SiteInfo ReadPriceList(string fileName, SiteInfo.SiteName name) {
-			SiteInfo siteInfo = new SiteInfo(name);
-			
+		private static void WriteBzPricesToSummaryTable(ISheet sheet, int filid, BackgroundWorker backgroundWorker, int progress) {
+			backgroundWorker.ReportProgress(progress, "Загрузка собственных цен из базы Инфоклиники");
+			string dbAddress = Properties.Settings.Default.MisDbAddress;
+			string dbName = Properties.Settings.Default.MisDbName;
+			string sqlQuery = Properties.Settings.Default.MisDbSelectPriceByCode;
+
+			backgroundWorker.ReportProgress(progress, "Создание подключения к БД: " + dbAddress + ":" + dbName);
+			FirebirdClient firebirdClient = new FirebirdClient(
+				dbAddress,
+				dbName,
+				Properties.Settings.Default.MisDbUser,
+				Properties.Settings.Default.MisDbPassword);
+
+			backgroundWorker.ReportProgress(progress, "Выполнение запроса на получения цен для услуг (" + 
+				(sheet.LastRowNum - 1) + " шт.)");
+			for (int rowCount = 1; rowCount <= sheet.LastRowNum; rowCount++) {
+				IRow row = sheet.GetRow(rowCount);
+
+				if (row == null)  //null is when the row only contains empty cells 
+					continue;
+				
+				string kodoper = GetCellValue(row.GetCell(1));
+				string schname = GetCellValue(row.GetCell(2));
+				if (string.IsNullOrEmpty(kodoper) || string.IsNullOrEmpty(schname))
+					continue;
+
+				DataTable dataTable = firebirdClient.GetDataTable(sqlQuery, new Dictionary<string, object>() {
+					{ "@filid", filid },
+					{ "@kodoper", kodoper },
+					{ "@schname", schname }
+				});
+
+				if (dataTable.Rows.Count == 0)
+					continue;
+
+				string price = dataTable.Rows[0][0].ToString();
+				ICell cellPrice = row.GetCell(3);
+
+				if (double.TryParse(price, out double result))
+					cellPrice.SetCellValue(result);
+				else
+					cellPrice.SetCellValue(price);
+			}
+
+			firebirdClient.Close();
+		}
+
+		private static string GetCellValue(ICell cell) {
+			return cell.CellType == CellType.String ? cell.StringCellValue : cell.NumericCellValue.ToString();
+		}
+
+		public static void ReadPriceList(SiteInfo siteInfo) {
+			if (string.IsNullOrEmpty(siteInfo.SelectedPriceListFile)) {
+				Console.WriteLine("siteInfo: " + siteInfo.Name + " - SelectedPriceListFile is empty");
+				return;
+			}
+
 			IWorkbook workbook;
 			try {
-				using (FileStream file = new FileStream(fileName, FileMode.Open, FileAccess.Read)) {
+				using (FileStream file = new FileStream(siteInfo.SelectedPriceListFile, FileMode.Open, FileAccess.Read)) {
 					workbook = new XSSFWorkbook(file);
 				}
 			} catch (Exception e) {
 				Console.WriteLine(e.Message + Environment.NewLine + e.StackTrace);
-				return siteInfo;
+				return;
 			}
 
 			ISheet sheet = workbook.GetSheet("Data");
@@ -108,13 +185,10 @@ namespace PriceListLoader {
 				if (row == null)  //null is when the row only contains empty cells 
 					continue;
 
-				string groupName = row.GetCell(0).StringCellValue;
-				string groupLink = row.GetCell(1).StringCellValue;
-				string serviceName = row.GetCell(2).StringCellValue;
-				string servicePrice = 
-					row.GetCell(3).CellType == CellType.String ? 
-					row.GetCell(3).StringCellValue : 
-					row.GetCell(3).NumericCellValue.ToString();
+				string groupName = GetCellValue(row.GetCell(0));
+				string groupLink = GetCellValue(row.GetCell(1));
+				string serviceName = GetCellValue(row.GetCell(2));
+				string servicePrice = GetCellValue(row.GetCell(3));
 
 				int groupCounter = -1;
 				for (int i = 0; i < siteInfo.ServiceGroupItems.Count; i++) {
@@ -144,7 +218,16 @@ namespace PriceListLoader {
 
 			workbook.Close();
 
-			return siteInfo;
+			return;
+		}
+
+		public static string GetFileName(string siteName) {
+			string fileName = siteName;
+
+			foreach (char item in Path.GetInvalidFileNameChars())
+				fileName = fileName.Replace(item, '-');
+
+			return fileName;
 		}
 
 		public static string WriteItemSiteDataToExcel(SiteInfo siteInfo, BackgroundWorker backgroundWorker,
@@ -152,9 +235,7 @@ namespace PriceListLoader {
 			double progressCurrent = progressFrom;
 
 			string templateFile = Environment.CurrentDirectory + "\\Template.xlsx";
-			string resultFilePrefix = siteInfo.UrlServicesPage;
-			foreach (char item in Path.GetInvalidFileNameChars())
-				resultFilePrefix = resultFilePrefix.Replace(item, '-');
+			string resultFilePrefix = GetFileName(siteInfo.UrlServicesPage);
 
 			backgroundWorker.ReportProgress((int)progressCurrent, "Выгрузка данных в Excel");
 

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.Win32;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
@@ -23,16 +24,21 @@ namespace PriceListLoader {
 	/// </summary>
 	public partial class MainWindow : Window {
 		public ObservableCollection<SiteInfo> SiteItems { get; set; } = new ObservableCollection<SiteInfo>();
+		public ObservableCollection<SiteInfo> PivotTableItems { get; set; } = new ObservableCollection<SiteInfo>();
 
 		public MainWindow() {
 			InitializeComponent();
 
 			//ListViewSites.DataContext = this;
 			DataGridSites.DataContext = this;
+			ListViewPivotTable.DataContext = this;
 
 			foreach (SiteInfo.SiteName name in Enum.GetValues(typeof(SiteInfo.SiteName)))
 				SiteItems.Add(new SiteInfo(name));
-			
+
+			foreach (SiteInfo siteInfo in SiteItems)
+				if (!ListBoxRegions.Items.Contains(siteInfo.City))
+					ListBoxRegions.Items.Add(siteInfo.City);
 		}
 
 		private void ButtonExecute_Click(object sender, RoutedEventArgs e) {
@@ -82,7 +88,173 @@ namespace PriceListLoader {
 		}
 
 		private void ButtonDo_Click(object sender, RoutedEventArgs e) {
-			PriceSummary.Test();
+			TextBoxPivotTableResult.Text = string.Empty;
+			Cursor = Cursors.Wait;
+
+			IsEnabled = false;
+
+			BackgroundWorker backgroundWorkerPivotTable = new BackgroundWorker();
+			backgroundWorkerPivotTable.WorkerReportsProgress = true;
+			backgroundWorkerPivotTable.DoWork += BackgroundWorkerPivotTable_DoWork;
+			backgroundWorkerPivotTable.RunWorkerCompleted += BackgroundWorkerPivotTable_RunWorkerCompleted;
+			backgroundWorkerPivotTable.ProgressChanged += BackgroundWorkerPivotTable_ProgressChanged;
+			backgroundWorkerPivotTable.RunWorkerAsync(new object[] { TextBoxPivotTableTemplate.Text, CheckboxLoadBzPrices.IsChecked.Value });
+		}
+
+		private void BackgroundWorkerPivotTable_ProgressChanged(object sender, ProgressChangedEventArgs e) {
+			ProgressBarPivotTable.Value = e.ProgressPercentage;
+
+			string text = e.UserState as string;
+			if (!string.IsNullOrEmpty(text))
+				TextBoxPivotTableResult.Text = text + Environment.NewLine + TextBoxPivotTableResult.Text;
+		}
+
+		private void BackgroundWorkerPivotTable_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e) {
+			if (e.Error != null) {
+				TextBoxPivotTableResult.Text = e.Error.Message + Environment.NewLine + e.Error.StackTrace +
+					Environment.NewLine + TextBoxPivotTableResult.Text;
+			}
+
+			IsEnabled = true;
+
+			Cursor = Cursors.Arrow;
+		}
+
+		private void BackgroundWorkerPivotTable_DoWork(object sender, DoWorkEventArgs e) {
+			object[] args = e.Argument as object[];
+			string templateFile = args[0] is string ? args[0] as string : string.Empty;
+			bool loadBzPrices = args[1] is bool ? (bool)args[1] : false;
+			PriceSummary.Test(PivotTableItems, templateFile, sender as BackgroundWorker, loadBzPrices);
+		}
+
+		private void ListBoxRegions_SelectionChanged(object sender, SelectionChangedEventArgs e) {
+			PivotTableItems.Clear();
+
+			foreach (SiteInfo siteInfo in SiteItems)
+				if (siteInfo.City.Equals(ListBoxRegions.SelectedItem))
+					PivotTableItems.Add(siteInfo);
+
+			string pivotTableTemplate = TextBoxPivotTableTemplate.Text;
+			if (!string.IsNullOrEmpty(pivotTableTemplate) &&
+				!pivotTableTemplate.Contains("Template"))
+				return;
+
+			string selectedRegionTemplate = string.Empty;
+			switch (ListBoxRegions.SelectedItem) {
+				case "Москва":
+					selectedRegionTemplate = "TemplateSummaryMoscow.xlsx";
+					break;
+				case "Санкт-Петербург":
+					selectedRegionTemplate = "TemplateSummarySpb.xlsx";
+					break;
+				default:
+					break;
+			}
+
+			if (!string.IsNullOrEmpty(selectedRegionTemplate))
+				selectedRegionTemplate = System.IO.Path.Combine(Environment.CurrentDirectory, selectedRegionTemplate);
+
+			TextBoxPivotTableTemplate.Text = selectedRegionTemplate;
+		}
+
+		private void Button_Click(object sender, RoutedEventArgs e) {
+			ListViewItem listViewItem = GetAncestorOfType<ListViewItem>(sender as Button);
+
+			if (listViewItem == null)
+				return;
+
+			if (!(listViewItem.Content is SiteInfo siteInfo))
+				return;
+
+			if (SelectXlsxFile(out string selectedFile))
+				siteInfo.SelectedPriceListFile = selectedFile;
+		}
+
+		public T GetAncestorOfType<T>(FrameworkElement child) where T : FrameworkElement {
+			var parent = VisualTreeHelper.GetParent(child);
+			if (parent != null && !(parent is T))
+				return (T)GetAncestorOfType<T>((FrameworkElement)parent);
+			return (T)parent;
+		}
+
+		private void ButtonSelectPivotTableTemplate_Click(object sender, RoutedEventArgs e) {
+			if (SelectXlsxFile(out string selectedFile))
+				TextBoxPivotTableTemplate.Text = selectedFile;
+		}
+
+		private void ButtonSelectFolderWithPrices_Click(object sender, RoutedEventArgs e) {
+			using (var dialog = new System.Windows.Forms.FolderBrowserDialog()) {
+				if (dialog.ShowDialog() != System.Windows.Forms.DialogResult.OK)
+					return;
+
+				string selectedFolder = dialog.SelectedPath;
+				TextBoxFolderWithPrices.Text = selectedFolder;
+			}
+		}
+
+		private bool SelectXlsxFile(out string selectedFile) {
+			selectedFile = string.Empty;
+
+			OpenFileDialog openFileDialog = new OpenFileDialog();
+			openFileDialog.Filter = "Книга Excel (*.xls*)|*.xls*";
+			openFileDialog.CheckFileExists = true;
+			openFileDialog.CheckPathExists = true;
+			openFileDialog.Multiselect = false;
+			openFileDialog.RestoreDirectory = true;
+
+			if (openFileDialog.ShowDialog() == true)
+				selectedFile = openFileDialog.FileName;
+			else
+				return false;
+
+			return true;
+		}
+
+		private void ButtonMatchFiles_Click(object sender, RoutedEventArgs e) {
+			if (PivotTableItems.Count == 0) {
+				MessageBox.Show(this, "Отсутствует информация о прайс-листах для выбранного региона",
+					"", MessageBoxButton.OK, MessageBoxImage.Information);
+				return;
+			}
+
+			if (ListBoxRegions.SelectedItem == null) {
+				MessageBox.Show(this, "Не выбран регион", "",
+					MessageBoxButton.OK, MessageBoxImage.Information);
+				return;
+			}
+
+			string selectedFolder = TextBoxFolderWithPrices.Text;
+			if (string.IsNullOrEmpty(selectedFolder)) {
+				MessageBox.Show(this, "Не выбрана папка с прайс-листами", "",
+					MessageBoxButton.OK, MessageBoxImage.Information);
+				return;
+			}
+
+			string[] files = Directory.GetFiles(selectedFolder, "*.xls*");
+			if (files.Length == 0) {
+				MessageBox.Show(this, "В папке " + selectedFolder + " отсутсвуют файлы формата *.xls*", "",
+					MessageBoxButton.OK, MessageBoxImage.Information);
+				return;
+			}
+
+			foreach (SiteInfo siteInfo in PivotTableItems) {
+				if (!string.IsNullOrEmpty(siteInfo.SelectedPriceListFile))
+					continue;
+
+				string fileStartsWith = NpoiExcel.GetFileName(siteInfo.UrlServicesPage);
+
+				foreach (string file in files) {
+					if (!file.Contains(fileStartsWith))
+						continue;
+
+					if (siteInfo.Name == SiteInfo.SiteName.msk_familydoctor_ru)
+						if (file.Contains("child"))
+							continue;
+
+					siteInfo.SelectedPriceListFile = file;
+					break;
+				}
+			}
 		}
 	}
 }

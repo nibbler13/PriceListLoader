@@ -1,11 +1,19 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 namespace PriceListLoader {
-	public class SiteInfo {
+	public class SiteInfo : INotifyPropertyChanged {
+		public event PropertyChangedEventHandler PropertyChanged;
+		private void NotifyPropertyChanged([CallerMemberName] String propertyName = "") {
+			PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+		}
+
 		public string UrlRoot { get; set; } = string.Empty;
 		public string UrlServicesPage { get; set; } = string.Empty;
 		public string CompanyName { get; set; } = string.Empty;
@@ -13,9 +21,24 @@ namespace PriceListLoader {
 		public string City { get; set; } = string.Empty;
 		public string SummaryColumnName { get; set; } = string.Empty;
 
+		private string selectedPriceListFile = string.Empty;
+		public string SelectedPriceListFile {
+			get {
+				return selectedPriceListFile;
+			}
+			set {
+				if (value != selectedPriceListFile) {
+					selectedPriceListFile = value;
+					NotifyPropertyChanged();
+				}
+			}
+		}
+
 		public List<ItemServiceGroup> ServiceGroupItems { get; set; }
 		private SortedDictionary<string, string> DictionaryAllServices { get; set; }
 		public SiteName Name { get; set; }
+
+		private Regex regexClearString = new Regex("[^а-яА-Яa-zA-Z0-9 -]");
 
 		public enum SiteName {
 			msk_fdoctor_ru,
@@ -24,7 +47,7 @@ namespace PriceListLoader {
 			msk_alfazdrav_ru,
 			msk_nrmed_ru,
 			msk_nrmed_ru_child,
-			msk_nrlab_ru,
+			msk_nrmedlab_ru,
 			msk_onclinic_ru,
 			msk_smclinic_ru,
 			msk_smdoctor_ru,
@@ -38,8 +61,11 @@ namespace PriceListLoader {
 			msk_novostom_ru,
 			msk_masterdent_ru,
 			msk_gemotest_ru,
-			msk_kdllab_ru,
+			msk_kdl_ru,
 			msk_medsi_ru,
+			msk_medsiKDCB_ru,
+			msk_medsiKPP_ru,
+			msk_medsiPIROGOVKA_ru,
 			msk_sm_stomatology_ru,
 			msk_smclinic_ru_lab,
 			spb_mc21_ru,
@@ -73,6 +99,7 @@ namespace PriceListLoader {
 			krd_clinicist_ru,
 			krd_poly_clinic_ru,
 			krd_clinica_nazdorovie_ru,
+			krd_clinica_nazdorovie_ru_lab,
 			krd_kuban_kbl_ru,
 			sochi_armed_mc_ru,
 			sochi_uzlovaya_poliklinika_ru,
@@ -80,15 +107,40 @@ namespace PriceListLoader {
 			sochi_medcentr_sochi_ru
 		}
 
+		public int GetFilId() {
+			switch (City) {
+				case "Москва":
+					return 5;
+				case "Санкт-Петербург":
+					return 3;
+				case "Уфа":
+					return 9;
+				case "Каменск-Уральский":
+					return 15;
+				case "Казань":
+					return 10;
+				case "Краснодар":
+					return 8;
+				case "Сочи":
+					return 17;
+				default:
+					return 12;
+			}
+		}
+
+
+		private string GetClearedString(string stringInitial) {
+			return regexClearString.Replace(stringInitial.ToLower().Replace(" ", ""), "");
+		}
 
 		public object GetServicePrice(string serviceName) {
-			serviceName = serviceName.ToLower();
+			serviceName = GetClearedString(serviceName);
 
 			if (DictionaryAllServices == null) {
 				DictionaryAllServices = new SortedDictionary<string, string>();
 				foreach (ItemServiceGroup group in ServiceGroupItems)
 					foreach (ItemService service in group.ServiceItems) {
-						string key = service.Name.ToLower();
+						string key = GetClearedString(service.Name);
 						if (DictionaryAllServices.ContainsKey(key))
 							continue;
 
@@ -102,25 +154,31 @@ namespace PriceListLoader {
 				if (double.TryParse(price, out double priceValue)) {
 					switch (Name) {
 						case SiteName.msk_fdoctor_ru:
-							if (serviceName.Equals("профилактическая чистка зубов с помощью аппарата \" air-flow\" (за один зуб)"))
+							if (serviceName.Equals(GetClearedString(
+								"профилактическая чистка зубов с помощью аппарата \" air-flow\" (за один зуб)")))
 								return priceValue + "*28";
 							break;
 						case SiteName.msk_familydoctor_ru:
-							if (serviceName.Equals("рентгенография органов грудной клетки (боковая проекция)"))
+							if (serviceName.Equals(GetClearedString(
+								"рентгенография органов грудной клетки (боковая проекция)")))
 								return priceValue + "*2";
 							break;
 						case SiteName.msk_familydoctor_ru_child:
-							if (serviceName.Equals("рентгенография органов грудной клетки (боковая проекция) (дети)"))
+							if (serviceName.Equals(GetClearedString(
+								"рентгенография органов грудной клетки (боковая проекция) (дети)")))
 								return priceValue + "*2";
 							break;
 						case SiteName.msk_onclinic_ru:
-							if (serviceName.Equals("снятие зубных отложений airflow (1 зуб)"))
+							if (serviceName.Equals(GetClearedString(
+								"снятие зубных отложений airflow (1 зуб)")))
 								return priceValue + "*28";
 							break;
 						case SiteName.msk_sm_stomatology_ru:
-							if (serviceName.Equals("удаление зубного налета аэр флоу (1 челюсть)"))
+							if (serviceName.Equals(
+								GetClearedString("удаление зубного налета аэр флоу (1 челюсть)")))
 								return priceValue + "*2";
-							if (serviceName.Equals("снятие твердых зубных отложений ультразвуком (1 зуб)"))
+							if (serviceName.Equals(GetClearedString(
+								"снятие твердых зубных отложений ультразвуком (1 зуб)")))
 								return priceValue + "*28";
 							break;
 						default:
@@ -189,11 +247,11 @@ namespace PriceListLoader {
 					City = "Москва";
 					SummaryColumnName = "НИАРМЕДИК дети";
 					break;
-				case SiteName.msk_nrlab_ru:
-					UrlRoot = "http://www.nrlab.ru";
-					UrlServicesPage = UrlRoot + "/prices/groups/";
+				case SiteName.msk_nrmedlab_ru:
+					UrlRoot = "http://www.nrmed.ru";
+					UrlServicesPage = UrlRoot + "/rus/laboratoriya/alphabet";
 					CompanyName = "Лаборатория Ниармедик";
-					XPathServices = "//div[@class=\"spis_analiz\"]//a[@href]";
+					XPathServices = "//div[@class='quattro-block quattro-block_seven']//a[@href]";
 					City = "Москва";
 					SummaryColumnName = "НИАРМЕДИК лаборатория";
 					break;
@@ -304,7 +362,7 @@ namespace PriceListLoader {
 					City = "Москва";
 					SummaryColumnName = "Гемотест";
 					break;
-				case SiteName.msk_kdllab_ru:
+				case SiteName.msk_kdl_ru:
 					UrlRoot = "https://kdl.ru";
 					UrlServicesPage = UrlRoot + "/analizy-i-tseny";
 					CompanyName = "ООО «КДЛ ДОМОДЕДОВО-ТЕСТ»";
@@ -313,6 +371,29 @@ namespace PriceListLoader {
 					SummaryColumnName = "КДЛ Домодедово";
 					break;
 				case SiteName.msk_medsi_ru:
+					UrlRoot = "https://medsi.ru";
+					UrlServicesPage = UrlRoot + "/services/";
+					CompanyName = "АО \"Группа компаний МЕДСИ\"";
+					XPathServices = "//div[@class='b-services__row']//a[@href]";
+					City = "Москва";
+					break;
+				case SiteName.msk_medsiKDCB_ru:
+					UrlRoot = "https://medsi.ru";
+					UrlServicesPage = UrlRoot + "/services/";
+					CompanyName = "АО \"Группа компаний МЕДСИ\"";
+					XPathServices = "//div[@class='b-services__row']//a[@href]";
+					City = "Москва";
+					SummaryColumnName = "Медси КДЦБ";
+					break;
+				case SiteName.msk_medsiKPP_ru:
+					UrlRoot = "https://medsi.ru";
+					UrlServicesPage = UrlRoot + "/services/";
+					CompanyName = "АО \"Группа компаний МЕДСИ\"";
+					XPathServices = "//div[@class='b-services__row']//a[@href]";
+					City = "Москва";
+					SummaryColumnName = "Медси КЛП";
+					break;
+				case SiteName.msk_medsiPIROGOVKA_ru:
 					UrlRoot = "https://medsi.ru";
 					UrlServicesPage = UrlRoot + "/services/";
 					CompanyName = "АО \"Группа компаний МЕДСИ\"";
@@ -342,6 +423,7 @@ namespace PriceListLoader {
 					CompanyName = "Группа компаний Медицинский центр «XXI век»";
 					XPathServices = "//div[@class='mc_short_price']";
 					City = "Санкт-Петербург";
+					SummaryColumnName = "21 ВЕК";
 					break;
 				case SiteName.spb_evro_med_ru:
 					UrlRoot = "http://evro-med.ru";
@@ -356,6 +438,7 @@ namespace PriceListLoader {
 					CompanyName = "Сеть многопрофильных клиник “БалтЗдрав”";
 					XPathServices = "//div[@class='uk-panel uk-panel-box box']//a[@href]";
 					City = "Санкт-Петербург";
+					SummaryColumnName = "Балтздрав";
 					break;
 				case SiteName.spb_german_clinic:
 					UrlRoot = "https://german.clinic";
@@ -363,6 +446,7 @@ namespace PriceListLoader {
 					CompanyName = "Немецкая семейная клиника";
 					XPathServices = "//ul[@class='topmenu__container']/li[2]/ul[1]//a[@href]";
 					City = "Санкт-Петербург";
+					SummaryColumnName = "Немецкая семейная клиника поликлиника";
 					break;
 				case SiteName.spb_german_dental:
 					UrlRoot = "https://german.dental";
@@ -370,6 +454,7 @@ namespace PriceListLoader {
 					CompanyName = "Немецкая семейная стоматология";
 					XPathServices = "//div[@class='service']//a[@href]";
 					City = "Санкт-Петербург";
+					SummaryColumnName = "Немецкая семейная клиника стоматология";
 					break;
 				case SiteName.spb_clinic_complex_ru:
 					UrlRoot = "http://clinic-complex.ru";
@@ -377,6 +462,7 @@ namespace PriceListLoader {
 					CompanyName = "Современные медицинские технологии";
 					XPathServices = "//div[@class='mainblock-price-spollers-item']";
 					City = "Санкт-Петербург";
+					SummaryColumnName = "СМТ";
 					break;
 				case SiteName.spb_medswiss_spb_ru:
 					UrlRoot = "http://medswiss-spb.ru";
@@ -384,6 +470,7 @@ namespace PriceListLoader {
 					CompanyName = "MedSwiss Санкт-Петер6ург";
 					XPathServices = "//table[@id='viseble']//a[@href]";
 					City = "Санкт-Петербург";
+					SummaryColumnName = "Medswiss";
 					break;
 				case SiteName.spb_invitro_ru:
 					UrlRoot = "https://www.invitro.ru";
@@ -391,6 +478,7 @@ namespace PriceListLoader {
 					CompanyName = "ООО «ИНВИТРО»";
 					XPathServices = "//table[@class='table_price_c']//tbody";
 					City = "Санкт-Петербург";
+					SummaryColumnName = "ИНВИТРО";
 					break;
 				case SiteName.spb_helix_ru:
 					UrlRoot = "https://helix.ru";
@@ -398,6 +486,7 @@ namespace PriceListLoader {
 					CompanyName = "ООО «НПФ «ХЕЛИКС»";
 					XPathServices = "//div[@class='Catalog-Content-Navigation']//span[starts-with(@class,'Catalog-Content-Navigation')]";
 					City = "Санкт-Петербург";
+					SummaryColumnName = "ХЕЛИКС";
 					break;
 				case SiteName.spb_emcclinic_ru:
 					UrlRoot = "http://www.emcclinic.ru";
@@ -405,6 +494,7 @@ namespace PriceListLoader {
 					CompanyName = "ООО \"Единые Медицинские Системы\"";
 					XPathServices = "//div[@class='n-services__item']//a[@href]";
 					City = "Санкт-Петербург";
+					SummaryColumnName = "ЕМС";
 					break;
 				case SiteName.ufa_megi_clinic:
 					UrlRoot = "http://megi.clinic";
@@ -553,6 +643,13 @@ namespace PriceListLoader {
 					XPathServices = "//div[@class=' top-menu-main']/ul[1]/li[4]//a[@href]";
 					City = "Краснодар";
 					break;
+				case SiteName.krd_clinica_nazdorovie_ru_lab:
+					UrlRoot = "http://clinica-nazdorovie.ru";
+					UrlServicesPage = UrlRoot + "/m/products/";
+					CompanyName = "ООО \"МФО \"Клиника На здоровье\"";
+					XPathServices = "//div[@class='side-menu']//a[@href]";
+					City = "Краснодар";
+					break;
 				case SiteName.krd_kuban_kbl_ru:
 					UrlRoot = "https://www.kuban-kbl.ru";
 					UrlServicesPage = UrlRoot + "/ceni.php";
@@ -607,7 +704,6 @@ namespace PriceListLoader {
 				{ "&ndash;", "" },
 				{ "&lt;", "<" },
 				{ "&gt;", ">" },
-				{ "+", "" },
 				{ "&#8212;", "-" },
 				{ "&#171;", "«" },
 				{ "&#187;", "»" },
