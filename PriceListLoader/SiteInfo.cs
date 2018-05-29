@@ -69,7 +69,7 @@ namespace PriceListLoader {
 			msk_sm_stomatology_ru,
 			msk_smclinic_ru_lab,
 			spb_mc21_ru,
-			spb_evro_med_ru,
+			//spb_evro_med_ru,
 			spb_baltzdrav_ru,
 			spb_german_clinic,
 			spb_german_dental,
@@ -425,13 +425,13 @@ namespace PriceListLoader {
 					City = "Санкт-Петербург";
 					SummaryColumnName = "21 ВЕК";
 					break;
-				case SiteName.spb_evro_med_ru:
-					UrlRoot = "http://evro-med.ru";
-					UrlServicesPage = UrlRoot + "/ceny/";
-					CompanyName = "Многопрофильная клиника \"Европейский медицинский центр\"";
-					XPathServices = "//div[@class='b-editor']//a[@href]";
-					City = "Санкт-Петербург";
-					break;
+				//case SiteName.spb_evro_med_ru:
+				//	UrlRoot = "http://evro-med.ru";
+				//	UrlServicesPage = UrlRoot + "/ceny/";
+				//	CompanyName = "Многопрофильная клиника \"Европейский медицинский центр\"";
+				//	XPathServices = "//div[@class='b-editor']//a[@href]";
+				//	City = "Санкт-Петербург";
+				//	break;
 				case SiteName.spb_baltzdrav_ru:
 					UrlRoot = "http://baltzdrav.ru";
 					UrlServicesPage = UrlRoot + "/services";
@@ -502,6 +502,7 @@ namespace PriceListLoader {
 					CompanyName = "Сеть клиник «МЕГИ»";
 					XPathServices = "//div[@class='detail_cost']//div[@class='test']";
 					City = "Уфа";
+					SummaryColumnName = "МЕГИ";
 					break;
 				case SiteName.ufa_promedicina_clinic:
 					UrlRoot = "https://www.promedicina.clinic";
@@ -509,6 +510,7 @@ namespace PriceListLoader {
 					CompanyName = "ООО ММЦ «Профилактическая медицина»";
 					XPathServices = "//div[starts-with(@class,'col-md-4')]//a[@href]";
 					City = "Уфа";
+					SummaryColumnName = "ПРОмедицина";
 					break;
 				case SiteName.ufa_mamadeti_ru:
 					UrlRoot = "http://ufa.mamadeti.ru";
@@ -516,6 +518,7 @@ namespace PriceListLoader {
 					CompanyName = "Группа компаний «Мать и дитя»";
 					XPathServices = "//div[@class='b-tree_link__item']";
 					City = "Уфа";
+					SummaryColumnName = "Мать и Дитя";
 					break;
 				case SiteName.ufa_rkbkuv_ru:
 					UrlRoot = "https://rkbkuv.ru";
@@ -523,6 +526,7 @@ namespace PriceListLoader {
 					CompanyName = "ГБУЗ РКБ им. Г.Г. Куватова";
 					XPathServices = "";
 					City = "Уфа";
+					SummaryColumnName = " ГБУЗ РКБ им. Г.Г.Куватова";
 					break;
 				case SiteName.ufa_mdplus_ru:
 					UrlRoot = "http://www.ufamdplus.ru";
@@ -530,6 +534,7 @@ namespace PriceListLoader {
 					CompanyName = "Клиника «МД плюс»";
 					XPathServices = "//div[@class='col-lg-12']";
 					City = "Уфа";
+					SummaryColumnName = "МД +";
 					break;
 				case SiteName.yekuk_mfcrubin_ru:
 					UrlRoot = "http://www.mfcrubin.ru";

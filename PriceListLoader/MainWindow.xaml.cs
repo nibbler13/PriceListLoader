@@ -147,6 +147,9 @@ namespace PriceListLoader {
 				case "Санкт-Петербург":
 					selectedRegionTemplate = "TemplateSummarySpb.xlsx";
 					break;
+				case "Уфа":
+					selectedRegionTemplate = "TemplateSummaryUfa.xlsx";
+					break;
 				default:
 					break;
 			}

@@ -80,7 +80,7 @@ namespace PriceListLoader {
 				case SiteInfo.SiteName.msk_onclinic_ru:
 				case SiteInfo.SiteName.msk_nrmedlab_ru:
 				case SiteInfo.SiteName.msk_sm_stomatology_ru:
-				case SiteInfo.SiteName.spb_evro_med_ru:
+				//case SiteInfo.SiteName.spb_evro_med_ru:
 				case SiteInfo.SiteName.spb_baltzdrav_ru:
 				case SiteInfo.SiteName.spb_german_clinic:
 				case SiteInfo.SiteName.spb_german_dental:
@@ -1370,9 +1370,9 @@ namespace PriceListLoader {
 						case SiteInfo.SiteName.msk_sm_stomatology_ru:
 							ParseSiteSmStomatologyRu(docService, ref itemServiceGroup);
 							break;
-						case SiteInfo.SiteName.spb_evro_med_ru:
-							ParseSiteSpbEvroMedRu(docService, ref itemServiceGroup);
-							break;
+						//case SiteInfo.SiteName.spb_evro_med_ru:
+						//	ParseSiteSpbEvroMedRu(docService, ref itemServiceGroup);
+						//	break;
 						case SiteInfo.SiteName.spb_baltzdrav_ru:
 							ParseSiteSpbBaltzdravRu(docService, ref itemServiceGroup);
 							break;
@@ -2800,35 +2800,35 @@ namespace PriceListLoader {
 						continue;
 					}
 
-					if (siteInfo.Name == SiteInfo.SiteName.spb_evro_med_ru) {
-						HtmlNodeCollection nodeCollectionPName = nodeTd[nameOffset].SelectNodes("p");
-						HtmlNodeCollection nodeCollectionPPrice = nodeTd[1 + priceOffset].SelectNodes("p");
+					//if (siteInfo.Name == SiteInfo.SiteName.spb_evro_med_ru) {
+					//	HtmlNodeCollection nodeCollectionPName = nodeTd[nameOffset].SelectNodes("p");
+					//	HtmlNodeCollection nodeCollectionPPrice = nodeTd[1 + priceOffset].SelectNodes("p");
 
-						if (nodeCollectionPName != null) {
-							string rootName = string.Empty;
-							int pNameOffset = 0;
-							int pPriceOffset = 0;
+					//	if (nodeCollectionPName != null) {
+					//		string rootName = string.Empty;
+					//		int pNameOffset = 0;
+					//		int pPriceOffset = 0;
 
-							if (SiteInfo.ClearString(nodeCollectionPName.Last().InnerText).StartsWith("-")) {
-								rootName = SiteInfo.ClearString(nodeCollectionPName.First().InnerText);
-								pNameOffset = 1;
-								pPriceOffset = 1;
-							}
+					//		if (SiteInfo.ClearString(nodeCollectionPName.Last().InnerText).StartsWith("-")) {
+					//			rootName = SiteInfo.ClearString(nodeCollectionPName.First().InnerText);
+					//			pNameOffset = 1;
+					//			pPriceOffset = 1;
+					//		}
 
-							for (int i = pNameOffset; i < nodeCollectionPName.Count; i++) {
-								string currentName = SiteInfo.ClearString(nodeCollectionPName[i].InnerText);
-								string nameInner = string.IsNullOrEmpty(rootName) ? currentName : rootName + " " + currentName;
-								string priceInner = SiteInfo.ClearString(nodeCollectionPPrice[pPriceOffset + i].InnerText);
+					//		for (int i = pNameOffset; i < nodeCollectionPName.Count; i++) {
+					//			string currentName = SiteInfo.ClearString(nodeCollectionPName[i].InnerText);
+					//			string nameInner = string.IsNullOrEmpty(rootName) ? currentName : rootName + " " + currentName;
+					//			string priceInner = SiteInfo.ClearString(nodeCollectionPPrice[pPriceOffset + i].InnerText);
 
-								items.Add(new ItemService() {
-									Name = nameInner,
-									Price = priceInner
-								});
-							}
+					//			items.Add(new ItemService() {
+					//				Name = nameInner,
+					//				Price = priceInner
+					//			});
+					//		}
 
-							continue;
-						}
-					}
+					//		continue;
+					//	}
+					//}
 
 					string nameRaw = string.Empty;
 					string priceRaw = string.Empty;
