@@ -103,7 +103,9 @@ namespace PriceListLoader {
 			krd_kuban_kbl_ru,
 			sochi_armed_mc_ru,
 			sochi_uzlovaya_poliklinika_ru,
-			sochi_23doc_ru,
+			sochi_23doc_ru_main_price,
+			sochi_23doc_ru_doctors,
+			sochi_23doc_ru_lab,
 			sochi_medcentr_sochi_ru
 		}
 
@@ -676,9 +678,23 @@ namespace PriceListLoader {
 					XPathServices = "//div[@class='pricelist-group btop pd-m']";
 					City = "Сочи";
 					break;
-				case SiteName.sochi_23doc_ru:
+				case SiteName.sochi_23doc_ru_main_price:
 					UrlRoot = "http://23doc.ru";
 					UrlServicesPage = UrlRoot + "/prays-list";
+					CompanyName = "Детский диагностический центр \"Семья\"";
+					XPathServices = "//ul[@class='accordion_square accordion-rounded2']//li";
+					City = "Сочи";
+					break;
+				case SiteName.sochi_23doc_ru_doctors:
+					UrlRoot = "http://23doc.ru";
+					UrlServicesPage = UrlRoot + "/spetsialisty";
+					CompanyName = "Детский диагностический центр \"Семья\"";
+					XPathServices = "//li[@class='g-submenu__item']//a[@href]";
+					City = "Сочи";
+					break;
+				case SiteName.sochi_23doc_ru_lab:
+					UrlRoot = "http://23doc.ru";
+					UrlServicesPage = UrlRoot + "/priyem-analizov";
 					CompanyName = "Детский диагностический центр \"Семья\"";
 					XPathServices = "//ul[@class='accordion_square accordion-rounded2']//li";
 					City = "Сочи";
