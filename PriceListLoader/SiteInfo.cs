@@ -763,7 +763,8 @@ namespace PriceListLoader {
 			{ " i", "" },
 			{ " р", "" },
 			{ " &#1088;&#1091;&#1073;.", "" },
-			{ "Казань:", "" }
+			{ "Казань:", "" },
+			{ ",0", "" }
 		};
 
 		public string Name { get; set; }
@@ -775,6 +776,7 @@ namespace PriceListLoader {
 			}
 			set {
 				string newValue = value;
+
 				foreach (KeyValuePair<string, string> item in toReplace)
 					if (newValue.Contains(item.Key))
 						newValue = newValue.Replace(item.Key, item.Value);

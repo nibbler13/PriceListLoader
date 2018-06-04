@@ -1531,6 +1531,9 @@ namespace PriceListLoader {
 				return;
 			}
 
+			if (itemServiceGroup.Link.Equals("https://www.clinic23.ru/lechenie/item/pediatriya"))
+				Console.WriteLine();
+
 			foreach (HtmlNode nodeTbody in nodeCollectionTbodies) {
 				List<ItemService> serviceItems = ReadTrNodesFdoctorRu(nodeTbody);
 				itemServiceGroup.ServiceItems.AddRange(serviceItems);
@@ -2934,6 +2937,10 @@ namespace PriceListLoader {
 
 					if (string.IsNullOrEmpty(name) || string.IsNullOrEmpty(price))
 						continue;
+
+					if (siteInfo.Name == SiteInfo.SiteName.krd_clinic23_ru &&
+						price.EndsWith(",0"))
+						price = price.Replace(",0", "");
 					
 					ItemService itemService = new ItemService() {
 						Name = name,
