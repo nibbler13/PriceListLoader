@@ -626,7 +626,7 @@ namespace PriceListLoader {
 					UrlRoot = "https://www.clinic23.ru";
 					UrlServicesPage = UrlRoot + "";
 					CompanyName = "КЛИНИКА «ЕКАТЕРИНИНСКАЯ»";
-					XPathServices = "//table[@class='categoriya']//a[@href]";
+					XPathServices = "//nav[@class='tm-navbar uk-navbar']//a[@href]";
 					City = "Краснодар";
 					break;
 				case SiteName.krd_clinicist_ru:

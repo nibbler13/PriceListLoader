@@ -1304,6 +1304,10 @@ namespace PriceListLoader {
 
 					ItemServiceGroup itemServiceGroup = new ItemServiceGroup() { Name = serviceName, Link = urlService };
 
+					if (siteInfo.Name == SiteInfo.SiteName.krd_clinic23_ru)
+						if (itemServiceGroup.Link.Contains("50510"))
+							continue;
+
 					HtmlDocument docService = _htmlAgility.GetDocument(urlService, siteInfo.Name);
 					HtmlDocument docServicePrice = new HtmlDocument();
 
@@ -1520,23 +1524,35 @@ namespace PriceListLoader {
 		}
 
 		private void ParseSiteKrdClinic23Ru(HtmlDocument docService, ref ItemServiceGroup itemServiceGroup) {
-			if (itemServiceGroup.Link.Equals("https://www.clinic23.ru/lechenie/konservativnoe-konsultatsii/item/psihoterapiya")) {
-				Console.WriteLine();
-			}
+			if (siteInfo.ServiceGroupItems.Select(l => l.Link).ToList().Contains(itemServiceGroup.Link) ||
+				itemServiceGroup.Link.Equals("https://www.clinic23.ru/khirurgiya/item/ambulatornaya-hirurgiya"))
+				return;
+
+			string xPathLinks = "//div[@class='description-full']//table[@class='categoriya']//a[@href]";
+			HtmlNodeCollection nodeCollectionLinks = _htmlAgility.GetNodeCollection(docService, xPathLinks);
+			if (nodeCollectionLinks != null) {
+				siteInfo.XPathServices = xPathLinks;
+				ParseSiteWithLinksOnMainPage(docService);
+			} else
+				Console.WriteLine("nodeCollectionLinks == null");
 
 			string xPathTbodies = "//main[@class='tm-content']//table[@class='uk-table uk-table-striped' or @class=' uk-table uk-table-striped']//tbody";
 			HtmlNodeCollection nodeCollectionTbodies = _htmlAgility.GetNodeCollection(docService, xPathTbodies);
-			if (nodeCollectionTbodies == null) {
-				Console.WriteLine("nodeCollectionTbodies == null");
-				return;
-			}
-
-			if (itemServiceGroup.Link.Equals("https://www.clinic23.ru/lechenie/item/pediatriya"))
-				Console.WriteLine();
-
-			foreach (HtmlNode nodeTbody in nodeCollectionTbodies) {
-				List<ItemService> serviceItems = ReadTrNodesFdoctorRu(nodeTbody);
-				itemServiceGroup.ServiceItems.AddRange(serviceItems);
+			if (nodeCollectionTbodies != null) {
+				foreach (HtmlNode nodeTbody in nodeCollectionTbodies) {
+					List<ItemService> serviceItems = ReadTrNodesFdoctorRu(nodeTbody);
+					itemServiceGroup.ServiceItems.AddRange(serviceItems);
+				}
+			} else {
+				string xPathHiddenTables = "//div[@class='content wk-content clearfix']//tbody";
+				HtmlNodeCollection nodeCollectionHiddenTables = _htmlAgility.GetNodeCollection(docService, xPathHiddenTables);
+				if (nodeCollectionHiddenTables != null) {
+					foreach (HtmlNode nodeTbody in nodeCollectionHiddenTables) {
+						List<ItemService> serviceItems = ReadTrNodesFdoctorRu(nodeTbody);
+						itemServiceGroup.ServiceItems.AddRange(serviceItems);
+					}
+				} else
+					Console.WriteLine("nodeCollectionHiddenTables == null");
 			}
 		}
 
