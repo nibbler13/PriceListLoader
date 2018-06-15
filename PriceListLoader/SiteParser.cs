@@ -840,30 +840,41 @@ namespace PriceListLoader {
 				return;
 			}
 
-			foreach (HtmlNode node in nodeCollectionServices) {
-				HtmlNode htmlNodeGroup = node.SelectSingleNode("p");
-				if (htmlNodeGroup == null) {
-					Console.WriteLine("htmlNodeGroup == null");
+			ItemServiceGroup itemServiceGroup = null;
+			foreach (HtmlNode nodeTr in nodeCollectionServices) {
+				HtmlNodeCollection nodeCollectionTd = nodeTr.SelectNodes(nodeTr.XPath + "//td");
+				if (nodeCollectionTd == null) {
+					Console.WriteLine("nodeCollectionTd == null");
 					continue;
 				}
 
-				string groupName = htmlNodeGroup.InnerText;
-				ItemServiceGroup itemServiceGroup = new ItemServiceGroup() {
-					Name = SiteInfo.ClearString(groupName),
-					Link = siteInfo.UrlServicesPage
+				string serviceCode = SiteInfo.ClearString(nodeCollectionTd[0].InnerText);
+				string serviceName = SiteInfo.ClearString(nodeCollectionTd[1].InnerText);
+				string servicePrice = SiteInfo.ClearString(nodeCollectionTd[2].InnerText);
+
+				if (string.IsNullOrWhiteSpace(serviceCode) || string.IsNullOrEmpty(serviceCode)) {
+					if (itemServiceGroup != null)
+						siteInfo.ServiceGroupItems.Add(itemServiceGroup);
+
+					itemServiceGroup = new ItemServiceGroup() {
+						Name = serviceName,
+						Link = siteInfo.UrlServicesPage
+					};
+					continue;
+				}
+
+				if (itemServiceGroup == null)
+					continue;
+
+				ItemService itemService = new ItemService() {
+					Name = serviceName,
+					Price = servicePrice
 				};
-
-				HtmlNode htmlNodeTable = node.SelectSingleNode("div[1]/table");
-				if (htmlNodeTable == null) {
-					Console.WriteLine("htmlNodeTable == null");
-					continue;
-				}
-
-				List<ItemService> serviceItems = ReadTrNodesFdoctorRu(htmlNodeTable.SelectSingleNode("tbody"), 1, 1);
-				itemServiceGroup.ServiceItems = serviceItems;
-
-				siteInfo.ServiceGroupItems.Add(itemServiceGroup);
+				itemServiceGroup.ServiceItems.Add(itemService);
 			}
+
+			if (itemServiceGroup != null)
+				siteInfo.ServiceGroupItems.Add(itemServiceGroup);
 		}
 
 		private void ParseSiteNovostomRu(HtmlDocument docServices) {

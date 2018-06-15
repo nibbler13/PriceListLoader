@@ -106,7 +106,9 @@ namespace PriceListLoader {
 			sochi_23doc_ru_main_price,
 			sochi_23doc_ru_doctors,
 			sochi_23doc_ru_lab,
-			sochi_medcentr_sochi_ru
+			sochi_medcentr_sochi_ru,
+			sochi_kb4sochi_ru,
+			sochi_medprofisochi_com
 		}
 
 		public int GetFilId() {
@@ -350,9 +352,9 @@ namespace PriceListLoader {
 					break;
 				case SiteName.msk_masterdent_ru:
 					UrlRoot = "http://masterdent.ru";
-					UrlServicesPage = UrlRoot + "/prais.html";
+					UrlServicesPage = UrlRoot + "/content/%D0%BF%D1%80%D0%B0%D0%B9%D1%81";
 					CompanyName = "Мастердент";
-					XPathServices = "//div[@class='podrazdel']";
+					XPathServices = "//div[@class='field-item even']//tbody//tr";
 					City = "Москва";
 					SummaryColumnName = "Мастердент";
 					break;
@@ -704,6 +706,18 @@ namespace PriceListLoader {
 					UrlServicesPage = UrlRoot + "/uslugi-i-ceny-medicinskogo-centra-proksima.html";
 					CompanyName = "Медицинский клинический центр «Проксима»";
 					XPathServices = "//div[@id='page']";
+					City = "Сочи";
+					break;
+				case SiteName.sochi_kb4sochi_ru:
+					UrlRoot = "http://kb4sochi.ru";
+					UrlServicesPage = UrlRoot + "/pages/108";
+					CompanyName = "ГБУЗ Краевая больница №4 Сочи";
+					City = "Сочи";
+					break;
+				case SiteName.sochi_medprofisochi_com:
+					UrlRoot = "http://www.medprofisochi.com";
+					UrlServicesPage = UrlRoot + "/vii----";
+					CompanyName = "КЛИНИКА МЕДПРОФИ";
 					City = "Сочи";
 					break;
 				default:

@@ -185,10 +185,20 @@ namespace PriceListLoader {
 				if (row == null)  //null is when the row only contains empty cells 
 					continue;
 
-				string groupName = GetCellValue(row.GetCell(0));
-				string groupLink = GetCellValue(row.GetCell(1));
-				string serviceName = GetCellValue(row.GetCell(2));
-				string servicePrice = GetCellValue(row.GetCell(3));
+				string groupName = string.Empty;
+				string groupLink = string.Empty;
+				string serviceName = string.Empty;
+				string servicePrice = string.Empty;
+
+				try {
+					groupName = GetCellValue(row.GetCell(0));
+					groupLink = GetCellValue(row.GetCell(1));
+					serviceName = GetCellValue(row.GetCell(2));
+					servicePrice = GetCellValue(row.GetCell(3));
+				} catch (Exception e) {
+					Console.WriteLine("row: " + rowCount + ", " + e.Message + Environment.NewLine + e.StackTrace);
+					continue;
+				}
 
 				int groupCounter = -1;
 				for (int i = 0; i < siteInfo.ServiceGroupItems.Count; i++) {
