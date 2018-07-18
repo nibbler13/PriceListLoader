@@ -150,6 +150,18 @@ namespace PriceListLoader {
 				case "Уфа":
 					selectedRegionTemplate = "TemplateSummaryUfa.xlsx";
 					break;
+				case "Каменск-Уральский":
+					selectedRegionTemplate = "TemplateSummaryKamenskUralsky.xlsx";
+					break;
+				case "Казань":
+					selectedRegionTemplate = "TemplateSummaryKazan.xlsx";
+					break;
+				case "Краснодар":
+					selectedRegionTemplate = "TemplateSummaryKrasnodar.xlsx";
+					break;
+				case "Сочи":
+					selectedRegionTemplate = "TemplateSummarySochi.xlsx";
+					break;
 				default:
 					break;
 			}

@@ -114,7 +114,7 @@ namespace PriceListLoader {
 		public int GetFilId() {
 			switch (City) {
 				case "Москва":
-					return 5;
+					return 12;
 				case "Санкт-Петербург":
 					return 3;
 				case "Уфа":
@@ -546,6 +546,7 @@ namespace PriceListLoader {
 					CompanyName = "ООО МФЦ РУБИН";
 					XPathServices = "//div[@class='item column-1']//tr";
 					City = "Каменск-Уральский";
+					SummaryColumnName = "МФЦ Рубин";
 					break;
 				case SiteName.yekuk_ruslabs_ru:
 					UrlRoot = "http://www.ruslabs.ru";
@@ -553,6 +554,7 @@ namespace PriceListLoader {
 					CompanyName = "Лаборатория «Руслаб»";
 					XPathServices = "//div[@class='price-sidebar']//a[@href]";
 					City = "Каменск-Уральский";
+					SummaryColumnName = "Клинико-диагностический центр Руслаб";
 					break;
 				case SiteName.yekuk_mc_vd_ru:
 					UrlRoot = "http://mc-vd.ru";
@@ -560,6 +562,7 @@ namespace PriceListLoader {
 					CompanyName = "ООО \"Медсервис Каменск\"";
 					XPathServices = "//div[@id='nextend-accordion-menu-nextendaccordionmenuwidget-2']//a[@href]";
 					City = "Каменск-Уральский";
+					SummaryColumnName = "ООО Медсервис Каменск (Ваш Доктор)";
 					break;
 				case SiteName.yekuk_immunoresurs_ru:
 					UrlRoot = "http://immunoresurs.ru";
@@ -567,6 +570,7 @@ namespace PriceListLoader {
 					CompanyName = "ООО Медицинский центр \"Иммуноресурс\"";
 					XPathServices = "//div[@id='global3']//a[@href]";
 					City = "Каменск-Уральский";
+					SummaryColumnName = "ООО Медицинский центр Иммуноресурс";
 					break;
 				case SiteName.yekuk_medkamensk_ru:
 					UrlRoot = "http://medkamensk.ru";
@@ -574,13 +578,15 @@ namespace PriceListLoader {
 					CompanyName = "ГБУЗ Свердловской обл. «Городская больница г.Каменск - Уральский»";
 					XPathServices = "//table[@class='waffle']//tr";
 					City = "Каменск-Уральский";
+					SummaryColumnName = "ГБУЗ СО Городская больница г.Каменск - Уральский";
 					break;
 				case SiteName.kazan_ava_kazan_ru:
 					UrlRoot = "https://ava-kazan.ru";
-					UrlServicesPage = UrlRoot + "/price/";
+					UrlServicesPage = UrlRoot + "";
 					CompanyName = "АО \"АВА - Казань\"";
-					XPathServices = "//a[@class='off_menu__link']";
+					XPathServices = "//nav[@class='top__menu']//a[@href]";
 					City = "Казань";
+					SummaryColumnName = "АВА-Казань";
 					break;
 				case SiteName.kazan_mc_aybolit_ru:
 					UrlRoot = "http://mc-aybolit.ru";
@@ -588,12 +594,14 @@ namespace PriceListLoader {
 					CompanyName = "ООО \"МЦ Айболит\"";
 					XPathServices = "//div[@id='accordion']//a[@href]";
 					City = "Казань";
+					SummaryColumnName = "Айболит";
 					break;
 				case SiteName.kazan_biomed_mc_ru:
 					UrlRoot = "https://biomed-mc.ru";
 					UrlServicesPage = UrlRoot + "/static5/uslugi";
 					CompanyName = "ООО лечебно-диагностический центр \"БИОМЕД\"";
 					XPathServices = "//div[starts-with(@class,'megamenu')]//a[@href]";
+					SummaryColumnName = "Био Мед (основной конкурент)";
 					City = "Казань";
 					break;
 				case SiteName.kazan_zdorovie7i_ru:
@@ -601,6 +609,7 @@ namespace PriceListLoader {
 					UrlServicesPage = UrlRoot + "/uslugi-i-tseny";
 					CompanyName = "Сеть лечебно-диагностических центров «Здоровье семьи»";
 					XPathServices = "//div[@class='mainpage']//a[@href]";
+					SummaryColumnName = "Здоровье Семьи";
 					City = "Казань";
 					break;
 				case SiteName.kazan_starclinic_ru:
@@ -609,6 +618,7 @@ namespace PriceListLoader {
 					CompanyName = "Медцентр «ЗВЕЗДА»";
 					XPathServices = "//div[@class='news-list']//a[@href]";
 					City = "Казань";
+					SummaryColumnName = "Звезда";
 					break;
 				case SiteName.kazan_love_dr_ru:
 					UrlRoot = "http://www.love-dr.ru";
@@ -616,6 +626,7 @@ namespace PriceListLoader {
 					CompanyName = "ООО \"Любимый доктор\"";
 					XPathServices = "//td[@class='main-column']//ul[not(@*)]//a[@href]";
 					City = "Казань";
+					SummaryColumnName = "Любимый доктор";
 					break;
 				case SiteName.kazan_medexpert_kazan_ru:
 					UrlRoot = "http://medexpert-kazan.ru";
@@ -623,6 +634,7 @@ namespace PriceListLoader {
 					CompanyName = "Сеть медицинских клиник «Медэксперт»";
 					XPathServices = "//ul[starts-with(@class,'service__list row')]//a[@href]";
 					City = "Казань";
+					SummaryColumnName = "Медэксперт";
 					break;
 				case SiteName.krd_clinic23_ru:
 					UrlRoot = "https://www.clinic23.ru";
@@ -630,6 +642,7 @@ namespace PriceListLoader {
 					CompanyName = "КЛИНИКА «ЕКАТЕРИНИНСКАЯ»";
 					XPathServices = "//nav[@class='tm-navbar uk-navbar']//a[@href]";
 					City = "Краснодар";
+					SummaryColumnName = "Екатерининская";
 					break;
 				case SiteName.krd_clinicist_ru:
 					UrlRoot = "https://www.clinicist.ru";
@@ -637,6 +650,7 @@ namespace PriceListLoader {
 					CompanyName = "Сеть медицинских центров «Клиницист»";
 					XPathServices = "//table[@class='visual-table']//tbody//tr";
 					City = "Краснодар";
+					SummaryColumnName = "Клиницист.ру";
 					break;
 				case SiteName.krd_poly_clinic_ru:
 					UrlRoot = "https://poly-clinic.ru";
@@ -644,6 +658,7 @@ namespace PriceListLoader {
 					CompanyName = "Клиника семейного здоровья Сити-Клиник";
 					XPathServices = "//div[@class='news-list']//a[@href]";
 					City = "Краснодар";
+					SummaryColumnName = "Сити клиник (основной конкурент)";
 					break;
 				case SiteName.krd_clinica_nazdorovie_ru:
 					UrlRoot = "http://clinica-nazdorovie.ru";
@@ -651,6 +666,7 @@ namespace PriceListLoader {
 					CompanyName = "ООО \"МФО \"Клиника На здоровье\"";
 					XPathServices = "//div[@class=' top-menu-main']/ul[1]/li[4]//a[@href]";
 					City = "Краснодар";
+					SummaryColumnName = "Клиника \"На здоровье\" Основное";
 					break;
 				case SiteName.krd_clinica_nazdorovie_ru_lab:
 					UrlRoot = "http://clinica-nazdorovie.ru";
@@ -658,6 +674,7 @@ namespace PriceListLoader {
 					CompanyName = "ООО \"МФО \"Клиника На здоровье\"";
 					XPathServices = "//div[@class='side-menu']//a[@href]";
 					City = "Краснодар";
+					SummaryColumnName = "Клиника \"На здоровье\" Лаборатория";
 					break;
 				case SiteName.krd_kuban_kbl_ru:
 					UrlRoot = "https://www.kuban-kbl.ru";
@@ -665,6 +682,7 @@ namespace PriceListLoader {
 					CompanyName = "ОАО «ЦВМР «Краснодарская бальнеолечебница»";
 					XPathServices = "//div[@class='panel panel-default']";
 					City = "Краснодар";
+					SummaryColumnName = "Краснодарская бальнеолечебница";
 					break;
 				case SiteName.sochi_armed_mc_ru:
 					UrlRoot = "http://armed-mc.ru";
@@ -672,6 +690,7 @@ namespace PriceListLoader {
 					CompanyName = "ООО \"АРМЕД\"";
 					XPathServices = "//div[@class='mk-accordion-single']";
 					City = "Сочи";
+					SummaryColumnName = "Армед";
 					break;
 				case SiteName.sochi_uzlovaya_poliklinika_ru:
 					UrlRoot = "http://uzlovaya-poliklinika.ru";
@@ -679,6 +698,7 @@ namespace PriceListLoader {
 					CompanyName = "Узловая поликлиника на станции Сочи";
 					XPathServices = "//div[@class='pricelist-group btop pd-m']";
 					City = "Сочи";
+					SummaryColumnName = "РЖД";
 					break;
 				case SiteName.sochi_23doc_ru_main_price:
 					UrlRoot = "http://23doc.ru";
@@ -686,6 +706,7 @@ namespace PriceListLoader {
 					CompanyName = "Детский диагностический центр \"Семья\"";
 					XPathServices = "//ul[@class='accordion_square accordion-rounded2']//li";
 					City = "Сочи";
+					SummaryColumnName = "Семья, Основное";
 					break;
 				case SiteName.sochi_23doc_ru_doctors:
 					UrlRoot = "http://23doc.ru";
@@ -693,6 +714,7 @@ namespace PriceListLoader {
 					CompanyName = "Детский диагностический центр \"Семья\"";
 					XPathServices = "//li[@class='g-submenu__item']//a[@href]";
 					City = "Сочи";
+					SummaryColumnName = "Семья, Специалисты";
 					break;
 				case SiteName.sochi_23doc_ru_lab:
 					UrlRoot = "http://23doc.ru";
@@ -700,6 +722,7 @@ namespace PriceListLoader {
 					CompanyName = "Детский диагностический центр \"Семья\"";
 					XPathServices = "//ul[@class='accordion_square accordion-rounded2']//li";
 					City = "Сочи";
+					SummaryColumnName = "Семья, Лаборатория";
 					break;
 				case SiteName.sochi_medcentr_sochi_ru:
 					UrlRoot = "https://medcentr-sochi.ru";
@@ -707,6 +730,7 @@ namespace PriceListLoader {
 					CompanyName = "Медицинский клинический центр «Проксима»";
 					XPathServices = "//div[@id='page']";
 					City = "Сочи";
+					SummaryColumnName = "Проксима";
 					break;
 				case SiteName.sochi_kb4sochi_ru:
 					UrlRoot = "http://kb4sochi.ru";
@@ -719,6 +743,7 @@ namespace PriceListLoader {
 					UrlServicesPage = UrlRoot + "/vii----";
 					CompanyName = "КЛИНИКА МЕДПРОФИ";
 					City = "Сочи";
+					SummaryColumnName = "Медпрофи";
 					break;
 				default:
 					return;

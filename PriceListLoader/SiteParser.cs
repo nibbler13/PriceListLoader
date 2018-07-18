@@ -848,6 +848,11 @@ namespace PriceListLoader {
 					continue;
 				}
 
+				if (nodeCollectionTd.Count < 3) {
+					Console.WriteLine("nodeCollectionTd.Count < 3");
+					continue;
+				}
+
 				string serviceCode = SiteInfo.ClearString(nodeCollectionTd[0].InnerText);
 				string serviceName = SiteInfo.ClearString(nodeCollectionTd[1].InnerText);
 				string servicePrice = SiteInfo.ClearString(nodeCollectionTd[2].InnerText);
@@ -1226,7 +1231,7 @@ namespace PriceListLoader {
 
 
 
-		private void ParseSiteWithLinksOnMainPage(HtmlDocument docServices) {
+		private void ParseSiteWithLinksOnMainPage(HtmlDocument docServices, bool isAvaKazanFirstCycle = true) {
 			HtmlNodeCollection nodeCollectionServices = _htmlAgility.GetNodeCollection(docServices, siteInfo.XPathServices);
 			if (nodeCollectionServices == null) {
 				Console.WriteLine("nodeCollectionServices is null");
@@ -1416,7 +1421,7 @@ namespace PriceListLoader {
 							ParseSiteYekukImmunoresursRu(docService, ref itemServiceGroup);
 							break;
 						case SiteInfo.SiteName.kazan_ava_kazan_ru:
-							ParseSiteKazanAvaKazanRu(docService, ref itemServiceGroup);
+							ParseSiteKazanAvaKazanRu(docService, ref itemServiceGroup, isAvaKazanFirstCycle);
 							break;
 						case SiteInfo.SiteName.kazan_mc_aybolit_ru:
 							ParseSiteKazanMcAybolitRy(docService, ref itemServiceGroup);
@@ -1909,7 +1914,17 @@ namespace PriceListLoader {
 			}
 		}
 
-		private void ParseSiteKazanAvaKazanRu(HtmlDocument docService, ref ItemServiceGroup itemServiceGroup) {
+		private void ParseSiteKazanAvaKazanRu(HtmlDocument docService, ref ItemServiceGroup itemServiceGroup, bool goDeeper = true) {
+			string xPathInnerLinks = "//ul[@class='ul-marker']//a[@href]";
+			HtmlNodeCollection nodeCollectionsInnerLinks = _htmlAgility.GetNodeCollection(docService, xPathInnerLinks);
+
+			if (nodeCollectionsInnerLinks != null && goDeeper)
+				foreach (HtmlNode nodeInnerLink in nodeCollectionsInnerLinks) {
+					siteInfo.XPathServices = xPathInnerLinks;
+					siteInfo.UrlServicesPage = siteInfo.UrlRoot + nodeInnerLink.Attributes["href"].Value;
+					ParseSiteWithLinksOnMainPage(docService, false);
+				}
+
 			string xPathServices = "//div[starts-with(@class,'price')]";
 			HtmlNodeCollection nodeCollectionServices = _htmlAgility.GetNodeCollection(docService, xPathServices);
 			Console.WriteLine(itemServiceGroup.Name);
