@@ -178,11 +178,26 @@ namespace PriceListLoader {
 								return priceValue + "*28";
 							break;
 						case SiteName.msk_sm_stomatology_ru:
-							if (serviceName.Equals(
-								GetClearedString("удаление зубного налета аэр флоу (1 челюсть)")))
+							if (serviceName.Equals(GetClearedString(
+								"удаление зубного налета аэр флоу (1 челюсть)")))
 								return priceValue + "*2";
 							if (serviceName.Equals(GetClearedString(
 								"снятие твердых зубных отложений ультразвуком (1 зуб)")))
+								return priceValue + "*28";
+							break;
+						case SiteName.msk_dentol_ru:
+							if (serviceName.Equals(GetClearedString(
+								"Метод \"AIR - FLOW\" (одна челюсть)")))
+								return priceValue + "*2";
+							break;
+						case SiteName.msk_novostom_ru:
+							if (serviceName.Equals(GetClearedString(
+								"Снятие пигментированного налета в области 1 зуба (Air-Flow)")))
+								return priceValue + "*28";
+							break;
+						case SiteName.msk_masterdent_ru:
+							if (serviceName.Equals(GetClearedString(
+								"Airflow (1 зуб)")))
 								return priceValue + "*28";
 							break;
 						default:
