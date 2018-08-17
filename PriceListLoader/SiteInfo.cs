@@ -477,9 +477,9 @@ namespace PriceListLoader {
 					break;
 				case SiteName.spb_clinic_complex_ru:
 					UrlRoot = "http://clinic-complex.ru";
-					UrlServicesPage = UrlRoot + "/tseny-i-atsii/tseny/";
+					UrlServicesPage = UrlRoot + "/price/";
 					CompanyName = "Современные медицинские технологии";
-					XPathServices = "//div[@class='mainblock-price-spollers-item']";
+					XPathServices = "//div[@class='col-md-12 col-sm-12']";
 					City = "Санкт-Петербург";
 					SummaryColumnName = "СМТ";
 					break;
@@ -559,7 +559,7 @@ namespace PriceListLoader {
 					UrlRoot = "http://www.mfcrubin.ru";
 					UrlServicesPage = UrlRoot + "/stoimostuslug";
 					CompanyName = "ООО МФЦ РУБИН";
-					XPathServices = "//div[@class='item column-1']//tr";
+					XPathServices = "//div[@class='price-row']";
 					City = "Каменск-Уральский";
 					SummaryColumnName = "МФЦ Рубин";
 					break;
