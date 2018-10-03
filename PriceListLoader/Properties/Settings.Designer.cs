@@ -12,7 +12,7 @@ namespace PriceListLoader.Properties {
     
     
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
-    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.VisualStudio.Editors.SettingsDesigner.SettingsSingleFileGenerator", "15.7.0.0")]
+    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.VisualStudio.Editors.SettingsDesigner.SettingsSingleFileGenerator", "15.8.0.0")]
     internal sealed partial class Settings : global::System.Configuration.ApplicationSettingsBase {
         
         private static Settings defaultInstance = ((Settings)(global::System.Configuration.ApplicationSettingsBase.Synchronized(new Settings())));
@@ -79,7 +79,7 @@ namespace PriceListLoader.Properties {
                                 and p.fdate <= current_date
         join SCHPRICECONTRACTOR S   on w.schid = s.schid
                                     and s.prid = p.prid
-                                    and s.kateg = 13
+                                    and s.kateg = 14 --13-individual --14-legal-entity
     where
         w.schid = (
 select schid 
@@ -99,6 +99,78 @@ and w.structid = 3)
             }
             set {
                 this["MisDbSelectPriceByCode"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("donotreply")]
+        public string MailUser {
+            get {
+                return ((string)(this["MailUser"]));
+            }
+            set {
+                this["MailUser"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("klNhr1hi9qp55weewAXd")]
+        public string MailPassword {
+            get {
+                return ((string)(this["MailPassword"]));
+            }
+            set {
+                this["MailPassword"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("bzklinika.ru")]
+        public string MailDomain {
+            get {
+                return ((string)(this["MailDomain"]));
+            }
+            set {
+                this["MailDomain"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("mail.bzklinika.ru")]
+        public string MailSmtpServer {
+            get {
+                return ((string)(this["MailSmtpServer"]));
+            }
+            set {
+                this["MailSmtpServer"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("nn-admin@bzklinika.ru")]
+        public string MailCopy {
+            get {
+                return ((string)(this["MailCopy"]));
+            }
+            set {
+                this["MailCopy"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("s.a.starodymov@bzklinika.ru")]
+        public string MailTo {
+            get {
+                return ((string)(this["MailTo"]));
+            }
+            set {
+                this["MailTo"] = value;
             }
         }
     }

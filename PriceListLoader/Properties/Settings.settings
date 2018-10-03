@@ -21,7 +21,7 @@
                                 and p.fdate &lt;= current_date
         join SCHPRICECONTRACTOR S   on w.schid = s.schid
                                     and s.prid = p.prid
-                                    and s.kateg = 13
+                                    and s.kateg = 14 --13-individual --14-legal-entity
     where
         w.schid = (
 select schid 
@@ -35,6 +35,24 @@ and w.structid = 3)
         and s.schid is not null
         and s.pricetype = 0
     order by w.schid, p.fdate desc</Value>
+    </Setting>
+    <Setting Name="MailUser" Type="System.String" Scope="User">
+      <Value Profile="(Default)">donotreply</Value>
+    </Setting>
+    <Setting Name="MailPassword" Type="System.String" Scope="User">
+      <Value Profile="(Default)">klNhr1hi9qp55weewAXd</Value>
+    </Setting>
+    <Setting Name="MailDomain" Type="System.String" Scope="User">
+      <Value Profile="(Default)">bzklinika.ru</Value>
+    </Setting>
+    <Setting Name="MailSmtpServer" Type="System.String" Scope="User">
+      <Value Profile="(Default)">mail.bzklinika.ru</Value>
+    </Setting>
+    <Setting Name="MailCopy" Type="System.String" Scope="User">
+      <Value Profile="(Default)">nn-admin@bzklinika.ru</Value>
+    </Setting>
+    <Setting Name="MailTo" Type="System.String" Scope="User">
+      <Value Profile="(Default)">s.a.starodymov@bzklinika.ru</Value>
     </Setting>
   </Settings>
 </SettingsFile>

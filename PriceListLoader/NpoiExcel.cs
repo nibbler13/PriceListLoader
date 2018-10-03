@@ -254,7 +254,7 @@ namespace PriceListLoader {
 				return "Не удалось найти файл шаблона: " + templateFile;
 			}
 
-			string resultPath = Path.Combine(Environment.CurrentDirectory, "Results\\" + DateTime.Now.ToString("yyyyMMdd"));
+			string resultPath = Path.Combine(Environment.CurrentDirectory, "Results\\" + DateTime.Now.ToString("yyyyMMdd") + "\\" + siteInfo.City);
 			if (!Directory.Exists(resultPath))
 				Directory.CreateDirectory(resultPath);
 

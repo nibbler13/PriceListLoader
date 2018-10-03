@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Configuration;
 using System.Data;
 using System.Linq;
@@ -11,5 +12,54 @@ namespace PriceListLoader {
 	/// Логика взаимодействия для App.xaml
 	/// </summary>
 	public partial class App : Application {
+		private string autoModeResult = string.Empty;
+		private string delimiter = Environment.NewLine + new string('-', 20) +
+			Environment.NewLine;
+		public static string errorPrefix = "!!!!!-----Ошибка-----!!!!! ";
+
+		private void Application_Startup(object sender, StartupEventArgs e) {
+			if (e.Args.Length > 0 && e.Args[0].ToLower().Equals("auto")) {
+				LoadAllSites();
+				Shutdown();
+			}
+
+			MainWindow window = new MainWindow();
+			window.Show();
+		}
+
+		private void LoadAllSites() {
+			BackgroundWorker backgroundWorker = new BackgroundWorker();
+			backgroundWorker.WorkerReportsProgress = true;
+			backgroundWorker.ProgressChanged += BackgroundWorker_ProgressChanged; 
+			SiteParser siteParser = new SiteParser(backgroundWorker);
+
+			SiteInfo.SiteName[] siteNames = (SiteInfo.SiteName[])Enum.GetValues(typeof(SiteInfo.SiteName));
+
+			autoModeResult += "Автоматическая загрузка прайс-листов. Организаций в списке: " + siteNames.Length + delimiter;
+
+			foreach (SiteInfo.SiteName name in siteNames) {
+				SiteInfo siteInfo = new SiteInfo(name);
+				autoModeResult += siteInfo.City + " | " + siteInfo.CompanyName + " | " + 
+					siteInfo.UrlServicesPage + Environment.NewLine;
+				string resultFile = siteParser.ParseSelectedSite(siteInfo, true);
+				autoModeResult += "Получено групп услуг: " + siteInfo.ServiceGroupItems.Count + Environment.NewLine;
+
+				if (siteInfo.ServiceGroupItems.Count == 0 || string.IsNullOrEmpty(resultFile))
+					autoModeResult += errorPrefix + "Не удалось получить список услуг";
+				else
+					autoModeResult += "Файл с прайс-листом сохранен по адресу: " + resultFile;
+
+				autoModeResult += delimiter;
+			}
+
+			autoModeResult += "Завершение работы, подробности в локальном журнале работы";
+
+			SystemMail.SendMail("Загрузка прайс-листов", autoModeResult, PriceListLoader.Properties.Settings.Default.MailTo);
+		}
+
+		private void BackgroundWorker_ProgressChanged(object sender, ProgressChangedEventArgs e) {
+			if (e.UserState != null)
+				autoModeResult += e.UserState + Environment.NewLine;
+		}
 	}
 }

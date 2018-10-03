@@ -80,6 +80,8 @@
       <SubType>Designer</SubType>
     </ApplicationDefinition>
     <Compile Include="FirebirdClient.cs" />
+    <Compile Include="Logging.cs" />
+    <Compile Include="Mail.cs" />
     <Compile Include="NpoiExcel.cs" />
     <Compile Include="PriceSummary.cs" />
     <Compile Include="SiteInfo.cs" />

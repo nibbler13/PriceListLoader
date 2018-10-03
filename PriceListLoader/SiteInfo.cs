@@ -68,6 +68,10 @@ namespace PriceListLoader {
 			msk_medsiPIROGOVKA_ru,
 			msk_sm_stomatology_ru,
 			msk_smclinic_ru_lab,
+			msk_legal_entity_k31,
+			msk_legal_entity_litfond,
+			msk_legal_entity_ssmc,
+			msk_legal_entity_lechebniy_centr,
 			spb_mc21_ru,
 			//spb_evro_med_ru,
 			spb_baltzdrav_ru,
@@ -78,6 +82,9 @@ namespace PriceListLoader {
 			spb_invitro_ru,
 			spb_helix_ru,
 			spb_emcclinic_ru,
+			spb_legal_entity_allergomed,
+			spb_legal_entity_odont,
+			spb_legal_entity_pervaya_semeinaya_klinika,
 			ufa_megi_clinic,
 			ufa_promedicina_clinic,
 			ufa_mamadeti_ru,
@@ -88,6 +95,7 @@ namespace PriceListLoader {
 			yekuk_mc_vd_ru,
 			yekuk_immunoresurs_ru,
 			yekuk_medkamensk_ru,
+			yekuk_invitro_ru,
 			kazan_ava_kazan_ru,
 			kazan_mc_aybolit_ru,
 			kazan_biomed_mc_ru,
@@ -96,11 +104,15 @@ namespace PriceListLoader {
 			kazan_love_dr_ru,
 			kazan_medexpert_kazan_ru,
 			krd_clinic23_ru,
+			krd_clinic23_ru_lab,
 			krd_clinicist_ru,
 			krd_poly_clinic_ru,
 			krd_clinica_nazdorovie_ru,
 			krd_clinica_nazdorovie_ru_lab,
 			krd_kuban_kbl_ru,
+			krd_solnechnaya,
+			krd_v_nadezhnyh_rykah,
+			krd_evromed,
 			sochi_armed_mc_ru,
 			sochi_uzlovaya_poliklinika_ru,
 			sochi_23doc_ru_main_price,
@@ -108,7 +120,9 @@ namespace PriceListLoader {
 			sochi_23doc_ru_lab,
 			sochi_medcentr_sochi_ru,
 			sochi_kb4sochi_ru,
-			sochi_medprofisochi_com
+			sochi_medprofisochi_com,
+			sochi_clinic23_ru,
+			sochi_clinic23_ru_lab
 		}
 
 		public int GetFilId() {
@@ -400,25 +414,25 @@ namespace PriceListLoader {
 					UrlRoot = "https://medsi.ru";
 					UrlServicesPage = UrlRoot + "/services/";
 					CompanyName = "АО \"Группа компаний МЕДСИ\"";
-					XPathServices = "//div[@class='b-services__row']//a[@href]";
+					XPathServices = "";
 					City = "Москва";
-					SummaryColumnName = "Медси КДЦБ";
+					SummaryColumnName = "Медси Клинико-дагностический центр на Белорусской";
 					break;
 				case SiteName.msk_medsiKPP_ru:
 					UrlRoot = "https://medsi.ru";
 					UrlServicesPage = UrlRoot + "/services/";
 					CompanyName = "АО \"Группа компаний МЕДСИ\"";
-					XPathServices = "//div[@class='b-services__row']//a[@href]";
+					XPathServices = "";
 					City = "Москва";
-					SummaryColumnName = "Медси КЛП";
+					SummaryColumnName = "Медси Клиника первой помощи на Ленинградском проспекте";
 					break;
 				case SiteName.msk_medsiPIROGOVKA_ru:
 					UrlRoot = "https://medsi.ru";
 					UrlServicesPage = UrlRoot + "/services/";
 					CompanyName = "АО \"Группа компаний МЕДСИ\"";
-					XPathServices = "//div[@class='b-services__row']//a[@href]";
+					XPathServices = "";
 					City = "Москва";
-					SummaryColumnName = "Медси на Пироговке";
+					SummaryColumnName = "Медси Детская клиника на Пироговской";
 					break;
 				case SiteName.msk_sm_stomatology_ru:
 					UrlRoot = "http://www.sm-stomatology.ru";
@@ -435,6 +449,38 @@ namespace PriceListLoader {
 					XPathServices = "//div[@class='panel panel-default pull-left']";
 					City = "Москва";
 					SummaryColumnName = "СМ-Клиник анализы";
+					break;
+				case SiteName.msk_legal_entity_k31:
+					UrlRoot = "";
+					UrlServicesPage = UrlRoot + "";
+					CompanyName = "К31";
+					XPathServices = "";
+					City = "Москва";
+					SummaryColumnName = "К31";
+					break;
+				case SiteName.msk_legal_entity_litfond:
+					UrlRoot = "";
+					UrlServicesPage = UrlRoot + "";
+					CompanyName = "Литфонд";
+					XPathServices = "";
+					City = "Москва";
+					SummaryColumnName = "Литфонд";
+					break;
+				case SiteName.msk_legal_entity_ssmc:
+					UrlRoot = "";
+					UrlServicesPage = UrlRoot + "";
+					CompanyName = "ССМЦ";
+					XPathServices = "";
+					City = "Москва";
+					SummaryColumnName = "ССМЦ";
+					break;
+				case SiteName.msk_legal_entity_lechebniy_centr:
+					UrlRoot = "";
+					UrlServicesPage = UrlRoot + "";
+					CompanyName = "Лечебный центр";
+					XPathServices = "";
+					City = "Москва";
+					SummaryColumnName = "Лечебный центр";
 					break;
 				case SiteName.spb_mc21_ru:
 					UrlRoot = "https://www.mc21.ru";
@@ -514,6 +560,30 @@ namespace PriceListLoader {
 					XPathServices = "//div[@class='n-services__item']//a[@href]";
 					City = "Санкт-Петербург";
 					SummaryColumnName = "ЕМС";
+					break;
+				case SiteName.spb_legal_entity_allergomed:
+					UrlRoot = "";
+					UrlServicesPage = UrlRoot + "";
+					CompanyName = "Аллергомед";
+					XPathServices = "";
+					City = "Санкт-Петербург";
+					SummaryColumnName = "Аллергомед";
+					break;
+				case SiteName.spb_legal_entity_odont:
+					UrlRoot = "";
+					UrlServicesPage = UrlRoot + "";
+					CompanyName = "Одонт";
+					XPathServices = "";
+					City = "Санкт-Петербург";
+					SummaryColumnName = "Одонт на Казанской";
+					break;
+				case SiteName.spb_legal_entity_pervaya_semeinaya_klinika:
+					UrlRoot = "";
+					UrlServicesPage = UrlRoot + "";
+					CompanyName = "Первая семейная клиника";
+					XPathServices = "";
+					City = "Санкт-Петербург";
+					SummaryColumnName = "Первая семейная клиника";
 					break;
 				case SiteName.ufa_megi_clinic:
 					UrlRoot = "http://megi.clinic";
@@ -595,6 +665,14 @@ namespace PriceListLoader {
 					City = "Каменск-Уральский";
 					SummaryColumnName = "ГБУЗ СО Городская больница г.Каменск - Уральский";
 					break;
+				case SiteName.yekuk_invitro_ru:
+					UrlRoot = "https://www.invitro.ru";
+					UrlServicesPage = UrlRoot + "/analizes/for-doctors/kamensk-uralskiy/";
+					CompanyName = "ООО «ИНВИТРО»";
+					XPathServices = "//table[@class='table_price_c']//tbody";
+					City = "Каменск-Уральский";
+					SummaryColumnName = "Инвитро";
+					break;
 				case SiteName.kazan_ava_kazan_ru:
 					UrlRoot = "https://ava-kazan.ru";
 					UrlServicesPage = UrlRoot + "";
@@ -655,9 +733,17 @@ namespace PriceListLoader {
 					UrlRoot = "https://www.clinic23.ru";
 					UrlServicesPage = UrlRoot + "";
 					CompanyName = "КЛИНИКА «ЕКАТЕРИНИНСКАЯ»";
-					XPathServices = "//nav[@class='tm-navbar uk-navbar']//a[@href]";
+					XPathServices = "//li[starts-with(@class,'b-menu__item')]//li[starts-with(@class,'b-submenu__item3')]//a[@href]";
 					City = "Краснодар";
 					SummaryColumnName = "Екатерининская";
+					break;
+				case SiteName.krd_clinic23_ru_lab:
+					UrlRoot = "https://www.clinic23.ru";
+					UrlServicesPage = UrlRoot + "/diagnostika/analizy";
+					CompanyName = "КЛИНИКА «ЕКАТЕРИНИНСКАЯ»";
+					XPathServices = "//div[@class='iitem']//a[@href]";
+					City = "Краснодар";
+					SummaryColumnName = "Екатерининская Лаборатория";
 					break;
 				case SiteName.krd_clinicist_ru:
 					UrlRoot = "https://www.clinicist.ru";
@@ -698,6 +784,30 @@ namespace PriceListLoader {
 					XPathServices = "//div[@class='panel panel-default']";
 					City = "Краснодар";
 					SummaryColumnName = "Краснодарская бальнеолечебница";
+					break;
+				case SiteName.krd_solnechnaya:
+					UrlRoot = "";
+					UrlServicesPage = UrlRoot + "";
+					CompanyName = "Солнечная";
+					XPathServices = "";
+					City = "Краснодар";
+					SummaryColumnName = "Солнечная";
+					break;
+				case SiteName.krd_v_nadezhnyh_rykah:
+					UrlRoot = "";
+					UrlServicesPage = UrlRoot + "";
+					CompanyName = "В надежных руках";
+					XPathServices = "";
+					City = "Краснодар";
+					SummaryColumnName = "В надежных руках";
+					break;
+				case SiteName.krd_evromed:
+					UrlRoot = "";
+					UrlServicesPage = UrlRoot + "";
+					CompanyName = "Евромед";
+					XPathServices = "";
+					City = "Краснодар";
+					SummaryColumnName = "Евромед";
 					break;
 				case SiteName.sochi_armed_mc_ru:
 					UrlRoot = "http://armed-mc.ru";
@@ -759,6 +869,22 @@ namespace PriceListLoader {
 					CompanyName = "КЛИНИКА МЕДПРОФИ";
 					City = "Сочи";
 					SummaryColumnName = "Медпрофи";
+					break;
+				case SiteName.sochi_clinic23_ru:
+					UrlRoot = "https://sochi.clinic23.ru";
+					UrlServicesPage = UrlRoot + "";
+					CompanyName = "КЛИНИКА «ЕКАТЕРИНИНСКАЯ» Сочи";
+					XPathServices = "//li[starts-with(@class,'b-menu__item')]//li[starts-with(@class,'b-submenu__item3')]//a[@href]";
+					City = "Сочи";
+					SummaryColumnName = "Екатерининская Сочи";
+					break;
+				case SiteName.sochi_clinic23_ru_lab:
+					UrlRoot = "https://sochi.clinic23.ru";
+					UrlServicesPage = UrlRoot + "/diagnostika/analizy";
+					CompanyName = "КЛИНИКА «ЕКАТЕРИНИНСКАЯ» Сочи";
+					XPathServices = "//div[@class='iitem']//a[@href]";
+					City = "Сочи";
+					SummaryColumnName = "Екатерининская Сочи Лаборатория";
 					break;
 				default:
 					return;
