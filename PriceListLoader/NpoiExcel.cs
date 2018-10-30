@@ -244,7 +244,7 @@ namespace PriceListLoader {
 			double progressFrom, double progressTo) {
 			double progressCurrent = progressFrom;
 
-			string templateFile = Environment.CurrentDirectory + "\\Template.xlsx";
+			string templateFile = Path.Combine(Logging.ASSEMBLY_DIRECTORY, "Template.xlsx");
 			string resultFilePrefix = GetFileName(siteInfo.UrlServicesPage);
 
 			backgroundWorker.ReportProgress((int)progressCurrent, "Выгрузка данных в Excel");
@@ -254,9 +254,13 @@ namespace PriceListLoader {
 				return "Не удалось найти файл шаблона: " + templateFile;
 			}
 
-			string resultPath = Path.Combine(Environment.CurrentDirectory, "Results\\" + DateTime.Now.ToString("yyyyMMdd") + "\\" + siteInfo.City);
+			string resultPath = Path.Combine(Logging.ASSEMBLY_DIRECTORY, "Results\\" + DateTime.Now.ToString("yyyyMMdd") + "\\" + siteInfo.City);
 			if (!Directory.Exists(resultPath))
-				Directory.CreateDirectory(resultPath);
+				try {
+					Directory.CreateDirectory(resultPath);
+				} catch (Exception e) {
+					Logging.ToLog(e.Message + Environment.NewLine + e.StackTrace);
+				}
 
 			string resultFile = Path.Combine(resultPath, resultFilePrefix + "_" +
 				DateTime.Now.ToString("yyyyMMdd_HHmmss") + ".xlsx");

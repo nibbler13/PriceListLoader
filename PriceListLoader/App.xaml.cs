@@ -19,8 +19,11 @@ namespace PriceListLoader {
 
 		private void Application_Startup(object sender, StartupEventArgs e) {
 			if (e.Args.Length > 0 && e.Args[0].ToLower().Equals("auto")) {
+				Logging.ToLog("---Автоматическая выгрузка прайс-листов для всех сайтов");
+				//MessageBox.Show(Logging.ASSEMBLY_DIRECTORY);
 				LoadAllSites();
 				Shutdown();
+				Logging.ToLog("---Завершение работы");
 			}
 
 			MainWindow window = new MainWindow();
@@ -58,8 +61,11 @@ namespace PriceListLoader {
 		}
 
 		private void BackgroundWorker_ProgressChanged(object sender, ProgressChangedEventArgs e) {
-			if (e.UserState != null)
-				autoModeResult += e.UserState + Environment.NewLine;
+			if (e.UserState != null) {
+				string state = e.UserState.ToString();
+				Logging.ToLog(state);
+				autoModeResult += state + Environment.NewLine;
+			}
 		}
 	}
 }
