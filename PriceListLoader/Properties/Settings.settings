@@ -15,26 +15,24 @@
       <Value Profile="(Default)">masterkey</Value>
     </Setting>
     <Setting Name="MisDbSelectPriceByCode" Type="System.String" Scope="User">
-      <Value Profile="(Default)">select first 1 S.SPRICE
-    from WSCHEMA W
-        join PRICESCONTRACTOR P on p.filial = @filid
-                                and p.fdate &lt;= current_date
-        join SCHPRICECONTRACTOR S   on w.schid = s.schid
-                                    and s.prid = p.prid
-                                    and s.kateg = 14 --13-individual --14-legal-entity
+      <Value Profile="(Default)">select
+  sprice
+from
+  get_pricebyid (
+    current_date,
+    13 /*13 НАЛ, 14 БНАЛ*/,
+    @filid,
+    38,
+    0,
+    (select
+      schid
+    from
+      wschema
     where
-        w.schid = (
-select schid 
-from wschema 
-where kodoper=@kodoper
-and schname=@schname
-and w.structid = 3)
-        and w.structid = 3
-        and (W.DISDATE is null or W.DISDATE &gt; '01.01.2017')
-        and (W.INVISINPRICE is null or W.INVISINPRICE = 0)
-        and s.schid is not null
-        and s.pricetype = 0
-    order by w.schid, p.fdate desc</Value>
+      kodoper = @kodoper
+      and structid = 4
+    )
+  )</Value>
     </Setting>
     <Setting Name="MailUser" Type="System.String" Scope="User">
       <Value Profile="(Default)">donotreply</Value>

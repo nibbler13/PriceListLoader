@@ -214,6 +214,11 @@ namespace PriceListLoader {
 								"Airflow (1 зуб)")))
 								return priceValue + "*28";
 							break;
+						case SiteName.krd_poly_clinic_ru:
+							if (serviceName.Equals(GetClearedString(
+								"Снятие зубных отложений методом Air-Flow (1 зуб)")))
+								return priceValue + "*28";
+							break;
 						default:
 							break;
 					}
@@ -316,8 +321,8 @@ namespace PriceListLoader {
 					UrlRoot = "https://www.invitro.ru";
 					UrlServicesPage = UrlRoot + "/analizes/for-doctors/";
 					CompanyName = "ООО «ИНВИТРО»";
-					//XPathServices = "/html/body/div[4]/div[2]/div[4]/div/div[1]/table/tbody";.
-					XPathServices = "//table[@class='table_price_c']//tbody";
+					//XPathServices = "/html/body/div[4]/div[2]/div[4]/div/div[1]/table/tbody";
+					XPathServices = "//div[@class='node' and @data-prices]";
 					City = "Москва";
 					SummaryColumnName = "Инвитро";
 					break;
@@ -541,7 +546,7 @@ namespace PriceListLoader {
 					UrlRoot = "https://www.invitro.ru";
 					UrlServicesPage = UrlRoot + "/analizes/for-doctors/piter/";
 					CompanyName = "ООО «ИНВИТРО»";
-					XPathServices = "//table[@class='table_price_c']//tbody";
+					XPathServices = "//div[@class='node' and @data-prices]";
 					City = "Санкт-Петербург";
 					SummaryColumnName = "ИНВИТРО";
 					break;
@@ -635,9 +640,9 @@ namespace PriceListLoader {
 					break;
 				case SiteName.yekuk_ruslabs_ru:
 					UrlRoot = "http://www.ruslabs.ru";
-					UrlServicesPage = UrlRoot + "/uslugi/obsheklinicheskiye-issledovaniya/";
+					UrlServicesPage = UrlRoot + "/analizyi-i-czenyi/";
 					CompanyName = "Лаборатория «Руслаб»";
-					XPathServices = "//div[@class='price-sidebar']//a[@href]";
+					XPathServices = "//div[@class='prices-item']//a[@href]";
 					City = "Каменск-Уральский";
 					SummaryColumnName = "Клинико-диагностический центр Руслаб";
 					break;
@@ -669,7 +674,7 @@ namespace PriceListLoader {
 					UrlRoot = "https://www.invitro.ru";
 					UrlServicesPage = UrlRoot + "/analizes/for-doctors/kamensk-uralskiy/";
 					CompanyName = "ООО «ИНВИТРО»";
-					XPathServices = "//table[@class='table_price_c']//tbody";
+					XPathServices = "//div[@class='node' and @data-prices]";
 					City = "Каменск-Уральский";
 					SummaryColumnName = "Инвитро";
 					break;

@@ -133,14 +133,15 @@ namespace PriceListLoader {
 					continue;
 				
 				string kodoper = GetCellValue(row.GetCell(1));
-				string schname = GetCellValue(row.GetCell(2));
-				if (string.IsNullOrEmpty(kodoper) || string.IsNullOrEmpty(schname))
+				//string schname = GetCellValue(row.GetCell(2));
+				if (string.IsNullOrEmpty(kodoper))// || string.IsNullOrEmpty(schname))
 					continue;
 
 				DataTable dataTable = firebirdClient.GetDataTable(sqlQuery, new Dictionary<string, object>() {
 					{ "@filid", filid },
-					{ "@kodoper", kodoper },
-					{ "@schname", schname }
+					{ "@kodoper", kodoper }
+     //               ,
+					//{ "@schname", schname }
 				});
 
 				if (dataTable.Rows.Count == 0)

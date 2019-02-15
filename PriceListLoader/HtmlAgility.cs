@@ -17,10 +17,10 @@ namespace PriceListLoader {
 			
 			if (isLocalFile) {
 				Encoding encoding = Encoding.UTF8;
-				if (siteName == SiteInfo.SiteName.msk_invitro_ru ||
-					siteName == SiteInfo.SiteName.spb_invitro_ru ||
-					siteName == SiteInfo.SiteName.yekuk_invitro_ru)
-					encoding = Encoding.GetEncoding("windows-1251");
+				//if (siteName == SiteInfo.SiteName.msk_invitro_ru ||
+				//	siteName == SiteInfo.SiteName.spb_invitro_ru ||
+				//	siteName == SiteInfo.SiteName.yekuk_invitro_ru)
+				//	encoding = Encoding.GetEncoding("windows-1251");
 
 				html = File.ReadAllText(url, encoding);
 			} else {

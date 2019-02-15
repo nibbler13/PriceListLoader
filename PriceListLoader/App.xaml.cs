@@ -31,8 +31,10 @@ namespace PriceListLoader {
 		}
 
 		private void LoadAllSites() {
-			BackgroundWorker backgroundWorker = new BackgroundWorker();
-			backgroundWorker.WorkerReportsProgress = true;
+			BackgroundWorker backgroundWorker = new BackgroundWorker {
+				WorkerReportsProgress = true
+			};
+
 			backgroundWorker.ProgressChanged += BackgroundWorker_ProgressChanged; 
 			SiteParser siteParser = new SiteParser(backgroundWorker);
 

@@ -1,4 +1,5 @@
 ﻿using Microsoft.Win32;
+using Microsoft.WindowsAPICodePack.Dialogs;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -172,7 +173,7 @@ namespace PriceListLoader {
 			TextBoxPivotTableTemplate.Text = selectedRegionTemplate;
 		}
 
-		private void Button_Click(object sender, RoutedEventArgs e) {
+		private void ButtonSelectFile_Click(object sender, RoutedEventArgs e) {
 			ListViewItem listViewItem = GetAncestorOfType<ListViewItem>(sender as Button);
 
 			if (listViewItem == null)
@@ -183,6 +184,18 @@ namespace PriceListLoader {
 
 			if (SelectXlsxFile(out string selectedFile))
 				siteInfo.SelectedPriceListFile = selectedFile;
+		}
+
+		private void ButtonClearSelected_Click(object sender, RoutedEventArgs e) {
+			ListViewItem listViewItem = GetAncestorOfType<ListViewItem>(sender as Button);
+
+			if (listViewItem == null)
+				return;
+
+			if (!(listViewItem.Content is SiteInfo siteInfo))
+				return;
+			
+			siteInfo.SelectedPriceListFile = string.Empty;
 		}
 
 		public T GetAncestorOfType<T>(FrameworkElement child) where T : FrameworkElement {
@@ -198,12 +211,14 @@ namespace PriceListLoader {
 		}
 
 		private void ButtonSelectFolderWithPrices_Click(object sender, RoutedEventArgs e) {
-			using (var dialog = new System.Windows.Forms.FolderBrowserDialog()) {
-				if (dialog.ShowDialog() != System.Windows.Forms.DialogResult.OK)
-					return;
+			using (CommonOpenFileDialog openFileDialog = new CommonOpenFileDialog()) {
+				openFileDialog.IsFolderPicker = true;
 
-				string selectedFolder = dialog.SelectedPath;
-				TextBoxFolderWithPrices.Text = selectedFolder;
+				if (!string.IsNullOrEmpty(TextBoxFolderWithPrices.Text))
+					openFileDialog.InitialDirectory = TextBoxFolderWithPrices.Text;
+
+				if (openFileDialog.ShowDialog() == CommonFileDialogResult.Ok)
+					TextBoxFolderWithPrices.Text = openFileDialog.FileName;
 			}
 		}
 
