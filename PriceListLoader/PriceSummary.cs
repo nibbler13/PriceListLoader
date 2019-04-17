@@ -19,10 +19,13 @@ namespace PriceListLoader {
 					backgroundWorker.ReportProgress((int)progressCurrent, "Для сайта " + siteInfo.CompanyName + " не выбран файл с прайс-листом, пропуск");
 					continue;
 				}
-				
-				NpoiExcel.ReadPriceList(siteInfo);
-				backgroundWorker.ReportProgress((int)progressCurrent, siteInfo.CompanyName + ", считано групп услуг: " + siteInfo.ServiceGroupItems.Count +
+
+				backgroundWorker.ReportProgress((int)progressCurrent, siteInfo.CompanyName);
+
+				int serviceCountCurrent = NpoiExcel.ReadPriceList(siteInfo);
+				backgroundWorker.ReportProgress((int)progressCurrent,  "считано услуг: " + serviceCountCurrent +
 					" - " + siteInfo.SelectedPriceListFile);
+
 				if (siteInfo.ServiceGroupItems.Count == 0) 
 					backgroundWorker.ReportProgress((int)progressCurrent, "!!! Внимание! Не считано ни одной группы услуг");
 			}

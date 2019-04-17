@@ -163,10 +163,12 @@ namespace PriceListLoader {
 			return cell.CellType == CellType.String ? cell.StringCellValue : cell.NumericCellValue.ToString();
 		}
 
-		public static void ReadPriceList(SiteInfo siteInfo) {
+		public static int ReadPriceList(SiteInfo siteInfo) {
+			int serviceCount = 0;
+
 			if (string.IsNullOrEmpty(siteInfo.SelectedPriceListFile)) {
 				Console.WriteLine("siteInfo: " + siteInfo.Name + " - SelectedPriceListFile is empty");
-				return;
+				return serviceCount;
 			}
 
 			IWorkbook workbook;
@@ -176,7 +178,7 @@ namespace PriceListLoader {
 				}
 			} catch (Exception e) {
 				Console.WriteLine(e.Message + Environment.NewLine + e.StackTrace);
-				return;
+				return serviceCount;
 			}
 
 			ISheet sheet = workbook.GetSheet("Data");
@@ -215,6 +217,7 @@ namespace PriceListLoader {
 						Name = groupName,
 						Link = groupLink
 					};
+
 					siteInfo.ServiceGroupItems.Add(itemServiceGroup);
 					groupCounter = siteInfo.ServiceGroupItems.Count - 1;
 				}
@@ -225,11 +228,12 @@ namespace PriceListLoader {
 				};
 
 				siteInfo.ServiceGroupItems[groupCounter].ServiceItems.Add(itemService);
+				serviceCount++;
 			}
 
 			workbook.Close();
 
-			return;
+			return serviceCount;
 		}
 
 		public static string GetFileName(string siteName) {

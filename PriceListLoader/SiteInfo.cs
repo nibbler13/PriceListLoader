@@ -122,7 +122,8 @@ namespace PriceListLoader {
 			sochi_kb4sochi_ru,
 			sochi_medprofisochi_com,
 			sochi_clinic23_ru,
-			sochi_clinic23_ru_lab
+			sochi_clinic23_ru_lab,
+			kovrov_clinicalcenter_ru
 		}
 
 		public int GetFilId() {
@@ -858,7 +859,7 @@ namespace PriceListLoader {
 					UrlRoot = "https://medcentr-sochi.ru";
 					UrlServicesPage = UrlRoot + "/uslugi-i-ceny-medicinskogo-centra-proksima.html";
 					CompanyName = "Медицинский клинический центр «Проксима»";
-					XPathServices = "//div[@id='page']";
+					XPathServices = "//div[@class='pt-4']";
 					City = "Сочи";
 					SummaryColumnName = "Проксима";
 					break;
@@ -890,6 +891,13 @@ namespace PriceListLoader {
 					XPathServices = "//div[@class='iitem']//a[@href]";
 					City = "Сочи";
 					SummaryColumnName = "Екатерининская Сочи Лаборатория";
+					break;
+				case SiteName.kovrov_clinicalcenter_ru:
+					UrlRoot = "https://clinicalcenter.ru";
+					UrlServicesPage = UrlRoot + "/uslugi/";
+					CompanyName = "Первый клинический медицинский центр";
+					XPathServices = "//div[@class='directions-list']//a[@href]";
+					City = "Ковров";
 					break;
 				default:
 					return;

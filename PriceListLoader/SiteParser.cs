@@ -112,6 +112,7 @@ namespace PriceListLoader {
 				case SiteInfo.SiteName.sochi_23doc_ru_doctors:
 				case SiteInfo.SiteName.sochi_clinic23_ru:
 				case SiteInfo.SiteName.sochi_clinic23_ru_lab:
+				case SiteInfo.SiteName.kovrov_clinicalcenter_ru:
 					ParseSiteWithLinksOnMainPage(docServices);
 					break;
 				case SiteInfo.SiteName.msk_alfazdrav_ru:
@@ -1451,6 +1452,9 @@ namespace PriceListLoader {
 						case SiteInfo.SiteName.spb_clinic_complex_ru:
 							ParseSiteSpbClinicComplexRu(docService, ref itemServiceGroup);
 							break;
+						case SiteInfo.SiteName.kovrov_clinicalcenter_ru:
+							ParseSiteKovrovClinicalcenterRu(docService, ref itemServiceGroup);
+							break;
 						default:
 							break;
 					}
@@ -1472,6 +1476,20 @@ namespace PriceListLoader {
 		}
 
 
+
+		private void ParseSiteKovrovClinicalcenterRu(HtmlDocument docService, ref ItemServiceGroup itemServiceGroup) {
+			string xPathTbodies = "//div[@class='tprice']//tbody";
+			HtmlNodeCollection nodeCollectionTbodies = _htmlAgility.GetNodeCollection(docService, xPathTbodies);
+			if (nodeCollectionTbodies == null) {
+				Console.WriteLine("nodeCollectionTbodies == null");
+				return;
+			}
+
+			foreach (HtmlNode nodeTbody in nodeCollectionTbodies) {
+				List<ItemService> serviceItems = ReadTrNodes(nodeTbody, 1, 1);
+				itemServiceGroup.ServiceItems.AddRange(serviceItems);
+			}
+		}
 		
 		private void ParseSiteSpbClinicComplexRu(HtmlDocument docServices, ref ItemServiceGroup itemServiceGroup) {
 			string xPathService = "//div[@class='col-md-12 col-sm-12']";
@@ -2194,7 +2212,7 @@ namespace PriceListLoader {
 			}
 
 			foreach (HtmlNode nodeService in nodeCollectionServices) {
-				HtmlNode nodeServiceName = nodeService.SelectSingleNode(nodeService.XPath + "/div[@class='price_text']");
+				HtmlNode nodeServiceName = nodeService.SelectSingleNode(nodeService.XPath + "/div[starts-with(@class, 'price_text')]");
 				HtmlNode nodeServicePrice = nodeService.SelectSingleNode(nodeService.XPath + "//div[@class='price_value']");
 
 				if (nodeServiceName == null) {
@@ -2206,7 +2224,13 @@ namespace PriceListLoader {
 				string servicePrice = string.Empty;
 				if (nodeServicePrice != null) {
 					servicePrice = SiteInfo.ClearString(nodeServicePrice.InnerText);
-					serviceName = SiteInfo.ClearString(serviceName.Substring(0, serviceName.IndexOf(servicePrice) - 1));
+
+					if (serviceName.Contains(servicePrice) && serviceName.IndexOf(servicePrice) > 0)
+						try {
+							serviceName = SiteInfo.ClearString(serviceName.Substring(0, serviceName.IndexOf(servicePrice) - 1));
+						} catch (Exception e) {
+							Console.WriteLine(e.Message + Environment.NewLine + e.StackTrace);
+						}
 				}
 
 				ItemService itemService = new ItemService() {
