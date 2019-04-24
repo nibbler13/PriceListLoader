@@ -47,12 +47,13 @@ namespace PriceListLoader {
 							Stream receiveStream = response.GetResponseStream();
 							StreamReader readStream = null;
 
-							if (response.CharacterSet == null) {
+							if (response.CharacterSet == null || 
+								siteName == SiteInfo.SiteName.spb_starsclinic_ru || 
+								siteName == SiteInfo.SiteName.sochi_5vrachey_com)
 								readStream = new StreamReader(receiveStream);
-							} else {
+							else 
 								readStream = new StreamReader(receiveStream, Encoding.GetEncoding(response.CharacterSet));
-							}
-
+							
 							html = readStream.ReadToEnd();
 
 							response.Close();
