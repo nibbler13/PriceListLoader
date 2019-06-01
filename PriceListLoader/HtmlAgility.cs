@@ -11,11 +11,11 @@ using HtmlAgilityPack;
 
 namespace PriceListLoader {
 	class HtmlAgility {
-		public HtmlDocument GetDocument(string url, SiteInfo.SiteName siteName, bool isLocalFile = false) {
+		public HtmlDocument GetDocument(string url, SiteInfo siteInfo) {
 			HtmlDocument doc = new HtmlDocument();
 			string html = string.Empty;
 			
-			if (isLocalFile) {
+			if (siteInfo.IsLocalFile) {
 				Encoding encoding = Encoding.UTF8;
 				//if (siteName == SiteInfo.SiteName.msk_invitro_ru ||
 				//	siteName == SiteInfo.SiteName.spb_invitro_ru ||
@@ -30,7 +30,8 @@ namespace PriceListLoader {
 						request.UserAgent =
 							"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/66.0.3359.139 Safari/537.36";
 
-						if (siteName == SiteInfo.SiteName.spb_helix_ru) {
+						if (siteInfo.CityValue == Enums.Cities.SaintPetersburg &&
+                            (Enums.SaintPetersburgSites)siteInfo.SiteValue == Enums.SaintPetersburgSites.helix_ru) {
 							CookieContainer cookieContainer = new CookieContainer();
 							Uri uri = new Uri(url);
 							Cookie cookieRegion =
@@ -48,8 +49,10 @@ namespace PriceListLoader {
 							StreamReader readStream = null;
 
 							if (response.CharacterSet == null || 
-								siteName == SiteInfo.SiteName.spb_starsclinic_ru || 
-								siteName == SiteInfo.SiteName.sochi_5vrachey_com)
+								(siteInfo.CityValue == Enums.Cities.SaintPetersburg &&
+                                (Enums.SaintPetersburgSites)siteInfo.SiteValue == Enums.SaintPetersburgSites.starsclinic_ru) || 
+								(siteInfo.CityValue == Enums.Cities.Sochi &&
+                                (Enums.SochiSites)siteInfo.SiteValue == Enums.SochiSites._5vrachey_com))
 								readStream = new StreamReader(receiveStream);
 							else 
 								readStream = new StreamReader(receiveStream, Encoding.GetEncoding(response.CharacterSet));

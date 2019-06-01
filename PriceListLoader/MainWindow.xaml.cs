@@ -34,12 +34,13 @@ namespace PriceListLoader {
 			DataGridSites.DataContext = this;
 			ListViewPivotTable.DataContext = this;
 
-			foreach (SiteInfo.SiteName name in Enum.GetValues(typeof(SiteInfo.SiteName)))
-				SiteItems.Add(new SiteInfo(name));
+			foreach (KeyValuePair<Enums.Cities, Type> keyValuePair in SiteInfo.CitySitesMap)
+                foreach (int siteValue in Enum.GetValues(keyValuePair.Value))
+				SiteItems.Add(new SiteInfo(keyValuePair.Key, siteValue));
 
 			foreach (SiteInfo siteInfo in SiteItems)
-				if (!ListBoxRegions.Items.Contains(siteInfo.City))
-					ListBoxRegions.Items.Add(siteInfo.City);
+				if (!ListBoxRegions.Items.Contains(siteInfo.CityName))
+					ListBoxRegions.Items.Add(siteInfo.CityName);
 		}
 
 		private void ButtonExecute_Click(object sender, RoutedEventArgs e) {
@@ -132,7 +133,7 @@ namespace PriceListLoader {
 			PivotTableItems.Clear();
 
 			foreach (SiteInfo siteInfo in SiteItems)
-				if (siteInfo.City.Equals(ListBoxRegions.SelectedItem))
+				if (siteInfo.CityName.Equals(ListBoxRegions.SelectedItem))
 					PivotTableItems.Add(siteInfo);
 
 			string pivotTableTemplate = TextBoxPivotTableTemplate.Text;
@@ -277,7 +278,8 @@ namespace PriceListLoader {
 					if (!file.Contains(fileStartsWith))
 						continue;
 
-					if (siteInfo.Name == SiteInfo.SiteName.msk_familydoctor_ru)
+					if (siteInfo.CityValue == Enums.Cities.Moscow &&
+                        (Enums.MoscowSites)siteInfo.SiteValue == Enums.MoscowSites.familydoctor_ru)
 						if (file.Contains("child"))
 							continue;
 

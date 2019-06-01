@@ -38,23 +38,23 @@ namespace PriceListLoader {
 			backgroundWorker.ProgressChanged += BackgroundWorker_ProgressChanged; 
 			SiteParser siteParser = new SiteParser(backgroundWorker);
 
-			SiteInfo.SiteName[] siteNames = (SiteInfo.SiteName[])Enum.GetValues(typeof(SiteInfo.SiteName));
+			autoModeResult += "Автоматическая загрузка прайс-листов. Организаций в списке: " + SiteInfo.CitySitesMap.Values.Count + delimiter;
 
-			autoModeResult += "Автоматическая загрузка прайс-листов. Организаций в списке: " + siteNames.Length + delimiter;
+			foreach (KeyValuePair<Enums.Cities, Type> keyValuePair in SiteInfo.CitySitesMap) {
+                foreach (int siteValue in Enum.GetValues(keyValuePair.Value)) {
+                    SiteInfo siteInfo = new SiteInfo(keyValuePair.Key, siteValue);
+                    autoModeResult += siteInfo.CityName + " | " + siteInfo.CompanyName + " | " +
+                        siteInfo.UrlServicesPage + Environment.NewLine;
+                    string resultFile = siteParser.ParseSelectedSite(siteInfo, true);
+                    autoModeResult += "Получено групп услуг: " + siteInfo.ServiceGroupItems.Count + Environment.NewLine;
 
-			foreach (SiteInfo.SiteName name in siteNames) {
-				SiteInfo siteInfo = new SiteInfo(name);
-				autoModeResult += siteInfo.City + " | " + siteInfo.CompanyName + " | " + 
-					siteInfo.UrlServicesPage + Environment.NewLine;
-				string resultFile = siteParser.ParseSelectedSite(siteInfo, true);
-				autoModeResult += "Получено групп услуг: " + siteInfo.ServiceGroupItems.Count + Environment.NewLine;
+                    if (siteInfo.ServiceGroupItems.Count == 0 || string.IsNullOrEmpty(resultFile))
+                        autoModeResult += errorPrefix + "Не удалось получить список услуг";
+                    else
+                        autoModeResult += "Файл с прайс-листом сохранен по адресу: " + resultFile;
 
-				if (siteInfo.ServiceGroupItems.Count == 0 || string.IsNullOrEmpty(resultFile))
-					autoModeResult += errorPrefix + "Не удалось получить список услуг";
-				else
-					autoModeResult += "Файл с прайс-листом сохранен по адресу: " + resultFile;
-
-				autoModeResult += delimiter;
+                    autoModeResult += delimiter;
+                }
 			}
 
 			autoModeResult += "Завершение работы, подробности в локальном журнале работы";

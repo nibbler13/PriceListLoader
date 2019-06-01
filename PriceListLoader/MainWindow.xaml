@@ -44,7 +44,7 @@
                                 </Style>
                             </DataGrid.CellStyle>
                             <DataGrid.Columns>
-                                <DataGridTextColumn Binding="{Binding City}" Header="Город">
+                                <DataGridTextColumn Binding="{Binding CityName}" Header="Город">
                                     <DataGridTextColumn.HeaderStyle>
                                         <Style TargetType="DataGridColumnHeader">
                                             <Setter Property="HorizontalContentAlignment" Value="Center"/>

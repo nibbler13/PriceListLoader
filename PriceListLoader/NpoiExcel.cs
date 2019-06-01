@@ -167,7 +167,7 @@ namespace PriceListLoader {
 			int serviceCount = 0;
 
 			if (string.IsNullOrEmpty(siteInfo.SelectedPriceListFile)) {
-				Console.WriteLine("siteInfo: " + siteInfo.Name + " - SelectedPriceListFile is empty");
+				Console.WriteLine("siteInfo: " + siteInfo.CityValue + " | " + siteInfo.SiteValue + " - SelectedPriceListFile is empty");
 				return serviceCount;
 			}
 
@@ -213,7 +213,7 @@ namespace PriceListLoader {
 				}
 
 				if (groupCounter == -1) {
-					ItemServiceGroup itemServiceGroup = new ItemServiceGroup() {
+					Items.ServiceGroup itemServiceGroup = new Items.ServiceGroup() {
 						Name = groupName,
 						Link = groupLink
 					};
@@ -222,7 +222,7 @@ namespace PriceListLoader {
 					groupCounter = siteInfo.ServiceGroupItems.Count - 1;
 				}
 
-				ItemService itemService = new ItemService() {
+				Items.Service itemService = new Items.Service() {
 					Name = serviceName,
 					Price = servicePrice
 				};
@@ -259,7 +259,7 @@ namespace PriceListLoader {
 				return "Не удалось найти файл шаблона: " + templateFile;
 			}
 
-			string resultPath = Path.Combine(Logging.ASSEMBLY_DIRECTORY, "Results\\" + DateTime.Now.ToString("yyyyMMdd") + "\\" + siteInfo.City);
+			string resultPath = Path.Combine(Logging.ASSEMBLY_DIRECTORY, "Results\\" + DateTime.Now.ToString("yyyyMMdd") + "\\" + siteInfo.CityName);
 			if (!Directory.Exists(resultPath))
 				try {
 					Directory.CreateDirectory(resultPath);
@@ -284,11 +284,11 @@ namespace PriceListLoader {
 
 			double progressStep = (progressTo / 2 - progressCurrent) / siteInfo.ServiceGroupItems.Count;
 			
-			foreach (ItemServiceGroup group in siteInfo.ServiceGroupItems) {
+			foreach (Items.ServiceGroup group in siteInfo.ServiceGroupItems) {
 				backgroundWorker.ReportProgress((int)progressCurrent);
 				progressCurrent += progressStep;
 
-				foreach (ItemService service in group.ServiceItems) {
+				foreach (Items.Service service in group.ServiceItems) {
 					IRow row = sheet.CreateRow(rowNumber);
 					string[] values = new string[] { group.Name, group.Link, service.Name, service.Price };
 
