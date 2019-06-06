@@ -133,7 +133,9 @@ namespace PriceListLoader {
         }
 
         public enum OtherSites {
-            kovrov_clinicalcenter_ru
+            kovrov_clinicalcenter_ru,
+            nedorezov_mc_ru,
+            nedorezov_prom_metall_kz
         }
     }
 }

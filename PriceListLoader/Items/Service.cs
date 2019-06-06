@@ -41,5 +41,13 @@ namespace PriceListLoader.Items {
                 price = newValue.Replace(",", "");
             }
         }
+
+        public string R1 { get; set; }
+        public string Type { get; set; }
+        public string Lenght { get; set; }
+        public string Metalbase { get; set; }
+        public string Price1t { get; set; }
+        public string Price5t { get; set; }
+        public string Price10t { get; set; }
     }
 }

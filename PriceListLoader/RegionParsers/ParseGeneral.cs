@@ -65,6 +65,16 @@ namespace PriceListLoader.RegionParsers {
                         serviceName.ToLower().Equals("записаться"))
                         continue;
 
+                    if (siteInfo.CityValue == Enums.Cities.Other &&
+                        (Enums.OtherSites)siteInfo.SiteValue == Enums.OtherSites.nedorezov_prom_metall_kz) {
+                        HtmlNode nodeServiceNameH2 = servicePage.SelectSingleNode(servicePage.XPath + "//h2");
+                        if (nodeServiceNameH2 != null)
+                            serviceName = ClearString(nodeServiceNameH2.InnerText);
+
+                        if (isFirstCycle && !serviceName.StartsWith("Черный прокат"))
+                            continue;
+                    }
+
                     backgroundWorker.ReportProgress((int)progressCurrent, serviceName);
                     Console.WriteLine("serviceName: " + serviceName);
 
@@ -111,6 +121,10 @@ namespace PriceListLoader.RegionParsers {
                         }
                     }
 
+                    if (siteInfo.CityValue == Enums.Cities.Other &&
+                        (Enums.OtherSites)siteInfo.SiteValue == Enums.OtherSites.nedorezov_mc_ru)
+                        urlService = urlService.TrimEnd('/') + "/PageAll/1";
+
                     if (string.IsNullOrEmpty(urlService)) {
                         Console.WriteLine("string.IsNullOrEmpty(urlService)");
                         continue;
@@ -118,10 +132,8 @@ namespace PriceListLoader.RegionParsers {
 
                     Items.ServiceGroup itemServiceGroup = new Items.ServiceGroup() { Name = serviceName, Link = urlService };
 
-                    if (siteInfo.CityValue == Enums.Cities.SaintPetersburg &&
-                        (Enums.SaintPetersburgSites)siteInfo.SiteValue == Enums.SaintPetersburgSites.clinic_complex_ru && 
-                        !string.IsNullOrEmpty(itemGroupNamePrefix))
-                        itemServiceGroup.Name = itemGroupNamePrefix + " - " + itemServiceGroup.Name;
+                    if (!string.IsNullOrEmpty(itemGroupNamePrefix))
+                        itemServiceGroup.Name = itemGroupNamePrefix + " @ " + itemServiceGroup.Name;
 
                     if (siteInfo.CityValue == Enums.Cities.Krasnodar &&
                         (Enums.KrasnodarSites)siteInfo.SiteValue == Enums.KrasnodarSites.clinic23_ru)
@@ -260,7 +272,7 @@ namespace PriceListLoader.RegionParsers {
                                     ParseSiteClinic23Ru(docService, ref itemServiceGroup);
                                     break;
                                 case Enums.SochiSites._23doc_ru_doctors:
-                                    parseSochi.ParseSiteSochi23docRuDoctors(docService, ref itemServiceGroup);
+                                    parseSochi.ParseSite23docRuDoctors(docService, ref itemServiceGroup);
                                     break;
                                 default:
                                     break;
@@ -362,6 +374,12 @@ namespace PriceListLoader.RegionParsers {
                                 case Enums.OtherSites.kovrov_clinicalcenter_ru:
                                     parseOther.ParseSiteKovrovClinicalcenterRu(docService, ref itemServiceGroup);
                                     break;
+                                case Enums.OtherSites.nedorezov_mc_ru:
+                                    parseOther.ParseSiteNedorezovMcRu(docService, ref itemServiceGroup);
+                                    break;
+                                case Enums.OtherSites.nedorezov_prom_metall_kz:
+                                    parseOther.ParseSiteNedorezovPromMetallKz(docService, ref itemServiceGroup);
+                                    break;
                                 default:
                                     break;
                             }
@@ -371,7 +389,7 @@ namespace PriceListLoader.RegionParsers {
                     }
 
                     if (itemServiceGroup.ServiceItems.Count == 0) {
-                        backgroundWorker.ReportProgress((int)progressCurrent, App.errorPrefix + "Услуг не обнаружено, пропуск");
+                        backgroundWorker.ReportProgress((int)progressCurrent, App.errorPrefix + "Услуг не обнаружено, пропуск: " + itemServiceGroup.Name);
                         continue;
                     }
 
@@ -469,12 +487,12 @@ namespace PriceListLoader.RegionParsers {
             //	itemServiceGroup.Link.Equals("https://www.clinic23.ru/khirurgiya/item/ambulatornaya-hirurgiya"))
             //	return;
 
-            string xPathLinksBlocks = "//div[@class='b-content__list']//div[@class='iitem']//a[@class='b-content__item-title-link']";
-            HtmlNodeCollection nodeCollectionLinksBlocks = htmlAgility.GetNodeCollection(docService, xPathLinksBlocks);
-            if (nodeCollectionLinksBlocks != null) {
-                siteInfo.XPathServices = xPathLinksBlocks;
-                ParseSiteWithLinksOnMainPage(docService);
-            }
+            //string xPathLinksBlocks = "//div[@class='b-content__list']//div[@class='iitem']//a[@class='b-content__item-title-link']";
+            //HtmlNodeCollection nodeCollectionLinksBlocks = htmlAgility.GetNodeCollection(docService, xPathLinksBlocks);
+            //if (nodeCollectionLinksBlocks != null) {
+            //    siteInfo.XPathServices = xPathLinksBlocks;
+            //    ParseSiteWithLinksOnMainPage(docService);
+            //}
 
             //string xPathLinks = "//div[@class='description-full']//table[@class='categoriya']//a[@href]";
             //HtmlNodeCollection nodeCollectionLinks = _htmlAgility.GetNodeCollection(docService, xPathLinks);
@@ -484,28 +502,50 @@ namespace PriceListLoader.RegionParsers {
             //} else
             //	Console.WriteLine("nodeCollectionLinks == null");
 
-            string xPathTableTbodyDiag = "//table[@class='table table-diagnostic']//tbody";
-            HtmlNodeCollection nodeCollectionTbodyDiag = htmlAgility.GetNodeCollection(docService, xPathTableTbodyDiag);
-            if (nodeCollectionTbodyDiag != null) {
-                foreach (HtmlNode nodeTbody in nodeCollectionTbodyDiag) {
-                    List<Items.Service> serviceItems = ReadTrNodes(nodeTbody);
-                    if (serviceItems.Count > 0)
-                        itemServiceGroup.ServiceItems.AddRange(serviceItems);
+            string xPathServiceGroup = "//div[@class='price_line']";
+            HtmlNodeCollection nodeCollectionGroups = htmlAgility.GetNodeCollection(docService, xPathServiceGroup);
+
+            foreach (HtmlNode nodeGroup in nodeCollectionGroups) {
+                string xPathGroupName = "//a[starts-with(@class,'prince_button2')]";
+                HtmlNode nodeGroupName = nodeGroup.SelectSingleNode(nodeGroup.XPath + xPathGroupName);
+
+                if (nodeGroupName == null) {
+                    Console.WriteLine("nodeGroupName == null");
+                    continue;
                 }
+
+                string groupName = ClearString(nodeGroupName.InnerText);
+                Items.ServiceGroup serviceGroupInner = new Items.ServiceGroup {
+                    Name = itemServiceGroup.Name + " - " + groupName,
+                    Link = itemServiceGroup.Link
+                };
+
+                string xPathTableTbodyDiag = "//table[@class='table table-diagnostic']//tbody";
+                HtmlNodeCollection nodeCollectionTbodyDiag = nodeGroup.SelectNodes(nodeGroup.XPath + xPathTableTbodyDiag);
+                if (nodeCollectionTbodyDiag != null) {
+                    foreach (HtmlNode nodeTbody in nodeCollectionTbodyDiag) {
+                        List<Items.Service> serviceItems = ReadTrNodes(nodeTbody);
+                        if (serviceItems.Count > 0)
+                            serviceGroupInner.ServiceItems.AddRange(serviceItems);
+                    }
+                }
+
+                string xPathTableTbodyAnaliz = "//table[@class='table analiz-table ']/tbody";
+                HtmlNodeCollection nodeCollectionTbodyAnaliz = nodeGroup.SelectNodes(nodeGroup.XPath + xPathTableTbodyAnaliz);
+                if (nodeCollectionTbodyAnaliz != null) {
+                    foreach (HtmlNode nodeTbody in nodeCollectionTbodyAnaliz) {
+                        List<Items.Service> serviceItems = ReadTrNodes(nodeTbody, 0, 1);
+                        if (serviceItems.Count > 0)
+                            serviceGroupInner.ServiceItems.AddRange(serviceItems);
+                    }
+                }
+
+                siteInfo.ServiceGroupItems.Add(serviceGroupInner);
             }
 
-            string xPathTableTbodyAnaliz = "//table[@class='table analiz-table ']/tbody";
-            HtmlNodeCollection nodeCollectionTbodyAnaliz = htmlAgility.GetNodeCollection(docService, xPathTableTbodyAnaliz);
-            if (nodeCollectionTbodyAnaliz != null) {
-                foreach (HtmlNode nodeTbody in nodeCollectionTbodyAnaliz) {
-                    List<Items.Service> serviceItems = ReadTrNodes(nodeTbody, 0, 1);
-                    if (serviceItems.Count > 0)
-                        itemServiceGroup.ServiceItems.AddRange(serviceItems);
-                }
-            }
 
-            if (itemServiceGroup.ServiceItems.Count == 0)
-                Console.WriteLine("itemServiceGroup.ServiceItems.Count == 0");
+            //if (itemServiceGroup.ServiceItems.Count == 0)
+            //    Console.WriteLine("itemServiceGroup.ServiceItems.Count == 0");
 
 
 
@@ -716,7 +756,8 @@ namespace PriceListLoader.RegionParsers {
                 { "&#8212;", "-" },
                 { "&#171;", "«" },
                 { "&#187;", "»" },
-                { "&#160;", "" }
+                { "&#160;", "" },
+                { "&#215;", "x" }
             };
 
             foreach (KeyValuePair<string, string> pair in toReplace)

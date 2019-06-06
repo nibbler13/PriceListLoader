@@ -10,7 +10,7 @@ namespace PriceListLoader.RegionParsers {
     class ParseSochi : ParseGeneral {
         public ParseSochi(HtmlAgility htmlAgility, BackgroundWorker bworker, SiteInfo siteInfo) : base(htmlAgility, bworker, siteInfo) { }
 
-        public void ParseSiteSochiMedcentrSochiRu(HtmlDocument docServices) {
+        public void ParseSiteMedcentrSochiRu(HtmlDocument docServices) {
             HtmlNodeCollection nodeCollection = htmlAgility.GetNodeCollection(docServices, siteInfo.XPathServices);
             if (nodeCollection == null) {
                 Console.WriteLine("nodeCollection == null");
@@ -42,7 +42,7 @@ namespace PriceListLoader.RegionParsers {
             }
         }
 
-        public void ParseSiteSochi23docRu(HtmlDocument docServices) {
+        public void ParseSite23docRu(HtmlDocument docServices) {
             HtmlNodeCollection nodeCollection = htmlAgility.GetNodeCollection(docServices, siteInfo.XPathServices);
             if (nodeCollection != null) {
                 foreach (HtmlNode nodeLi in nodeCollection) {
@@ -75,7 +75,7 @@ namespace PriceListLoader.RegionParsers {
             }
         }
 
-        public void ParseSiteSochiUzlovayaPoliklinikaRu(HtmlDocument docServices) {
+        public void ParseSiteUzlovayaPoliklinikaRu(HtmlDocument docServices) {
             HtmlNodeCollection nodeCollection = htmlAgility.GetNodeCollection(docServices, siteInfo.XPathServices);
             if (nodeCollection == null) {
                 Console.WriteLine("nodeCollection == null");
@@ -123,7 +123,7 @@ namespace PriceListLoader.RegionParsers {
             }
         }
 
-        public void ParseSiteSochiArmedRu(HtmlDocument docServices) {
+        public void ParseSiteArmedRu(HtmlDocument docServices) {
             HtmlNodeCollection nodeCollection = htmlAgility.GetNodeCollection(docServices, siteInfo.XPathServices);
             if (nodeCollection == null) {
                 Console.WriteLine("nodeCollection == null");
@@ -156,7 +156,7 @@ namespace PriceListLoader.RegionParsers {
             }
         }
 
-        public void ParseSiteSochiMcDanielRu(HtmlDocument docServices) {
+        public void ParseSiteMcDanielRu(HtmlDocument docServices) {
             HtmlNodeCollection nodeCollection = htmlAgility.GetNodeCollection(docServices, siteInfo.XPathServices);
             if (nodeCollection != null) {
                 foreach (HtmlNode nodeServiceRoot in nodeCollection) {
@@ -211,7 +211,7 @@ namespace PriceListLoader.RegionParsers {
             }
         }
 
-        public void ParseSiteSochi5vracheyCom(HtmlDocument docServices) {
+        public void ParseSite5vracheyCom(HtmlDocument docServices) {
             string url = "https://wix-visual-data.appspot.com/app/file?" +
                 "compId=comp-jgdgts3t&instance=OEUK2YDKHQjGmlBfbueJESLm" +
                 "XL2Wi97Uajq1SZVfccI.eyJpbnN0YW5jZUlkIjoiNjE1M2Y3ZWQtOW" +
@@ -256,7 +256,7 @@ namespace PriceListLoader.RegionParsers {
             siteInfo.ServiceGroupItems.Add(itemServiceGroup);
         }
 
-        public void ParseSiteSochi23docRuDoctors(HtmlDocument docService, ref Items.ServiceGroup itemServiceGroup) {
+        public void ParseSite23docRuDoctors(HtmlDocument docService, ref Items.ServiceGroup itemServiceGroup) {
             string xPathTbodies = "//ul[@class='accordion_square accordion-rounded2']//tbody";
             HtmlNodeCollection nodeCollectionTbodies = htmlAgility.GetNodeCollection(docService, xPathTbodies);
             if (nodeCollectionTbodies == null) {

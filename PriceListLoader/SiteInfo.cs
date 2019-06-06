@@ -875,9 +875,10 @@ namespace PriceListLoader {
             switch (krasnodarSite) {
                 case Enums.KrasnodarSites.clinic23_ru:
                     UrlRoot = "https://www.clinic23.ru";
-                    UrlServicesPage = UrlRoot + "";
+                    UrlServicesPage = UrlRoot + "/price";
                     CompanyName = "КЛИНИКА «ЕКАТЕРИНИНСКАЯ»";
-                    XPathServices = "//li[starts-with(@class,'b-menu__item')]//li[starts-with(@class,'b-submenu__item3')]//a[@href]";
+                    //XPathServices = "//li[starts-with(@class,'b-menu__item')]//li[starts-with(@class,'b-submenu__item3')]//a[@href]";
+                    XPathServices = "//div[@id='chekerList1']//div[@class='iitem']/a[@href and @class='b-content__item-title-link']";
                     CityName = "Краснодар";
                     SummaryColumnName = "Екатерининская";
                     break;
@@ -999,7 +1000,7 @@ namespace PriceListLoader {
 
                 case Enums.UfaSites.mamadeti_ru:
                     UrlRoot = "http://ufa.mamadeti.ru";
-                    UrlServicesPage = UrlRoot + "/price-list2/the-clinic-mother-and-child-ufa/price/";
+                    UrlServicesPage = UrlRoot + "/price-list2/hospital-mother-and-child-ufa/price/";
                     CompanyName = "Группа компаний «Мать и дитя»";
                     XPathServices = "//div[@class='b-tree_link__item']";
                     CityName = "Уфа";
@@ -1037,6 +1038,21 @@ namespace PriceListLoader {
                     CompanyName = "Первый клинический медицинский центр";
                     XPathServices = "//div[@class='directions-list']//a[@href]";
                     CityName = "Ковров";
+                    break;
+                case Enums.OtherSites.nedorezov_mc_ru:
+                    UrlRoot = "http://mc.ru:8080/";
+                    UrlServicesPage = UrlRoot + "";
+                    CompanyName = "Металл-Сервис";
+                    XPathServices = "//div[@id='catalog']//ul[@class='inserted']//a[@href]";
+                    CityName = "Нижний Новгород";
+                    break;
+                case Enums.OtherSites.nedorezov_prom_metall_kz:
+                    UrlRoot = "https://prom-metall.kz/";
+                    UrlServicesPage = UrlRoot + "";
+                    CompanyName = "Промышленная металлургия";
+                    //XPathServices = "//div[@class='container-fluid']//div[@class='grid']//figure[@class='effect-lily']//a[@href]";
+                    XPathServices = "//ul[@id='menu-vertical-menu']//a[@href]";
+                    CityName = "Нижний Новгород";
                     break;
 
                 default:

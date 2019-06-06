@@ -109,6 +109,7 @@ namespace PriceListLoader {
                     }
 
                     break;
+
                 case Enums.Cities.SaintPetersburg:
                     RegionParsers.ParseSpb parseSpb = new RegionParsers.ParseSpb(htmlAgility, backgroundWorker, siteInfo);
 
@@ -147,6 +148,7 @@ namespace PriceListLoader {
                     }
 
                     break;
+
                 case Enums.Cities.Sochi:
                     RegionParsers.ParseSochi parseSochi = new RegionParsers.ParseSochi(htmlAgility, backgroundWorker, siteInfo);
 
@@ -157,29 +159,30 @@ namespace PriceListLoader {
                             parseSochi.ParseSiteWithLinksOnMainPage(docServices);
                             break;
                         case Enums.SochiSites.armed_mc_ru:
-                            parseSochi.ParseSiteSochiArmedRu(docServices);
+                            parseSochi.ParseSiteArmedRu(docServices);
                             break;
                         case Enums.SochiSites.uzlovaya_poliklinika_ru:
-                            parseSochi.ParseSiteSochiUzlovayaPoliklinikaRu(docServices);
+                            parseSochi.ParseSiteUzlovayaPoliklinikaRu(docServices);
                             break;
                         case Enums.SochiSites._23doc_ru_main_price:
                         case Enums.SochiSites._23doc_ru_lab:
-                            parseSochi.ParseSiteSochi23docRu(docServices);
+                            parseSochi.ParseSite23docRu(docServices);
                             break;
                         case Enums.SochiSites.medcentr_sochi_ru:
-                            parseSochi.ParseSiteSochiMedcentrSochiRu(docServices);
+                            parseSochi.ParseSiteMedcentrSochiRu(docServices);
                             break;
                         case Enums.SochiSites._5vrachey_com:
-                            parseSochi.ParseSiteSochi5vracheyCom(docServices);
+                            parseSochi.ParseSite5vracheyCom(docServices);
                             break;
                         case Enums.SochiSites.mc_daniel_ru:
-                            parseSochi.ParseSiteSochiMcDanielRu(docServices);
+                            parseSochi.ParseSiteMcDanielRu(docServices);
                             break;
                         default:
                             break;
                     }
 
                     break;
+
                 case Enums.Cities.Kazan:
                     RegionParsers.ParseKazan parseKazan = new RegionParsers.ParseKazan(htmlAgility, backgroundWorker, siteInfo);
 
@@ -199,6 +202,7 @@ namespace PriceListLoader {
                     }
 
                     break;
+
                 case Enums.Cities.KamenskUralsky:
                     RegionParsers.ParseYekuk parseYekuk = new RegionParsers.ParseYekuk(htmlAgility, backgroundWorker, siteInfo);
 
@@ -224,6 +228,7 @@ namespace PriceListLoader {
                     }
 
                     break;
+
                 case Enums.Cities.Krasnodar:
                     RegionParsers.ParseKrd parseKrd = new RegionParsers.ParseKrd(htmlAgility, backgroundWorker, siteInfo);
 
@@ -247,6 +252,7 @@ namespace PriceListLoader {
                     }
 
                     break;
+
                 case Enums.Cities.Ufa:
                     RegionParsers.ParseUfa parseUfa = new RegionParsers.ParseUfa(htmlAgility, backgroundWorker, siteInfo);
 
@@ -268,11 +274,14 @@ namespace PriceListLoader {
                     }
 
                     break;
+
                 case Enums.Cities.Other:
                     RegionParsers.ParseOther parseOther = new RegionParsers.ParseOther(htmlAgility, backgroundWorker, siteInfo);
 
                     switch ((Enums.OtherSites)siteInfo.SiteValue) {
                         case Enums.OtherSites.kovrov_clinicalcenter_ru:
+                        case Enums.OtherSites.nedorezov_mc_ru:
+                        case Enums.OtherSites.nedorezov_prom_metall_kz:
                             parseOther.ParseSiteWithLinksOnMainPage(docServices);
                             break;
                         default:
@@ -280,6 +289,7 @@ namespace PriceListLoader {
                     }
 
                     break;
+
                 default:
                     break;
             }
@@ -291,6 +301,5 @@ namespace PriceListLoader {
 
 			return NpoiExcel.WriteItemSiteDataToExcel(siteInfo, backgroundWorker, progressCurrent, progressTo);
 		}
-
 	}
 }

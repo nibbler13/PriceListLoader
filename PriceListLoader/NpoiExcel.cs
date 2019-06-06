@@ -250,6 +250,10 @@ namespace PriceListLoader {
 			double progressCurrent = progressFrom;
 
 			string templateFile = Path.Combine(Logging.ASSEMBLY_DIRECTORY, "Template.xlsx");
+            if (siteInfo.CityValue == Enums.Cities.Other &&
+                (Enums.OtherSites)siteInfo.SiteValue == Enums.OtherSites.nedorezov_mc_ru)
+                templateFile = Path.Combine(Logging.ASSEMBLY_DIRECTORY, "TemplateMcRu.xlsx");
+
 			string resultFilePrefix = GetFileName(siteInfo.UrlServicesPage);
 
 			backgroundWorker.ReportProgress((int)progressCurrent, "Выгрузка данных в Excel");
@@ -291,6 +295,10 @@ namespace PriceListLoader {
 				foreach (Items.Service service in group.ServiceItems) {
 					IRow row = sheet.CreateRow(rowNumber);
 					string[] values = new string[] { group.Name, group.Link, service.Name, service.Price };
+
+                    if (siteInfo.CityValue == Enums.Cities.Other &&
+                        (Enums.OtherSites)siteInfo.SiteValue == Enums.OtherSites.nedorezov_mc_ru)
+                        values = new string[] { group.Name, service.Name, service.R1, service.Type, service.Lenght, service.Metalbase, service.Price1t, service.Price5t, service.Price10t };
 
 					foreach (string value in values) {
 						ICell cell = row.CreateCell(columnNumber);

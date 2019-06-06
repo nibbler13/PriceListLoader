@@ -1,17 +1,21 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using HtmlAgilityPack;
 
 
 namespace PriceListLoader {
 	class HtmlAgility {
-		public HtmlDocument GetDocument(string url, SiteInfo siteInfo) {
+        private static readonly HttpClient httpClient = new HttpClient();
+
+        public HtmlDocument GetDocument(string url, SiteInfo siteInfo, BackgroundWorker bw = null, int? progress = null) {
 			HtmlDocument doc = new HtmlDocument();
 			string html = string.Empty;
 			
@@ -24,7 +28,7 @@ namespace PriceListLoader {
 
 				html = File.ReadAllText(url, encoding);
 			} else {
-				for (int i = 0; i < 5; i++) {
+				for (int i = 0; i < 10; i++) {
 					try {
 						HttpWebRequest request = (HttpWebRequest)WebRequest.Create(url);
 						request.UserAgent =
@@ -54,7 +58,10 @@ namespace PriceListLoader {
 								(siteInfo.CityValue == Enums.Cities.Sochi &&
                                 (Enums.SochiSites)siteInfo.SiteValue == Enums.SochiSites._5vrachey_com))
 								readStream = new StreamReader(receiveStream);
-							else 
+                            else if (siteInfo.CityValue == Enums.Cities.Other &&
+                                (Enums.OtherSites)siteInfo.SiteValue == Enums.OtherSites.nedorezov_mc_ru)
+                                readStream = new StreamReader(receiveStream, Encoding.GetEncoding("windows-1251"));
+                            else 
 								readStream = new StreamReader(receiveStream, Encoding.GetEncoding(response.CharacterSet));
 							
 							html = readStream.ReadToEnd();
@@ -67,6 +74,12 @@ namespace PriceListLoader {
 						break;
 					} catch (Exception e) {
 						Console.WriteLine(e.Message + Environment.NewLine + e.StackTrace);
+
+                        if (bw != null)
+                            bw.ReportProgress(progress.HasValue ? progress.Value : 1, e.Message);
+
+                        if (e.Message.Contains("503"))
+                            Thread.Sleep(10000);
 					}
 				}
 			}
@@ -90,5 +103,28 @@ namespace PriceListLoader {
 				return reader.ReadToEnd();
 			}
 		}
+
+        public HtmlDocument ExecutePost(string url, Dictionary<string, string> dictParams, BackgroundWorker bw = null, int? progress = null) {
+            HtmlDocument doc = new HtmlDocument();
+
+            for (int i = 0; i < 5; i++) {
+                try {
+                    FormUrlEncodedContent content = new FormUrlEncodedContent(dictParams);
+                    HttpResponseMessage response = httpClient.PostAsync(url, content).Result;
+                    string responseString = response.Content.ReadAsStringAsync().Result;
+                    doc.LoadHtml(responseString);
+                    return doc;
+                } catch (Exception e) {
+                    Console.WriteLine(e.Message + Environment.NewLine + e.StackTrace);
+                    if (bw != null) {
+                        bw.ReportProgress(progress.HasValue ? progress.Value : 1, e.Message);
+                        Thread.Sleep(10000);
+                    }
+
+                }
+            }
+
+            return doc;
+        }
 	}
 }
