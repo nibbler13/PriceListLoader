@@ -96,33 +96,76 @@ namespace PriceListLoader.RegionParsers {
         }
 
         public void ParseSiteKrdVrukahCom(HtmlDocument docService, ref Items.ServiceGroup itemServiceGroup) {
-            string xPathServices = "//div[@class='branchService__title--lvl2 d-flex']";
-            HtmlNodeCollection nodeCollectionServices = docService.DocumentNode.SelectNodes(xPathServices);
+            string xPathServiceGroups = "//div[starts-with(@class,'branchService__item')]";
+            HtmlNodeCollection nodeCollectionServiceGroups = docService.DocumentNode.SelectNodes(xPathServiceGroups);
 
-            if (nodeCollectionServices == null) {
-                Console.WriteLine("nodeCollectionServices == null");
-                return;
+            if (nodeCollectionServiceGroups != null) {
+                foreach (HtmlNode nodeServiceGroup in nodeCollectionServiceGroups) {
+                    string xPathGroupName = "//div[starts-with(@class,'branchService__title')]/span";
+                    HtmlNode nodeGroupName = nodeServiceGroup.SelectSingleNode(nodeServiceGroup.XPath + xPathGroupName);
+
+                    if (nodeGroupName == null) {
+                        Console.WriteLine("nodeGroupName == null");
+                        continue;
+                    }
+
+                    Items.ServiceGroup serviceGroupInner = new Items.ServiceGroup {
+                        Name = itemServiceGroup.Name + " @ " + ClearString(nodeGroupName.InnerText),
+                        Link = itemServiceGroup.Link
+                    };
+
+                    string xPathGroupServices = "//div[@class='branchService__title--lvl2 d-flex']";
+                    HtmlNodeCollection nodeCollectionServices = nodeServiceGroup.SelectNodes(nodeServiceGroup.XPath + xPathGroupServices);
+
+                    if (nodeCollectionServices == null) {
+                        Console.WriteLine("nodeCollectionServices == null");
+                        continue;
+                    }
+
+                    foreach (HtmlNode nodeService in nodeCollectionServices) {
+                        HtmlNode nodeName = nodeService.SelectSingleNode(nodeService.XPath + "//span[1]");
+                        HtmlNode nodePrice = nodeService.SelectSingleNode(nodeService.XPath + "//span[2]");
+
+                        if (nodeName == null || nodePrice == null)
+                            continue;
+
+                        string name = ClearString(nodeName.InnerText);
+                        string price = ClearString(nodePrice.InnerText);
+
+                        if (string.IsNullOrEmpty(name) || string.IsNullOrEmpty(price))
+                            continue;
+
+                        Items.Service itemService = new Items.Service() {
+                            Name = name,
+                            Price = price
+                        };
+
+                        serviceGroupInner.ServiceItems.Add(itemService);
+                    }
+
+                    siteInfo.ServiceGroupItems.Add(serviceGroupInner);
+                }
             }
 
-            foreach (HtmlNode nodeService in nodeCollectionServices) {
-                HtmlNode nodeName = nodeService.SelectSingleNode(nodeService.XPath + "//span[1]");
-                HtmlNode nodePrice = nodeService.SelectSingleNode(nodeService.XPath + "//span[2]");
+            string xPathServicesLab = "//table[@class='table table-striped']//tbody";
+            HtmlNodeCollection nodeCollectionServicesLab = htmlAgility.GetNodeCollection(docService, xPathServicesLab);
 
-                if (nodeName == null || nodePrice == null)
-                    continue;
+            if (nodeCollectionServicesLab != null) {
+                foreach (HtmlNode nodeServiceLab in nodeCollectionServicesLab) {
+                    int nameOffset = 0;
+                    int priceOffset = 0;
 
-                string name = ClearString(nodeName.InnerText);
-                string price = ClearString(nodePrice.InnerText);
+                    if (itemServiceGroup.Name.Contains("CITO"))
+                        priceOffset = 1;
 
-                if (string.IsNullOrEmpty(name) || string.IsNullOrEmpty(price))
-                    continue;
+                    if (itemServiceGroup.Name.StartsWith("Предоперационные")) {
+                        nameOffset = 1;
+                        priceOffset = 1;
+                    }
 
-                Items.Service itemService = new Items.Service() {
-                    Name = name,
-                    Price = price
-                };
-
-                itemServiceGroup.ServiceItems.Add(itemService);
+                    List<Items.Service> services = ReadTrNodes(nodeServiceLab, nameOffset, priceOffset);
+                    itemServiceGroup.ServiceItems.AddRange(services);
+                }
             }
         }
 

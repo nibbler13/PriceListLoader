@@ -28,6 +28,8 @@ namespace PriceListLoader {
             onclinic_ru,
             smclinic_ru,
             smdoctor_ru,
+            sm_stomatology_ru,
+            smclinic_ru_lab,
             invitro_ru,
             cmd_online_ru,
             helix_ru,
@@ -43,8 +45,6 @@ namespace PriceListLoader {
             medsiKDCB_ru,
             medsiKPP_ru,
             medsiPIROGOVKA_ru,
-            sm_stomatology_ru,
-            smclinic_ru_lab,
             legal_entity_k31,
             legal_entity_litfond,
             legal_entity_ssmc,
@@ -121,7 +121,8 @@ namespace PriceListLoader {
             //solnechnaya,
             //v_nadezhnyh_rykah,
             //evromed,
-            vrukah_com
+            vrukah_com,
+            vrukah_com_lab
         }
 
         public enum UfaSites {

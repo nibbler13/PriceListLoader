@@ -127,115 +127,204 @@ namespace PriceListLoader.RegionParsers {
                 itemServiceGroup.ServiceItems.AddRange(ReadTrNodes(nodeTbody));
         }
 
-        public void ParseSiteKazanZdorovie7iRu(HtmlDocument docService, ref Items.ServiceGroup itemServiceGroup) {
-            Console.WriteLine(itemServiceGroup.Name);
+        public void ParseSiteKazanZdorovie7iRu(HtmlDocument docService) {
+			HtmlNodeCollection nodeCollection = htmlAgility.GetNodeCollection(docService, siteInfo.XPathServices);
+			if (nodeCollection == null) {
+				Console.WriteLine("nodeCollection == null");
+				return;
+			}
 
-            if (itemServiceGroup.Name.Equals("Анализы")) {
-                siteInfo.XPathServices = "//div[@class='test-list2']//a[@href]";
-                ParseSiteWithLinksOnMainPage(docService);
-                return;
-            }
+			foreach (HtmlNode nodeRoot in nodeCollection) {
+				HtmlNode nodeRootGroupName = nodeRoot.SelectSingleNode(nodeRoot.XPath + "//div[starts-with(@class,'doctor-item-header')]//div[@class='doctor-item__title']");
+				if (nodeRootGroupName == null) {
+					Console.WriteLine("nodeRootGroupName == null");
+					continue;
+				}
 
-            string xPathUlPriceList = "//ul[@class='pricelist']//li";
-            HtmlNodeCollection nodeCollectionLi = htmlAgility.GetNodeCollection(docService, xPathUlPriceList);
+				string rootGroupName = ClearString(nodeRootGroupName.InnerText);
+				backgroundWorker.ReportProgress((int)progressCurrent, rootGroupName);
+				Items.ServiceGroup serviceGroup = new Items.ServiceGroup {
+					Link = siteInfo.UrlServicesPage,
+					Name = rootGroupName
+				};
 
-            if (nodeCollectionLi != null)
-                itemServiceGroup.ServiceItems.AddRange(ParseLiItemsForKazanZdorovie7iRu(nodeCollectionLi));
+				string xPathInnerGroup = "//div[@class='doctor-elems']/div[@class='doctor-elem']";
+				HtmlNodeCollection nodeCollectionInnerGroup = nodeRoot.SelectNodes(nodeRoot.XPath + xPathInnerGroup);
+				if (nodeCollectionInnerGroup == null) {
+					Console.WriteLine("nodeCollectionInnerGroup == null");
+					continue;
+				}
 
-            string xPathUslugiTbody = "//div[@class='uslugi']//tbody";
-            HtmlNodeCollection nodeCollectionTbody = htmlAgility.GetNodeCollection(docService, xPathUslugiTbody);
+				foreach (HtmlNode nodeInner in nodeCollectionInnerGroup) {
+					string innerGroupName = string.Empty;
 
-            if (nodeCollectionTbody != null) {
-                foreach (HtmlNode nodeTbody in nodeCollectionTbody) {
-                    itemServiceGroup.ServiceItems.AddRange(ReadTrNodes(nodeTbody));
-                }
-            }
+					HtmlNode nodeInnerGroupName = nodeInner.SelectSingleNode(nodeInner.XPath + "/div[@class='doctor-elem__title']");
+					if (nodeInnerGroupName != null)
+						innerGroupName = ClearString(nodeInnerGroupName.InnerText);
 
-            if (itemServiceGroup.Name.Equals("Онкомаркеры"))
-                Console.WriteLine();
+					Items.ServiceGroup serviceGroupInner;
+					if (string.IsNullOrEmpty(innerGroupName))
+						serviceGroupInner = serviceGroup;
+					else
+						serviceGroupInner = new Items.ServiceGroup {
+							Link = serviceGroup.Link,
+							Name = serviceGroup.Name + " - " + innerGroupName
+						};
 
-            string xPathLab = "//ul[@class='mainanalyses']//li";
-            HtmlNodeCollection nodeCollectionLab = htmlAgility.GetNodeCollection(docService, xPathLab);
+					backgroundWorker.ReportProgress((int)progressCurrent, serviceGroupInner.Name);
 
-            if (nodeCollectionLab != null) {
-                foreach (HtmlNode nodeLi in nodeCollectionLab) {
-                    HtmlNode nodeServiceName = nodeLi.SelectSingleNode(nodeLi.XPath + "//span[@class='pr-name']");
-                    HtmlNode nodeServicePrice = nodeLi.SelectSingleNode(nodeLi.XPath + "//span[@class='pr']");
+					string xPathService = "//ul[@class='doctor-elem-item js-calc-pos']";
+					HtmlNodeCollection nodeCollectionServices = nodeInner.SelectNodes(nodeInner.XPath + xPathService);
+					if (nodeCollectionServices == null) {
+						Console.WriteLine("nodeCollectionServices == null");
+						continue;
+					}
 
-                    if (nodeServiceName == null ||
-                        nodeServicePrice == null) {
-                        continue;
-                    }
+					string xPathServiceName = "//label[@class='js-calc-pos-name']";
+					string xPathServiceNameExclude = "//div[@class='serice-item-info']";
+					string xPathServiceCost = "/li[2]";
+					foreach (HtmlNode nodeService in nodeCollectionServices) {
+						HtmlNode nodeServiceName = nodeService.SelectSingleNode(nodeService.XPath + xPathServiceName);
+						HtmlNode nodeServiceNameExclude = nodeService.SelectSingleNode(nodeService.XPath + xPathServiceNameExclude);
+						HtmlNode nodeServiceCost = nodeService.SelectSingleNode(nodeService.XPath + xPathServiceCost);
 
-                    Items.Service itemService = new Items.Service() {
-                        Name = ClearString(nodeServiceName.InnerText),
-                        Price = ClearString(nodeServicePrice.InnerText)
-                    };
+						if (nodeServiceName == null || nodeServiceCost == null) {
+							Console.WriteLine("nodeServiceName == null || nodeServiceCost == null");
+							continue;
+						}
 
-                    itemServiceGroup.ServiceItems.Add(itemService);
-                }
-            }
+						string serviceName = nodeServiceName.InnerText;
+						if (nodeServiceNameExclude != null) 
+							serviceName = serviceName.Replace(nodeServiceNameExclude.InnerText, "");
+						serviceName = ClearString(serviceName);
 
-            string xPathSpoilerDental = "//div[@class='item-page']//div[@class='spoiler']";
-            HtmlNodeCollection nodeCollectionSpoilersSental = htmlAgility.GetNodeCollection(docService, xPathSpoilerDental);
+						string serviceCost = ClearString(nodeServiceCost.InnerText);
 
-            if (nodeCollectionSpoilersSental != null) {
-                foreach (HtmlNode nodeSpoilerDental in nodeCollectionSpoilersSental) {
-                    HtmlNode nodeGroupName = nodeSpoilerDental.SelectSingleNode(nodeSpoilerDental.XPath + "/p[@class='spoiler-text']");
-                    if (nodeGroupName == null)
-                        nodeGroupName = nodeSpoilerDental.SelectSingleNode(nodeSpoilerDental.XPath + "/div[@class='spoiler-text']");
+						Items.Service service = new Items.Service {
+							Name = serviceName,
+							Price = serviceCost
+						};
 
-                    if (nodeGroupName == null) {
-                        Console.WriteLine("nodeGroupName == null");
-                        continue;
-                    }
+						serviceGroupInner.ServiceItems.Add(service);
+					}
 
-                    Items.ServiceGroup itemServiceGroupInner = new Items.ServiceGroup() {
-                        Name = itemServiceGroup.Name + " - " + ClearString(nodeGroupName.InnerText),
-                        Link = itemServiceGroup.Link
-                    };
+					siteInfo.ServiceGroupItems.Add(serviceGroupInner);
+				}
+			}
 
-                    string xPathTbody = nodeSpoilerDental.XPath + "//tbody";
-                    HtmlNodeCollection nodeCollectionTbodies = nodeSpoilerDental.SelectNodes(xPathTbody);
-                    if (nodeCollectionTbodies == null) {
-                        Console.WriteLine("nodeCollectionTbody == null");
-                        continue;
-                    }
 
-                    foreach (HtmlNode nodeTbody in nodeCollectionTbodies)
-                        itemServiceGroupInner.ServiceItems.AddRange(ReadTrNodes(nodeTbody, 1, 2));
 
-                    siteInfo.ServiceGroupItems.Add(itemServiceGroupInner);
-                }
-            }
 
-            string xPathSpoilerMassage = "//div[@class='uslugi']//div[@class='spoiler']";
-            HtmlNodeCollection nodeCollectionSpoilersMassage = htmlAgility.GetNodeCollection(docService, xPathSpoilerMassage);
 
-            if (nodeCollectionSpoilersMassage != null) {
-                foreach (HtmlNode nodeSpoilerMassage in nodeCollectionSpoilersMassage) {
-                    HtmlNode nodeGroupName = nodeSpoilerMassage.SelectSingleNode(nodeSpoilerMassage.XPath + "//div[@class='spoiler-text']");
-                    if (nodeGroupName == null) {
-                        Console.WriteLine("nodeGroupName == null");
-                        continue;
-                    }
 
-                    Items.ServiceGroup itemServiceGroupInner = new Items.ServiceGroup() {
-                        Name = itemServiceGroup.Name + " - " + ClearString(nodeGroupName.InnerText),
-                        Link = itemServiceGroup.Link
-                    };
+            //Console.WriteLine(itemServiceGroup.Name);
 
-                    HtmlNodeCollection nodeCollectionLiMassage =
-                        nodeSpoilerMassage.SelectNodes(nodeSpoilerMassage.XPath + "//ul[@class='pricelist']//li");
-                    if (nodeCollectionLiMassage == null) {
-                        Console.WriteLine("nodeCollectionLiMassage == null");
-                        continue;
-                    }
+            //if (itemServiceGroup.Name.Equals("Анализы")) {
+            //    siteInfo.XPathServices = "//div[@class='test-list2']//a[@href]";
+            //    ParseSiteWithLinksOnMainPage(docService);
+            //    return;
+            //}
 
-                    itemServiceGroupInner.ServiceItems.AddRange(ParseLiItemsForKazanZdorovie7iRu(nodeCollectionLiMassage));
-                    siteInfo.ServiceGroupItems.Add(itemServiceGroupInner);
-                }
-            }
+            //string xPathUlPriceList = "//ul[@class='pricelist']//li";
+            //HtmlNodeCollection nodeCollectionLi = htmlAgility.GetNodeCollection(docService, xPathUlPriceList);
+
+            //if (nodeCollectionLi != null)
+            //    itemServiceGroup.ServiceItems.AddRange(ParseLiItemsForKazanZdorovie7iRu(nodeCollectionLi));
+
+            //string xPathUslugiTbody = "//div[@class='uslugi']//tbody";
+            //HtmlNodeCollection nodeCollectionTbody = htmlAgility.GetNodeCollection(docService, xPathUslugiTbody);
+
+            //if (nodeCollectionTbody != null) {
+            //    foreach (HtmlNode nodeTbody in nodeCollectionTbody) {
+            //        itemServiceGroup.ServiceItems.AddRange(ReadTrNodes(nodeTbody));
+            //    }
+            //}
+
+            //if (itemServiceGroup.Name.Equals("Онкомаркеры"))
+            //    Console.WriteLine();
+
+            //string xPathLab = "//ul[@class='mainanalyses']//li";
+            //HtmlNodeCollection nodeCollectionLab = htmlAgility.GetNodeCollection(docService, xPathLab);
+
+            //if (nodeCollectionLab != null) {
+            //    foreach (HtmlNode nodeLi in nodeCollectionLab) {
+            //        HtmlNode nodeServiceName = nodeLi.SelectSingleNode(nodeLi.XPath + "//span[@class='pr-name']");
+            //        HtmlNode nodeServicePrice = nodeLi.SelectSingleNode(nodeLi.XPath + "//span[@class='pr']");
+
+            //        if (nodeServiceName == null ||
+            //            nodeServicePrice == null) {
+            //            continue;
+            //        }
+
+            //        Items.Service itemService = new Items.Service() {
+            //            Name = ClearString(nodeServiceName.InnerText),
+            //            Price = ClearString(nodeServicePrice.InnerText)
+            //        };
+
+            //        itemServiceGroup.ServiceItems.Add(itemService);
+            //    }
+            //}
+
+            //string xPathSpoilerDental = "//div[@class='item-page']//div[@class='spoiler']";
+            //HtmlNodeCollection nodeCollectionSpoilersSental = htmlAgility.GetNodeCollection(docService, xPathSpoilerDental);
+
+            //if (nodeCollectionSpoilersSental != null) {
+            //    foreach (HtmlNode nodeSpoilerDental in nodeCollectionSpoilersSental) {
+            //        HtmlNode nodeGroupName = nodeSpoilerDental.SelectSingleNode(nodeSpoilerDental.XPath + "/p[@class='spoiler-text']");
+            //        if (nodeGroupName == null)
+            //            nodeGroupName = nodeSpoilerDental.SelectSingleNode(nodeSpoilerDental.XPath + "/div[@class='spoiler-text']");
+
+            //        if (nodeGroupName == null) {
+            //            Console.WriteLine("nodeGroupName == null");
+            //            continue;
+            //        }
+
+            //        Items.ServiceGroup itemServiceGroupInner = new Items.ServiceGroup() {
+            //            Name = itemServiceGroup.Name + " - " + ClearString(nodeGroupName.InnerText),
+            //            Link = itemServiceGroup.Link
+            //        };
+
+            //        string xPathTbody = nodeSpoilerDental.XPath + "//tbody";
+            //        HtmlNodeCollection nodeCollectionTbodies = nodeSpoilerDental.SelectNodes(xPathTbody);
+            //        if (nodeCollectionTbodies == null) {
+            //            Console.WriteLine("nodeCollectionTbody == null");
+            //            continue;
+            //        }
+
+            //        foreach (HtmlNode nodeTbody in nodeCollectionTbodies)
+            //            itemServiceGroupInner.ServiceItems.AddRange(ReadTrNodes(nodeTbody, 1, 2));
+
+            //        siteInfo.ServiceGroupItems.Add(itemServiceGroupInner);
+            //    }
+            //}
+
+            //string xPathSpoilerMassage = "//div[@class='uslugi']//div[@class='spoiler']";
+            //HtmlNodeCollection nodeCollectionSpoilersMassage = htmlAgility.GetNodeCollection(docService, xPathSpoilerMassage);
+
+            //if (nodeCollectionSpoilersMassage != null) {
+            //    foreach (HtmlNode nodeSpoilerMassage in nodeCollectionSpoilersMassage) {
+            //        HtmlNode nodeGroupName = nodeSpoilerMassage.SelectSingleNode(nodeSpoilerMassage.XPath + "//div[@class='spoiler-text']");
+            //        if (nodeGroupName == null) {
+            //            Console.WriteLine("nodeGroupName == null");
+            //            continue;
+            //        }
+
+            //        Items.ServiceGroup itemServiceGroupInner = new Items.ServiceGroup() {
+            //            Name = itemServiceGroup.Name + " - " + ClearString(nodeGroupName.InnerText),
+            //            Link = itemServiceGroup.Link
+            //        };
+
+            //        HtmlNodeCollection nodeCollectionLiMassage =
+            //            nodeSpoilerMassage.SelectNodes(nodeSpoilerMassage.XPath + "//ul[@class='pricelist']//li");
+            //        if (nodeCollectionLiMassage == null) {
+            //            Console.WriteLine("nodeCollectionLiMassage == null");
+            //            continue;
+            //        }
+
+            //        itemServiceGroupInner.ServiceItems.AddRange(ParseLiItemsForKazanZdorovie7iRu(nodeCollectionLiMassage));
+            //        siteInfo.ServiceGroupItems.Add(itemServiceGroupInner);
+            //    }
+            //}
         }
 
         private List<Items.Service> ParseLiItemsForKazanZdorovie7iRu(HtmlNodeCollection nodeCollectionLi) {

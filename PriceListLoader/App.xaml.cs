@@ -43,6 +43,8 @@ namespace PriceListLoader {
 			foreach (KeyValuePair<Enums.Cities, Type> keyValuePair in SiteInfo.CitySitesMap) {
                 foreach (int siteValue in Enum.GetValues(keyValuePair.Value)) {
                     SiteInfo siteInfo = new SiteInfo(keyValuePair.Key, siteValue);
+                    if (!siteInfo.ShouldAutoLoad) continue;
+
                     autoModeResult += siteInfo.CityName + " | " + siteInfo.CompanyName + " | " +
                         siteInfo.UrlServicesPage + Environment.NewLine;
                     string resultFile = siteParser.ParseSelectedSite(siteInfo, true);

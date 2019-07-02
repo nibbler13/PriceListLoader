@@ -292,9 +292,6 @@ namespace PriceListLoader.RegionParsers {
                                 case Enums.KazanSites.biomed_mc_ru:
                                     parseKazan.ParseSiteKazanBiomedMcRu(docService, ref itemServiceGroup);
                                     break;
-                                case Enums.KazanSites.zdorovie7i_ru:
-                                    parseKazan.ParseSiteKazanZdorovie7iRu(docService, ref itemServiceGroup);
-                                    break;
                                 case Enums.KazanSites.starclinic_ru:
                                     parseKazan.ParseSiteKazanStarclinicRu(docService, ref itemServiceGroup);
                                     break;
@@ -348,6 +345,7 @@ namespace PriceListLoader.RegionParsers {
                                     parseKrd.ParseSiteKrdClinicaNazdorovieRuLab(docService, ref itemServiceGroup);
                                     break;
                                 case Enums.KrasnodarSites.vrukah_com:
+                                case Enums.KrasnodarSites.vrukah_com_lab:
                                     parseKrd.ParseSiteKrdVrukahCom(docService, ref itemServiceGroup);
                                     break;
                                 default:

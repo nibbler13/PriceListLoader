@@ -18,6 +18,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using Path = System.IO.Path;
 
 namespace PriceListLoader {
 	/// <summary>
@@ -35,8 +36,12 @@ namespace PriceListLoader {
 			ListViewPivotTable.DataContext = this;
 
 			foreach (KeyValuePair<Enums.Cities, Type> keyValuePair in SiteInfo.CitySitesMap)
-                foreach (int siteValue in Enum.GetValues(keyValuePair.Value))
-				SiteItems.Add(new SiteInfo(keyValuePair.Key, siteValue));
+                foreach (int siteValue in Enum.GetValues(keyValuePair.Value)) {
+                    SiteInfo siteInfo = new SiteInfo(keyValuePair.Key, siteValue);
+                    //if (!siteInfo.ShouldAutoLoad) continue;
+
+                    SiteItems.Add(siteInfo);
+                }
 
 			foreach (SiteInfo siteInfo in SiteItems)
 				if (!ListBoxRegions.Items.Contains(siteInfo.CityName))
@@ -44,7 +49,7 @@ namespace PriceListLoader {
 		}
 
 		private void ButtonExecute_Click(object sender, RoutedEventArgs e) {
-			BackgroundWorker backgroundWorker = new BackgroundWorker {
+            BackgroundWorker backgroundWorker = new BackgroundWorker {
 				WorkerReportsProgress = true
 			};
 
@@ -133,8 +138,10 @@ namespace PriceListLoader {
 			PivotTableItems.Clear();
 
 			foreach (SiteInfo siteInfo in SiteItems)
-				if (siteInfo.CityName.Equals(ListBoxRegions.SelectedItem))
-					PivotTableItems.Add(siteInfo);
+				if (siteInfo.CityName.Equals(ListBoxRegions.SelectedItem)) {
+					if (string.IsNullOrEmpty(siteInfo.SummaryColumnName)) continue;
+                    PivotTableItems.Add(siteInfo);
+                }
 
 			string pivotTableTemplate = TextBoxPivotTableTemplate.Text;
 			if (!string.IsNullOrEmpty(pivotTableTemplate) &&
@@ -169,7 +176,7 @@ namespace PriceListLoader {
 			}
 
 			if (!string.IsNullOrEmpty(selectedRegionTemplate))
-				selectedRegionTemplate = System.IO.Path.Combine(Environment.CurrentDirectory, selectedRegionTemplate);
+				selectedRegionTemplate = Path.Combine(Path.Combine(Environment.CurrentDirectory, "Templates"), selectedRegionTemplate);
 
 			TextBoxPivotTableTemplate.Text = selectedRegionTemplate;
 		}

@@ -30,7 +30,8 @@ namespace PriceListLoader {
 					backgroundWorker.ReportProgress((int)progressCurrent, "!!! Внимание! Не считано ни одной группы услуг");
 			}
 
-			NpoiExcel.WritePriceListToSummary(templateFile, pivotTableItems.ToList(), backgroundWorker, LoadBzPrices);
+			string resultFile = NpoiExcel.WritePriceListToSummary(templateFile, pivotTableItems.ToList(), backgroundWorker, LoadBzPrices);
+			ExcelInterop.SetFormatting(resultFile, backgroundWorker);
 
 			MessageBox.Show("Завершено");
 		}

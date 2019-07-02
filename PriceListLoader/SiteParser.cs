@@ -187,17 +187,19 @@ namespace PriceListLoader {
                     RegionParsers.ParseKazan parseKazan = new RegionParsers.ParseKazan(htmlAgility, backgroundWorker, siteInfo);
 
                     switch ((Enums.KazanSites)siteInfo.SiteValue) {
-                        case Enums.KazanSites.ava_kazan_ru:
+						case Enums.KazanSites.ava_kazan_ru:
                         case Enums.KazanSites.mc_aybolit_ru:
                         case Enums.KazanSites.biomed_mc_ru:
-                        case Enums.KazanSites.zdorovie7i_ru:
                         case Enums.KazanSites.starclinic_ru:
                         case Enums.KazanSites.love_dr_ru:
                         case Enums.KazanSites.medexpert_kazan_ru:
                         case Enums.KazanSites.kazan_clinic_ru:
                             parseKazan.ParseSiteWithLinksOnMainPage(docServices);
                             break;
-                        default:
+						case Enums.KazanSites.zdorovie7i_ru:
+							parseKazan.ParseSiteKazanZdorovie7iRu(docServices);
+							break;
+						default:
                             break;
                     }
 
@@ -239,6 +241,7 @@ namespace PriceListLoader {
                         case Enums.KrasnodarSites.clinica_nazdorovie_ru:
                         case Enums.KrasnodarSites.clinica_nazdorovie_ru_lab:
                         case Enums.KrasnodarSites.vrukah_com:
+                        case Enums.KrasnodarSites.vrukah_com_lab:
                             parseKrd.ParseSiteWithLinksOnMainPage(docServices);
                             break;
                         case Enums.KrasnodarSites.clinicist_ru:

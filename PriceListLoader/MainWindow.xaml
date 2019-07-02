@@ -44,6 +44,9 @@
                                 </Style>
                             </DataGrid.CellStyle>
                             <DataGrid.Columns>
+                                <DataGridCheckBoxColumn Binding="{Binding ShouldAutoLoad, Mode=OneTime}" 
+                                                        IsReadOnly="True" 
+                                                        Header="Авто"/>
                                 <DataGridTextColumn Binding="{Binding CityName}" Header="Город">
                                     <DataGridTextColumn.HeaderStyle>
                                         <Style TargetType="DataGridColumnHeader">
@@ -148,7 +151,7 @@
                             </ListBox>
                         </StackPanel>
 
-                        <CheckBox Content="Загружать собственные цены из БД МИС Инфоклинка" 
+                        <CheckBox Content="Загружать собственные цены" 
                                   HorizontalAlignment="Right"
                                   x:Name="CheckboxLoadBzPrices"/>
 

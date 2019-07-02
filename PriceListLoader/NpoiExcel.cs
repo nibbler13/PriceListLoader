@@ -1,4 +1,6 @@
-﻿using NPOI.SS.UserModel;
+﻿using NPOI.HSSF.UserModel;
+using NPOI.HSSF.Util;
+using NPOI.SS.UserModel;
 using NPOI.XSSF.UserModel;
 using System;
 using System.Collections.Generic;
@@ -9,10 +11,11 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Media;
 
 namespace PriceListLoader {
 	class NpoiExcel {
-		public static void WritePriceListToSummary(string templateFileName, List<SiteInfo> sitesInfo, BackgroundWorker backgroundWorker, bool LoadBzPrices) {
+		public static string WritePriceListToSummary(string templateFileName, List<SiteInfo> sitesInfo, BackgroundWorker backgroundWorker, bool LoadBzPrices) {
 			backgroundWorker.ReportProgress(50, "Заполнение шаблона сводной таблицы");
 			string resultPath = Path.Combine(Environment.CurrentDirectory, "Results\\" + DateTime.Now.ToString("yyyyMMdd"));
 			if (!Directory.Exists(resultPath))
@@ -28,7 +31,7 @@ namespace PriceListLoader {
 					workbook = new XSSFWorkbook(file);
 			} catch (Exception e) {
 				Console.WriteLine(e.Message + Environment.NewLine + e.StackTrace);
-				return;
+				return string.Empty;
 			}
 
 			double progressCurrent = 55;
@@ -37,7 +40,7 @@ namespace PriceListLoader {
 				WriteBzPricesToSummaryTable(sheet, sitesInfo[0].GetFilId(), backgroundWorker, (int)progressCurrent);
 			else
 				backgroundWorker.ReportProgress((int)progressCurrent, "Пропуск загрузки собственных цен");
-
+					   
 			double progressStep = 40.0d / (double)sitesInfo.Count;
 			foreach (SiteInfo siteInfo in sitesInfo) {
 				progressCurrent += progressStep;
@@ -104,11 +107,13 @@ namespace PriceListLoader {
 				}
 			}
 
-			backgroundWorker.ReportProgress(100, "Запись данных в файл: " + resultFile);
+			backgroundWorker.ReportProgress(90, "Запись данных в файл: " + resultFile);
 			using (FileStream stream = new FileStream(resultFile, FileMode.Create, FileAccess.Write))
 				workbook.Write(stream);
 
 			workbook.Close();
+
+			return resultFile;
 		}
 
 		private static void WriteBzPricesToSummaryTable(ISheet sheet, int filid, BackgroundWorker backgroundWorker, int progress) {
@@ -249,7 +254,7 @@ namespace PriceListLoader {
 			double progressFrom, double progressTo) {
 			double progressCurrent = progressFrom;
 
-			string templateFile = Path.Combine(Logging.ASSEMBLY_DIRECTORY, "Template.xlsx");
+			string templateFile = Path.Combine(Path.Combine(Logging.ASSEMBLY_DIRECTORY, "Templates"), "Template.xlsx");
             if (siteInfo.CityValue == Enums.Cities.Other &&
                 (Enums.OtherSites)siteInfo.SiteValue == Enums.OtherSites.nedorezov_mc_ru)
                 templateFile = Path.Combine(Logging.ASSEMBLY_DIRECTORY, "TemplateMcRu.xlsx");
