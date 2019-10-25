@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
@@ -43,7 +44,14 @@ namespace PriceListLoader {
 				if (value != selectedPriceListFile) {
 					selectedPriceListFile = value;
 					NotifyPropertyChanged();
+					NotifyPropertyChanged("SelectedPriceListFileName");
 				}
+			}
+		}
+
+		public string SelectedPriceListFileName {
+			get {
+				return Path.GetFileName(SelectedPriceListFile);
 			}
 		}
 
@@ -770,7 +778,17 @@ namespace PriceListLoader {
                     ShouldAutoLoad = true;
                     break;
 
-                default:
+				case Enums.SochiSites.analizy_sochi_ru:
+					UrlRoot = "https://analizy-sochi.ru";
+					UrlServicesPage = UrlRoot + "/analizy-pacientam.html";
+					CompanyName = "Медицинская лаборатория ОПТИМУМ";
+					XPathServices = "//table[@class='tests_costs_results']";
+					CityName = "Сочи";
+					SummaryColumnName = "";
+					ShouldAutoLoad = true;
+					break;
+
+				default:
                     break;
             }
         }
@@ -783,7 +801,8 @@ namespace PriceListLoader {
                     CompanyName = "АО \"АВА - Казань\"";
                     XPathServices = "//nav[@class='top__menu']//a[@href]";
                     CityName = "Казань";
-                    SummaryColumnName = "АВА-Казань";
+                    SummaryColumnName = "«АВА-КАЗАНЬ» (СКАНДИНАВИЯ)";
+					ShouldAutoLoad = true;
                     break;
 
                 case Enums.KazanSites.mc_aybolit_ru:
@@ -792,7 +811,8 @@ namespace PriceListLoader {
                     CompanyName = "ООО \"МЦ Айболит\"";
                     XPathServices = "//div[@id='accordion']//a[@href]";
                     CityName = "Казань";
-                    SummaryColumnName = "Айболит";
+                    SummaryColumnName = "МЦ «Айболит»";
+					ShouldAutoLoad = true;
                     break;
 
                 case Enums.KazanSites.biomed_mc_ru:
@@ -800,8 +820,9 @@ namespace PriceListLoader {
                     UrlServicesPage = UrlRoot + "/static5/uslugi";
                     CompanyName = "ООО лечебно-диагностический центр \"БИОМЕД\"";
                     XPathServices = "//div[starts-with(@class,'megamenu')]//a[@href]";
-                    SummaryColumnName = "Био Мед (основной конкурент)";
+                    SummaryColumnName = "Лечебно-диагностический центр «БИОМЕД»";
                     CityName = "Казань";
+					ShouldAutoLoad = true;
                     break;
 
                 case Enums.KazanSites.zdorovie7i_ru:
@@ -809,9 +830,10 @@ namespace PriceListLoader {
                     UrlServicesPage = UrlRoot + "/kalkulyator-uslug";
                     CompanyName = "Сеть лечебно-диагностических центров «Здоровье семьи»";
                     XPathServices = "//div[@class='doctor-item js-root-category']";
-                    SummaryColumnName = "Здоровье Семьи";
+                    SummaryColumnName = "МЛДЦ Здоровье семьи";
                     CityName = "Казань";
 					IsLocalFile = true;
+					ShouldAutoLoad = true;
                     break;
 
                 case Enums.KazanSites.starclinic_ru:
@@ -820,7 +842,8 @@ namespace PriceListLoader {
                     CompanyName = "Медцентр «ЗВЕЗДА»";
                     XPathServices = "//div[@class='news-list']//a[@href]";
                     CityName = "Казань";
-                    SummaryColumnName = "Звезда";
+                    SummaryColumnName = "МЦ «Звезда»";
+					ShouldAutoLoad = true;
                     break;
 
                 case Enums.KazanSites.love_dr_ru:
@@ -829,7 +852,6 @@ namespace PriceListLoader {
                     CompanyName = "ООО \"Любимый доктор\"";
                     XPathServices = "//td[@class='main-column']//ul[not(@*)]//a[@href]";
                     CityName = "Казань";
-                    SummaryColumnName = "Любимый доктор";
                     break;
 
                 case Enums.KazanSites.medexpert_kazan_ru:
@@ -838,7 +860,6 @@ namespace PriceListLoader {
                     CompanyName = "Сеть медицинских клиник «Медэксперт»";
                     XPathServices = "//ul[starts-with(@class,'service__list row')]//a[@href]";
                     CityName = "Казань";
-                    SummaryColumnName = "Медэксперт";
                     break;
 
                 case Enums.KazanSites.kazan_clinic_ru:
@@ -847,7 +868,8 @@ namespace PriceListLoader {
                     CompanyName = "Казанская Клиника";
                     XPathServices = "//div[@class='catalog-section-list']//a[@href]";
                     CityName = "Казань";
-                    SummaryColumnName = "";
+                    SummaryColumnName = "Казанская Клиника";
+					ShouldAutoLoad = true;
                     break;
 
                 default:
@@ -864,6 +886,7 @@ namespace PriceListLoader {
                     XPathServices = "//div[@class='price-row']";
                     CityName = "Каменск-Уральский";
                     SummaryColumnName = "МФЦ Рубин";
+					ShouldAutoLoad = true;
                     break;
 
                 case Enums.KamenskUralskySites.ruslabs_ru:
@@ -873,6 +896,7 @@ namespace PriceListLoader {
                     XPathServices = "//li[starts-with(@class,'sidebar-menu__item') and not(@id)]//a[@href]";
                     CityName = "Каменск-Уральский";
                     SummaryColumnName = "Клинико-диагностический центр Руслаб";
+					ShouldAutoLoad = true;
                     break;
 
                 case Enums.KamenskUralskySites.mc_vd_ru:
@@ -881,7 +905,8 @@ namespace PriceListLoader {
                     CompanyName = "ООО \"Медсервис Каменск\"";
                     XPathServices = "//div[@id='nextend-accordion-menu-nextendaccordionmenuwidget-2']//a[@href]";
                     CityName = "Каменск-Уральский";
-                    SummaryColumnName = "ООО Медсервис Каменск (Ваш Доктор)";
+                    SummaryColumnName = "Медсервис Каменск (Ваш Доктор)";
+					ShouldAutoLoad = true;
                     break;
 
                 case Enums.KamenskUralskySites.immunoresurs_ru:
@@ -890,7 +915,8 @@ namespace PriceListLoader {
                     CompanyName = "ООО Медицинский центр \"Иммуноресурс\"";
                     XPathServices = "//div[@id='global3']//a[@href]";
                     CityName = "Каменск-Уральский";
-                    SummaryColumnName = "ООО Медицинский центр Иммуноресурс";
+                    SummaryColumnName = "Медицинский центр Иммуноресурс";
+					ShouldAutoLoad = true;
                     break;
 
                 case Enums.KamenskUralskySites.medkamensk_ru:
@@ -899,8 +925,9 @@ namespace PriceListLoader {
                     CompanyName = "ГБУЗ Свердловской обл. «Городская больница г.Каменск - Уральский»";
                     XPathServices = "//table[@class='waffle']//tr";
                     CityName = "Каменск-Уральский";
-                    SummaryColumnName = "ГБУЗ СО Городская больница г.Каменск - Уральский";
+                    SummaryColumnName = "ГБУЗ СО Городская больница г. Каменск -Уральский";
                     IsLocalFile = true;
+					ShouldAutoLoad = true;
                     break;
 
                 case Enums.KamenskUralskySites.invitro_ru:
@@ -909,7 +936,6 @@ namespace PriceListLoader {
                     CompanyName = "ООО «ИНВИТРО»";
                     XPathServices = "//div[@class='node' and @data-prices]";
                     CityName = "Каменск-Уральский";
-                    SummaryColumnName = "Инвитро";
                     IsLocalFile = true;
                     break;
 
@@ -924,8 +950,7 @@ namespace PriceListLoader {
                     UrlRoot = "https://www.clinic23.ru";
                     UrlServicesPage = UrlRoot + "/price";
                     CompanyName = "КЛИНИКА «ЕКАТЕРИНИНСКАЯ»";
-                    //XPathServices = "//li[starts-with(@class,'b-menu__item')]//li[starts-with(@class,'b-submenu__item3')]//a[@href]";
-                    XPathServices = "//div[@id='chekerList1']//div[@class='iitem']/a[@href and @class='b-content__item-title-link']";
+                    XPathServices = "//div[@class='b-sidebar__section']//a[@href]";
                     CityName = "Краснодар";
                     SummaryColumnName = "КЛИНИКА «ЕКАТЕРИНИНСКАЯ»";
                     ShouldAutoLoad = true;
@@ -1051,6 +1076,7 @@ namespace PriceListLoader {
                     XPathServices = "//div[@class='detail_cost']//div[@class='test']";
                     CityName = "Уфа";
                     SummaryColumnName = "МЕГИ";
+					ShouldAutoLoad = true;
                     break;
 
                 case Enums.UfaSites.promedicina_clinic:
@@ -1059,7 +1085,6 @@ namespace PriceListLoader {
                     CompanyName = "ООО ММЦ «Профилактическая медицина»";
                     XPathServices = "//div[starts-with(@class,'col-md-4')]//a[@href]";
                     CityName = "Уфа";
-                    SummaryColumnName = "ПРОмедицина";
                     break;
 
                 case Enums.UfaSites.mamadeti_ru:
@@ -1068,7 +1093,8 @@ namespace PriceListLoader {
                     CompanyName = "Группа компаний «Мать и дитя»";
                     XPathServices = "//div[@class='b-tree_link__item']";
                     CityName = "Уфа";
-                    SummaryColumnName = "Мать и Дитя";
+                    SummaryColumnName = "«Мать и дитя»";
+					ShouldAutoLoad = true;
                     break;
 
                 case Enums.UfaSites.rkbkuv_ru:
@@ -1077,7 +1103,8 @@ namespace PriceListLoader {
                     CompanyName = "ГБУЗ РКБ им. Г.Г. Куватова";
                     XPathServices = "";
                     CityName = "Уфа";
-                    SummaryColumnName = " ГБУЗ РКБ им. Г.Г.Куватова";
+                    SummaryColumnName = "ГБУЗ РКБ им. Куватова";
+					ShouldAutoLoad = true;
                     break;
 
                 case Enums.UfaSites.mdplus_ru:
@@ -1087,6 +1114,7 @@ namespace PriceListLoader {
                     XPathServices = "//div[@class='col-lg-12']";
                     CityName = "Уфа";
                     SummaryColumnName = "МД +";
+					ShouldAutoLoad = true;
                     break;
 
                 default:

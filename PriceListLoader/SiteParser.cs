@@ -177,6 +177,9 @@ namespace PriceListLoader {
                         case Enums.SochiSites.mc_daniel_ru:
                             parseSochi.ParseSiteMcDanielRu(docServices);
                             break;
+						case Enums.SochiSites.analizy_sochi_ru:
+							parseSochi.ParseSiteAnalizySochiRu(docServices);
+							break;
                         default:
                             break;
                     }

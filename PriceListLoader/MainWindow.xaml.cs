@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
@@ -35,13 +36,17 @@ namespace PriceListLoader {
 			DataGridSites.DataContext = this;
 			ListViewPivotTable.DataContext = this;
 
-			foreach (KeyValuePair<Enums.Cities, Type> keyValuePair in SiteInfo.CitySitesMap)
-                foreach (int siteValue in Enum.GetValues(keyValuePair.Value)) {
-                    SiteInfo siteInfo = new SiteInfo(keyValuePair.Key, siteValue);
-                    //if (!siteInfo.ShouldAutoLoad) continue;
+			foreach (KeyValuePair<Enums.Cities, Type> keyValuePair in SiteInfo.CitySitesMap) {
+				if (!Debugger.IsAttached && keyValuePair.Key == Enums.Cities.Other)
+					continue;
 
-                    SiteItems.Add(siteInfo);
-                }
+				foreach (int siteValue in Enum.GetValues(keyValuePair.Value)) {
+					SiteInfo siteInfo = new SiteInfo(keyValuePair.Key, siteValue);
+					//if (!siteInfo.ShouldAutoLoad) continue;
+
+					SiteItems.Add(siteInfo);
+				}
+			}
 
 			foreach (SiteInfo siteInfo in SiteItems)
 				if (!ListBoxRegions.Items.Contains(siteInfo.CityName))
@@ -131,7 +136,7 @@ namespace PriceListLoader {
 			object[] args = e.Argument as object[];
 			string templateFile = args[0] is string ? args[0] as string : string.Empty;
 			bool loadBzPrices = args[1] is bool ? (bool)args[1] : false;
-			PriceSummary.Test(PivotTableItems, templateFile, sender as BackgroundWorker, loadBzPrices);
+			PriceSummary.Proceed(PivotTableItems, templateFile, sender as BackgroundWorker, loadBzPrices);
 		}
 
 		private void ListBoxRegions_SelectionChanged(object sender, SelectionChangedEventArgs e) {

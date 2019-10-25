@@ -9,7 +9,7 @@ using System.Windows;
 
 namespace PriceListLoader {
 	class PriceSummary {
-		public static void Test(ObservableCollection<SiteInfo> pivotTableItems, string templateFile, BackgroundWorker backgroundWorker, bool LoadBzPrices) {
+		public static void Proceed(ObservableCollection<SiteInfo> pivotTableItems, string templateFile, BackgroundWorker backgroundWorker, bool LoadBzPrices) {
 			backgroundWorker.ReportProgress(0, "Считывание прайс-листов");
 			double progressCurrent = 0;
 			double progressStep = 45.0d / (double)pivotTableItems.Count;
@@ -33,7 +33,7 @@ namespace PriceListLoader {
 			string resultFile = NpoiExcel.WritePriceListToSummary(templateFile, pivotTableItems.ToList(), backgroundWorker, LoadBzPrices);
 			ExcelInterop.SetFormatting(resultFile, backgroundWorker);
 
-			MessageBox.Show("Завершено");
+			MessageBox.Show("Завершено", "", MessageBoxButton.OK, MessageBoxImage.Information);
 		}
 	}
 }

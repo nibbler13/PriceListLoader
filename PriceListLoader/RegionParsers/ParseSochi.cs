@@ -18,27 +18,29 @@ namespace PriceListLoader.RegionParsers {
             }
 
             Items.ServiceGroup itemServiceGroup = null;
-            foreach (HtmlNode nodeChild in nodeCollection[0].ChildNodes) {
-                if (nodeChild.Name.Equals("h3")) {
-                    itemServiceGroup = new Items.ServiceGroup() {
-                        Name = ClearString(nodeChild.InnerText),
-                        Link = siteInfo.UrlServicesPage
-                    };
-                    backgroundWorker.ReportProgress(0, itemServiceGroup.Name);
-                } else if (nodeChild.Name.Equals("table") || nodeChild.Name.Equals("div")) {
-                    if (itemServiceGroup == null)
-                        continue;
+            foreach (HtmlNode nodeRoot in nodeCollection) {
+				foreach (HtmlNode nodeChild in nodeRoot.ChildNodes) {
+					if (nodeChild.Name.Equals("h3")) {
+						itemServiceGroup = new Items.ServiceGroup() {
+							Name = ClearString(nodeChild.InnerText),
+							Link = siteInfo.UrlServicesPage
+						};
+						backgroundWorker.ReportProgress(0, itemServiceGroup.Name);
+					} else if (nodeChild.Name.Equals("table") || nodeChild.Name.Equals("div")) {
+						if (itemServiceGroup == null)
+							continue;
 
-                    HtmlNode htmlNodeTbody = nodeChild.SelectSingleNode(nodeChild.XPath + "//tbody");
-                    if (htmlNodeTbody == null) {
-                        Console.WriteLine("htmlNodeTbody == null");
-                        continue;
-                    }
+						HtmlNode htmlNodeTbody = nodeChild.SelectSingleNode(nodeChild.XPath + "//tbody");
+						if (htmlNodeTbody == null) {
+							Console.WriteLine("htmlNodeTbody == null");
+							continue;
+						}
 
-                    List<Items.Service> serviceItems = ReadTrNodes(htmlNodeTbody, 1, 1);
-                    itemServiceGroup.ServiceItems.AddRange(serviceItems);
-                    siteInfo.ServiceGroupItems.Add(itemServiceGroup);
-                }
+						List<Items.Service> serviceItems = ReadTrNodes(htmlNodeTbody, 1, 1);
+						itemServiceGroup.ServiceItems.AddRange(serviceItems);
+						siteInfo.ServiceGroupItems.Add(itemServiceGroup);
+					}
+				}
             }
         }
 
@@ -270,5 +272,46 @@ namespace PriceListLoader.RegionParsers {
             }
         }
 
+		public void ParseSiteAnalizySochiRu(HtmlDocument docServices) {
+			HtmlNodeCollection nodeCollection = htmlAgility.GetNodeCollection(docServices, siteInfo.XPathServices);
+			if (nodeCollection == null) {
+				Console.WriteLine("nodeCollection == null");
+				return;
+			}
+
+			foreach (HtmlNode nodeTable in nodeCollection) {
+				HtmlNodeCollection nodeCollectionTr = nodeTable.SelectNodes(nodeTable.XPath + "//tr");
+				Items.ServiceGroup serviceGroupInner = null;
+
+				foreach (HtmlNode nodeTr in nodeCollectionTr) {
+					HtmlNodeCollection nodeCollectionTd = nodeTr.SelectNodes(nodeTr.XPath + "//td");
+
+					if (nodeCollectionTd.Count == 2) {
+						if (serviceGroupInner != null)
+							siteInfo.ServiceGroupItems.Add(serviceGroupInner);
+
+						serviceGroupInner = new Items.ServiceGroup() {
+							Name = ClearString(nodeCollectionTd[1].InnerText),
+							Link = siteInfo.UrlServicesPage
+						};
+
+						continue;
+					}
+
+					if (serviceGroupInner == null)
+						continue;
+
+					Items.Service service = new Items.Service() {
+						Name = ClearString(nodeCollectionTd[1].InnerText),
+						Price = ClearString(nodeCollectionTd[2].InnerText)
+					};
+
+					serviceGroupInner.ServiceItems.Add(service);
+				}
+
+				if (serviceGroupInner.ServiceItems.Count > 0)
+					siteInfo.ServiceGroupItems.Add(serviceGroupInner);
+			}
+		}
     }
 }

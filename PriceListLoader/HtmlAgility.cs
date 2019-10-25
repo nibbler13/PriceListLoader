@@ -28,7 +28,7 @@ namespace PriceListLoader {
 
 				html = File.ReadAllText(url, encoding);
 			} else {
-				for (int i = 0; i < 10; i++) {
+				for (int i = 0; i < 3; i++) {
 					try {
 						HttpWebRequest request = (HttpWebRequest)WebRequest.Create(url);
 						request.UserAgent =

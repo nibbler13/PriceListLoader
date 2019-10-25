@@ -87,7 +87,8 @@ namespace PriceListLoader {
             clinic23_ru_lab,
             _5vrachey_com,
             mc_daniel_ru,
-            medbr_ru
+            medbr_ru,
+			analizy_sochi_ru
         }
 
         public enum KazanSites {

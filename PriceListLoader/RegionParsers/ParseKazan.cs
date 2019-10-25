@@ -370,8 +370,9 @@ namespace PriceListLoader.RegionParsers {
 
             string[] xPathTables = new string[] {
                 "//div[starts-with(@class,'mainalltext')]//table",
-                "//div[starts-with(@class,'textinside')]//table"
-            };
+                "//div[starts-with(@class,'textinside')]//table",
+				"//div[@class='doctorstabb']//table"
+			};
 
             foreach (string xPathTable in xPathTables) {
                 HtmlNodeCollection nodeCollectionTables = htmlAgility.GetNodeCollection(docService, xPathTable);

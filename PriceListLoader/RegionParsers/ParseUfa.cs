@@ -35,7 +35,9 @@ namespace PriceListLoader.RegionParsers {
                             continue;
                         }
 
-                        List<Items.Service> serviceItems = ReadTrNodes(nodeTbody, 1, 1);
+
+
+                        List<Items.Service> serviceItems = ReadTrNodes(nodeTbody, 2, 2);
                         itemServiceGroup.ServiceItems.AddRange(serviceItems);
 
                         if (itemServiceGroup.ServiceItems.Count > 0)
