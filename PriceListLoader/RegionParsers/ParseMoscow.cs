@@ -1118,5 +1118,18 @@ namespace PriceListLoader.RegionParsers {
             }
         }
 
+        public void ParseSiteEmcMosRu(HtmlDocument docService, ref Items.ServiceGroup itemServiceGroup) {
+            string xPathPriceTable = "//div[@class='patients-price-list']//tbody";
+            HtmlNodeCollection nodeCollectionService = htmlAgility.GetNodeCollection(docService, xPathPriceTable);
+            if (nodeCollectionService == null) {
+                Console.WriteLine("nodeCollectionService is null");
+                return;
+            }
+
+            foreach (HtmlNode htmlNode in nodeCollectionService) {
+                List<Items.Service> serviceItems = ReadTrNodes(nodeCollectionService.First(), 1, 2);
+                itemServiceGroup.ServiceItems.AddRange(serviceItems);
+            }
+        }
     }
 }

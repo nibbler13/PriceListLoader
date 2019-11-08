@@ -465,6 +465,14 @@ namespace PriceListLoader {
                     SummaryColumnName = "";
                     break;
 
+                case Enums.MoscowSites.emcmos_ru:
+                    UrlRoot = "https://www.emcmos.ru";
+                    UrlServicesPage = UrlRoot + "/for-patients/pay";
+                    CompanyName = "Европейский медицинский центр";
+                    XPathServices = "//div[@class='row list-node-block price-lists-block']//a[@href]";
+                    SummaryColumnName = "";
+                    break;
+
                 default:
                     break;
             }

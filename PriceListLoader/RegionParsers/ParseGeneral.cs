@@ -212,6 +212,9 @@ namespace PriceListLoader.RegionParsers {
                                 case Enums.MoscowSites.sm_stomatology_ru:
                                     parseMoscow.ParseSiteSmStomatologyRu(docService, ref itemServiceGroup);
                                     break;
+                                case Enums.MoscowSites.emcmos_ru:
+                                    parseMoscow.ParseSiteEmcMosRu(docService, ref itemServiceGroup);
+                                    break;
                                 default:
                                     break;
                             }
@@ -715,8 +718,9 @@ namespace PriceListLoader.RegionParsers {
                     string name = ClearString(nameRaw);
                     string price = ClearString(priceRaw);
 
-                    if (string.IsNullOrEmpty(name) || string.IsNullOrEmpty(price))
-                        continue;
+                    if (!(siteInfo.CityValue == Enums.Cities.Moscow && (Enums.MoscowSites)siteInfo.SiteValue == Enums.MoscowSites.emcmos_ru))
+                        if (string.IsNullOrEmpty(name) || string.IsNullOrEmpty(price))
+                            continue;
 
                     if (siteInfo.CityValue == Enums.Cities.Krasnodar &&
                         (Enums.KrasnodarSites)siteInfo.SiteValue == Enums.KrasnodarSites.clinic23_ru &&

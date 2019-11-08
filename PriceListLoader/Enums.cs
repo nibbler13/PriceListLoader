@@ -48,7 +48,8 @@ namespace PriceListLoader {
             legal_entity_k31,
             legal_entity_litfond,
             legal_entity_ssmc,
-            legal_entity_lechebniy_centr
+            legal_entity_lechebniy_centr,
+            emcmos_ru
         }
 
         public enum SaintPetersburgSites {

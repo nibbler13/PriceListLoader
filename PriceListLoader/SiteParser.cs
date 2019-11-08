@@ -77,6 +77,7 @@ namespace PriceListLoader {
                         case Enums.MoscowSites.onclinic_ru:
                         case Enums.MoscowSites.nrmedlab_ru:
                         case Enums.MoscowSites.sm_stomatology_ru:
+                        case Enums.MoscowSites.emcmos_ru:
                             parseMoscow.ParseSiteWithLinksOnMainPage(docServices);
                             break;
                         case Enums.MoscowSites.alfazdrav_ru:
